@@ -349,3 +349,5 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
   .ttable tbody th { width: auto; background: var(--sunk); padding-bottom: 8px; }
   .ttable td { border-top: 0; border-left: 0; padding-top: 6px; }
 }
+.ttable--years tbody th { width: 7rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 599px) { .ttable--years tbody th { width: auto; } }
