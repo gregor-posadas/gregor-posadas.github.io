@@ -210,3 +210,70 @@
     e.preventDefault(); open(a);
   }, true);
 })();
+
+/* Glossary terms (Dad page). Hover previews an explanation; click, tap, Enter or Space pins it open.
+   Escape, a click elsewhere, or moving focus away closes it. Only one is open at a time. */
+(function () {
+  var terms = Array.prototype.slice.call(document.querySelectorAll(".term"));
+  if (!terms.length) return;
+  var open = null, timer = null;
+  var hover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  function parts(t) { return { b: t.querySelector(".term__btn"), tip: t.querySelector(".term__tip") }; }
+  function place(t) {
+    var tip = parts(t).tip; tip.style.left = "";
+    var r = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth, shift = 0;
+    if (r.right > vw - 12) shift = vw - 12 - r.right;
+    if (r.left + shift < 12) shift = 12 - r.left;
+    if (shift) tip.style.left = shift + "px";
+  }
+  function show(t, pin) {
+    if (open && open !== t) hide(open);
+    var p = parts(t); p.tip.hidden = false; p.b.setAttribute("aria-expanded", "true");
+    if (pin) t.classList.add("is-pinned");
+    open = t; place(t);
+  }
+  function hide(t) {
+    var p = parts(t); p.tip.hidden = true; p.b.setAttribute("aria-expanded", "false");
+    t.classList.remove("is-pinned"); if (open === t) open = null;
+  }
+  terms.forEach(function (t) {
+    var p = parts(t);
+    p.b.addEventListener("click", function () {
+      if (open === t && t.classList.contains("is-pinned")) hide(t); else show(t, true);
+    });
+    if (hover) {
+      t.addEventListener("mouseenter", function () { clearTimeout(timer); timer = setTimeout(function () { if (open !== t) show(t, false); }, 120); });
+      t.addEventListener("mouseleave", function () { clearTimeout(timer); if (!t.classList.contains("is-pinned")) timer = setTimeout(function () { if (open === t && !t.classList.contains("is-pinned")) hide(t); }, 300); });
+    }
+    t.addEventListener("focusout", function (e) { if (open === t && e.relatedTarget && !t.contains(e.relatedTarget)) hide(t); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && open) { var b = parts(open).b; hide(open); b.focus(); }
+  });
+  document.addEventListener("click", function (e) { if (open && !open.contains(e.target)) hide(open); });
+  window.addEventListener("resize", function () { if (open) place(open); });
+})();
+
+/* Timelapses play, muted, while at least 60% on screen, and pause when scrolled away.
+   They stay still for visitors who ask their device for reduced motion or data saving,
+   and a video someone pauses by hand stays paused. */
+(function () {
+  var vids = Array.prototype.slice.call(document.querySelectorAll("video[data-autoplay]"));
+  if (!vids.length || !("IntersectionObserver" in window)) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (navigator.connection && navigator.connection.saveData) return;
+  vids.forEach(function (v) {
+    v.muted = true;
+    v.addEventListener("pause", function () { if (v._autoPause) { v._autoPause = false; return; } v._userPaused = true; });
+    v.addEventListener("play", function () { if (v._autoPlay) { v._autoPlay = false; return; } v._userPaused = false; });
+  });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var v = e.target;
+      if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+        if (v.paused && !v._userPaused) { v._autoPlay = true; var pr = v.play(); if (pr && pr.catch) pr.catch(function () { v._autoPlay = false; }); }
+      } else if (!v.paused) { v._autoPause = true; v.pause(); }
+    });
+  }, { threshold: [0, 0.6] });
+  vids.forEach(function (v) { io.observe(v); });
+})();

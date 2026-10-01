@@ -321,3 +321,17 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .lineage__list { display: none; }
 @media (max-width: 899px) { .lineage svg { display: none; } .lineage__list { display: block; } }
 .lineage__note { margin-top: 14px; color: var(--ink-2); font-size: var(--f1); max-width: var(--read); }
+
+/* Glossary terms on the Dad page: a dotted underline marks a term with an explanation.
+   Hover shows it; a click, tap, Enter or Space pins it; Escape or a click elsewhere closes it. */
+.term { position: relative; }
+.term__btn { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; text-align: inherit; cursor: help;
+  text-decoration: underline dotted; text-decoration-thickness: 2px; text-underline-offset: 3px; -webkit-tap-highlight-color: transparent; }
+.term__btn:hover, .term__btn[aria-expanded="true"] { background: var(--sunk); text-decoration-style: solid; }
+.term__tip { position: absolute; left: 0; top: calc(100% + 8px); z-index: 30; display: block; width: max-content; max-width: min(24rem, calc(100vw - 32px));
+  padding: 12px 14px; background: var(--surface); color: var(--ink); border: 2px solid var(--rule-strong); box-shadow: 4px 4px 0 0 var(--rule-strong);
+  font-size: var(--f1); font-weight: 400; line-height: 1.5; white-space: normal; text-align: left; }
+.term__tip[hidden] { display: none; }
+.term__def { display: block; }
+.term__more { display: inline-block; margin-top: 6px; font-weight: 700; color: var(--ink); }
+@media print { .term__tip { display: none !important; } .term__btn { text-decoration: none; } }
