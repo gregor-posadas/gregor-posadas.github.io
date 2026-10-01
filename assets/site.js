@@ -38,7 +38,13 @@
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       if (!ctx) ctx = new AC();
-      if (ctx.state === "suspended") ctx.resume();
+      /* Phones start audio suspended until a tap finishes; wait for it rather than dropping the sound. */
+      if (ctx.state === "suspended") { ctx.resume().then(function () { play(kind); }, function () {}); return; }
+      play(kind);
+    } catch (e) {}
+  }
+  function play(kind) {
+    try {
       /* A keyswitch-style click: a few milliseconds of high-passed noise for the "snap",
          plus a very short high ping for the "tick". Press is lower and fuller, release is higher and lighter.
          Nothing below ~1.5 kHz, so there is no thump. */
@@ -78,25 +84,49 @@
       soundOn = !soundOn;
       store.set("gp.sound", soundOn ? "on" : "off");
       paintSound();
-      if (soundOn) tick("down");
+      if (soundOn) { tick("down"); setTimeout(function () { tick("up"); }, 70); }
     });
     paintSound();
   }
 
-  /* Press feel: sound on press and release for anything that looks like a button; keyboard gets the same. */
+  /* Press feel: one click on press, one on release, for anything that looks like a button.
+     The pressed element is remembered, so the release still sounds when the cursor has slipped off
+     the button (it sinks 4px away from the pointer) or the finger lifts elsewhere. */
   var SEL = ".btn, .sign, .nav a, .tool, .theme-toggle, details.more summary, .gallery a";
-  function target(e) { return e.target.closest ? e.target.closest(SEL) : null; }
-  document.addEventListener("pointerdown", function (e) { if (target(e)) tick("down"); });
-  document.addEventListener("pointerup", function (e) { if (target(e)) tick("up"); });
-  document.addEventListener("keydown", function (e) {
-    if (e.repeat) return;
-    if (e.key !== "Enter" && e.key !== " ") return;
+  var RELEASE_GAP = 60; /* ms a link waits so its release click is heard before the page changes */
+  function target(e) { return e.target && e.target.closest ? e.target.closest(SEL) : null; }
+  var pressed = null;
+  function release() { if (!pressed) return; pressed.classList.remove("is-pressed"); pressed = null; tick("up"); }
+  document.addEventListener("pointerdown", function (e) {
+    if (e.button !== undefined && e.button !== 0) return;
     var el = target(e); if (!el) return;
-    el.classList.add("is-pressed"); tick("down");
+    pressed = el; tick("down");
+  });
+  document.addEventListener("pointerup", release);
+  document.addEventListener("pointercancel", release);
+  window.addEventListener("blur", function () { if (pressed) { pressed.classList.remove("is-pressed"); pressed = null; } });
+
+  /* Keyboard: Enter on a link fires on key-down, so play both clicks then and follow the link after the gap. */
+  document.addEventListener("keydown", function (e) {
+    if (e.repeat || (e.key !== "Enter" && e.key !== " ")) return;
+    var el = target(e); if (!el) return;
+    el.classList.add("is-pressed"); pressed = el; tick("down");
+    if (e.key === "Enter" && el.tagName === "A") setTimeout(release, RELEASE_GAP - 20);
   });
   document.addEventListener("keyup", function (e) {
     if (e.key !== "Enter" && e.key !== " ") return;
-    var el = target(e); if (!el) return;
-    el.classList.remove("is-pressed"); tick("up");
+    release();
+  });
+
+  /* Links that leave the page: hold navigation just long enough for the release click to play.
+     Only plain same-tab clicks are delayed; new-tab, modified and middle clicks are left alone. */
+  document.addEventListener("click", function (e) {
+    if (!soundOn || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || !a.matches(SEL) || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#" || /^mailto:|^tel:/i.test(href)) return;
+    e.preventDefault();
+    setTimeout(function () { window.location.href = a.href; }, RELEASE_GAP);
   });
 })();
