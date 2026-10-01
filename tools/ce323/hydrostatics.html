@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrostatic Force on a Plane Surface — Virtual Lab (CE 323)</title>
+<style>
+  :root{
+    --bsu-blue:#0033A0; --bsu-orange:#D64309; --ink:#1b2330; --muted:#5b6472;
+    --line:#d8dee7; --bg:#f4f6f9; --panel:#ffffff; --good:#1a8f52; --bad:#c02a2a;
+    --good-bg:#e7f6ee; --bad-bg:#fbeaea; --accent:#eef3fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{background:var(--bsu-blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px}
+  header .logo{font-weight:800;letter-spacing:.5px;background:#fff;color:var(--bsu-blue);
+    padding:4px 9px;border-radius:5px;font-size:15px}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  header .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+  .wrap{max-width:1500px;margin:0 auto;padding:16px;display:grid;
+    grid-template-columns:minmax(430px,1.05fr) minmax(430px,1fr);gap:16px}
+  @media(max-width:1050px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 1px 3px rgba(20,30,50,.05);overflow:hidden}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;margin:0;
+    padding:10px 14px;background:var(--accent);border-bottom:1px solid var(--line);color:var(--bsu-blue)}
+  .pad{padding:14px}
+  .left,.right{display:flex;flex-direction:column;gap:16px}
+  canvas{display:block;width:100%;background:#fbfcfe;border-radius:8px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-top:12px}
+  .ctl{display:flex;flex-direction:column;gap:4px}
+  .ctl label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  select,input[type=number]{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#fff}
+  .btn{background:var(--bsu-orange);color:#fff;border:none;padding:9px 16px;border-radius:6px;
+    font-weight:650;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.06)}
+  .btn:disabled{background:#c3c8d0;cursor:not-allowed}
+  .btn.sec{background:#fff;color:var(--bsu-blue);border:1px solid var(--bsu-blue)}
+  .btn.sec:disabled{color:#9aa4b3;border-color:#d8dee7;background:#f6f8fb}
+  .btn.sec[aria-pressed="true"]{background:var(--bsu-blue);color:#fff}
+  :focus-visible{outline:3px solid #7aa7ff;outline-offset:2px;border-radius:4px}
+  .speed{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .speed input{width:96px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+  th{background:var(--accent);color:var(--bsu-blue);font-weight:650}
+  td.mass{font-weight:600;background:#fafbfd}
+  tr.active{outline:2px solid var(--bsu-orange);outline-offset:-2px}
+  .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  .step{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .step-h{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#fafbfd;
+    border-bottom:1px solid var(--line)}
+  .step-h .num{background:var(--bsu-blue);color:#fff;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+  .step-h .num.done{background:var(--good)}
+  .step-h .ttl{font-weight:650;font-size:13.5px}
+  .step-body{padding:12px}
+  .eq{background:#f7f9fc;border:1px solid var(--line);border-left:3px solid var(--bsu-blue);
+    padding:8px 11px;border-radius:5px;font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    font-size:15px;margin:8px 0;overflow-x:auto}
+  .eq .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}
+  .eq .frac >span:first-child{border-bottom:1.4px solid var(--ink);padding:0 5px}
+  .eq .frac >span:last-child{padding:0 5px}
+  sub{font-size:.72em}
+  .rowin{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .rowin input{width:96px}
+  .tag{font-size:12px;color:var(--muted)}
+  .msg{padding:7px 10px;border-radius:6px;font-size:12.5px;margin-top:8px;display:none}
+  .msg.ok{background:var(--good-bg);color:var(--good);display:block}
+  .msg.err{background:var(--bad-bg);color:var(--bad);display:block}
+  .msg.info{background:#eaf1fb;color:var(--bsu-blue);display:block}
+  .linkbtn{background:none;border:none;color:var(--bsu-blue);text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0}
+  .grid5{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;font-size:12.5px;align-items:center}
+  .grid5 .hd{font-weight:650;color:var(--bsu-blue);font-size:11.5px}
+  .grid5 input{width:100%;padding:5px}
+  .cell-ok{background:var(--good-bg)!important;border-color:var(--good)!important}
+  .cell-bad{background:var(--bad-bg)!important;border-color:var(--bad)!important}
+  .choice{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .choice button{flex:1 1 160px;padding:9px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  .choice button.sel{border-color:var(--bsu-orange);background:#fff5f0;font-weight:650}
+  .foot{font-size:11.5px;color:var(--muted);padding:10px 16px;text-align:center}
+  .note{background:#fff8ec;border:1px solid #f0dca8;border-radius:6px;padding:8px 11px;font-size:12.5px;margin-top:10px}
+  progress{width:120px;height:9px}
+  details.proc{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:12px;background:#fafbfd;font-size:12.5px}
+  details.proc summary{cursor:pointer;font-weight:650;color:var(--bsu-blue)}
+  .plots2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:640px){.plots2{grid-template-columns:1fr}}
+  .balance-chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:650}
+  .statusbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .parttabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+  .ck{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0}
+  .ck .dot{width:18px;height:18px;border-radius:50%;background:#c3c8d0;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:0 0 auto}
+  .ck.done .dot{background:var(--good)}
+  /* site: let the two panels shrink on phones */
+  .wrap>*{min-width:0} @media(max-width:1050px){.wrap{grid-template-columns:minmax(0,1fr)}} table{max-width:100%}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">CE&nbsp;323</span>
+  <div>
+    <h1>Hydrostatic Force on a Plane Surface — Virtual Fluids Laboratory</h1>
+    <div class="sub">Fluids Report No. 1 · Hydrostatics · quarter-circle block on a balance beam — F<sub>R</sub> as a function of water depth h</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: SIMULATION ================= -->
+  <div class="left">
+    <div class="panel">
+      <h2>Apparatus &amp; Measurement</h2>
+      <div class="pad">
+        <div class="parttabs" role="group" aria-label="Mode">
+          <button class="btn sec" id="tabSetup" aria-pressed="true">1 · Setup &amp; calibration</button>
+          <button class="btn sec" id="tabRun" aria-pressed="false" disabled title="Complete calibration first">2 · Run experiment</button>
+          <button class="btn sec" id="dlPS" style="margin-left:auto">⬇ Problem statement</button>
+        </div>
+        <canvas id="sim" width="760" height="470" role="img" aria-label="Animated balance beam with quarter-circle block over a water tank"></canvas>
+        <div class="statusbar" role="status" aria-live="polite">
+          <span class="balance-chip" id="tiltChip" style="background:#eef1f6;color:#5b6472">tilt = 0.00°</span>
+          <span class="balance-chip" id="balChip" style="background:#eef1f6;color:#5b6472">not level</span>
+        </div>
+        <div class="controls" id="calCtl">
+          <div class="ctl">
+            <label for="feet">Adjustable feet</label>
+            <input type="range" id="feet" min="-50" max="50" step="1" value="32" aria-label="Adjustable feet levelling">
+          </div>
+          <div class="ctl">
+            <label for="cwPos">Counterbalance position</label>
+            <input type="range" id="cwPos" min="0" max="100" step="0.5" value="16" aria-label="Counterbalance position along the arm">
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="drainCal">Open drain — empty tank</button>
+          </div>
+        </div>
+        <div id="calList" class="note"></div>
+        <div class="controls" id="runCtl" style="display:none">
+          <div class="ctl">
+            <label for="mass">Hanging mass, m</label>
+            <select id="mass" aria-label="Select hanging mass"></select>
+          </div>
+          <div class="ctl">
+            <label>Water valves</label>
+            <div style="display:flex;gap:6px">
+              <button class="btn sec" id="fillBtn" aria-pressed="false">Fill ▲</button>
+              <button class="btn sec" id="drainBtn" aria-pressed="false">Drain ▼</button>
+              <button class="btn sec" id="fineUp" title="Add 0.5 mm">+0.5&nbsp;mm</button>
+              <button class="btn sec" id="fineDn" title="Remove 0.5 mm">−0.5&nbsp;mm</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn" id="record" disabled>● Record depth h</button>
+          </div>
+          <div class="speed">
+            <label for="speed">Speed</label>
+            <input type="range" id="speed" min="1" max="10" step="1" value="4" aria-label="Fill and drain speed multiplier">
+            <span id="speedLbl">4×</span>
+          </div>
+        </div>
+        <p class="hint">Hang a mass on the beam — it tips. Open the <b>fill valve</b> until the hydrostatic force on the block's
+          vertical end face brings the beam back to <b>level</b> (watch the level indicator at the left end of the arm — its pointer lines up with the red datum mark), fine-tune with the ±0.5&nbsp;mm buttons,
+          then <b>record the depth h</b>. Repeat for all <b>10 masses</b>: five leave the face <b>partially submerged</b>
+          (h&nbsp;&lt;&nbsp;100&nbsp;mm) and five <b>fully submerge</b> it.</p>
+        <details class="proc">
+          <summary>Apparatus dimensions &amp; how balance works</summary>
+          <p>Beam length L&nbsp;=&nbsp;275&nbsp;mm (pivot to hanger) · inner radius R₁&nbsp;=&nbsp;100&nbsp;mm ·
+          outer radius R₂&nbsp;=&nbsp;200&nbsp;mm · face width b&nbsp;=&nbsp;75&nbsp;mm · face height D&nbsp;=&nbsp;R₂−R₁&nbsp;=&nbsp;100&nbsp;mm.
+          The curved sides of the block are <b>circular arcs centred on the pivot</b>, so pressure on them passes through the
+          pivot and produces no moment — only the force on the vertical end face turns the beam. At balance,
+          m·g·L equals F<sub>R</sub> times its moment arm about the pivot. Depth h is measured from the <b>bottom edge of the
+          end face</b>.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: DATA + CALCS ================= -->
+  <div class="right">
+    <div class="panel">
+      <h2>Raw Data <span id="dataBadge" style="float:right;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>γ<sub>water</sub> = <b>9810 N/m³</b> &nbsp;·&nbsp; L = <b>0.275 m</b> &nbsp;·&nbsp; face: <b>100 × 75 mm</b></div>
+          <div>Depth gauge: <span class="balance-chip" id="hLive" style="background:#eaf1fb;color:var(--bsu-blue)">h = 0.0 mm</span></div>
+        </div>
+        <table id="dataTable" aria-label="Recorded balance depths for each mass"></table>
+        <p class="hint" id="progressHint" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Guided Data Analysis — you calculate, the tool checks</h2>
+      <div class="pad" id="calc">
+        <div class="note" id="calcLock">Balance and record all <b>10 depths</b> first (5 partially + 5 fully submerged).
+          The analysis unlocks automatically.
+          <div style="margin-top:6px"><progress id="collProg" value="0" max="10"></progress>
+            <span id="collTxt">0 / 10 recorded</span></div></div>
+        <div id="steps" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  Virtual lab for CE&nbsp;323 (Environmental &amp; Fluids Laboratory), Boise State University · Dr.&nbsp;Sondra Miller.
+  Simulated depths are generated from the governing moment balance m·g·L = F<sub>R</sub>·(moment arm), so your worked
+  calculations close the loop between theory and experiment.
+</div>
+
+<script>
+/* ============================================================
+   PHYSICS (all SI internally)
+   ps (h<=D): F = γ b h²/2            arm = R2 − h/3
+   fs (h>=D): F = γ b D (h − D/2)     arm = R2 − D/2 + D²/(12(h−D/2))
+   Balance:   m g L = F · arm
+   ============================================================ */
+const g=9.81, GAM=9810, L=0.275, R1=0.100, R2=0.200, B=0.075, D=R2-R1;
+const MASSES=[50,90,130,170,210, 260,310,360,410,460];   // grams; first 5 ps, last 5 fs
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function F_th(h){return h<=D ? GAM*B*h*h/2 : GAM*B*D*(h-D/2);}
+function arm(h){return h<=D ? R2-h/3 : R2-D/2+D*D/(12*(h-D/2));}
+function M_net(mg,h){return mg/1000*g*L - F_th(h)*arm(h);}   // >0 → hanger side down
+function trueH(mg){   // depth that balances mass mg (grams)
+  let lo=0, hi=0.19;
+  for(let i=0;i<70;i++){const mid=(lo+hi)/2; if(M_net(mg,mid)>0) lo=mid; else hi=mid;}
+  return (lo+hi)/2;
+}
+
+/* ============================================================ STATE */
+const state={
+  massIdx:0, h:0.032, fill:false, drain:false,
+  mode:'setup', cal:{feetOK:false,cwOK:false,drained:false,done:false},
+  rec:MASSES.map(()=>null),         // recorded balanced depth (m), with reading noise
+  expOk:MASSES.map(()=>false),      // step-4 experimental F validated per mass
+  thDone:{ps:false,fs:false},       // steps 1-2 complete → theory curves draw
+  unlocked:false
+};
+const TOL_M=0.006;                  // N·m balance tolerance (≈ ±0.5 mm of water)
+const CW_REQ=55+Math.round(Math.random()*15);   // counterbalance zero position (varies per session)
+
+/* ============================================================ DOM */
+const $=id=>document.getElementById(id);
+const massSel=$('mass');
+MASSES.forEach((m,i)=>{const o=document.createElement('option');o.value=i;
+  o.textContent=m+' g'+(i<5?'  (partial)':'  (full)');massSel.appendChild(o);});
+const cvs=$('sim'), ctx=cvs.getContext('2d');
+let DPR=Math.min(window.devicePixelRatio||1,2);
+function fitCanvas(){DPR=Math.min(window.devicePixelRatio||1,2);
+  cvs.width=760*DPR;cvs.height=470*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+fitCanvas();
+
+/* ============================================================ DATA TABLE */
+function recCount(){return state.rec.filter(v=>v!=null).length;}
+function renderTable(){
+  let h='<tr><th>#</th><th>m (g)</th><th>face</th><th>balanced depth h (mm)</th></tr>';
+  MASSES.forEach((m,i)=>{
+    const r=state.rec[i];
+    const active=(i===state.massIdx)?' class="active"':'';
+    const face=r==null?'—':(r<=D?'partially submerged':'fully submerged');
+    h+='<tr'+active+'><td>'+(i+1)+'</td><td class="mass">'+m+'</td><td>'+face+'</td><td>'+
+       (r!=null?(r*1000).toFixed(1):'—')+'</td></tr>';
+  });
+  $('dataTable').innerHTML=h;
+  const n=recCount();
+  $('collProg').value=n; $('collTxt').textContent=n+' / 10 recorded';
+  $('progressHint').innerHTML='<b>'+n+'/10</b> depths recorded.'+
+    (n<10?' Balance the beam for each mass, then record.':' ✓ All data collected.');
+  $('dataBadge').innerHTML='<span class="balance-chip" style="background:#eaf1fb;color:var(--bsu-blue)">'+n+' / 10</span>';
+  if(n>=10 && !state.unlocked) unlockCalc();
+}
+let flashTimer=null;
+function flash(msg,type){
+  const el=$('progressHint');
+  el.innerHTML='<span style="color:'+(type==='ok'?'#1a8f52':type==='info'?'#0033A0':'#c02a2a')+'">'+msg+'</span>';
+  clearTimeout(flashTimer); flashTimer=setTimeout(renderTable,2600);
+}
+
+/* ============================================================ DRAWING
+   Modeled on the Armfield F1-12 apparatus: acrylic tank on adjustable
+   feet, balance arm on a knife-edge pivot, counterbalance (right),
+   weight hanger (left), and the quadrant bolted to the arm with both
+   arcs centred on the pivot. Depth reads on the quadrant scale strip. */
+const PX=430, PY=120, S=1.15;
+const R1p=R1*1000*S, R2p=R2*1000*S;
+const FACE_TOP=PY+R1p, FACE_BOT=PY+R2p;
+const TANK_L=190, TANK_R=645, TANK_TOP=158, TANK_BOT=FACE_BOT+10;
+const HANG_X=PX-L*1000*S;
+let ripplePh=0;
+
+function tiltDeg(){
+  if(state.mode==='setup')return Math.max(-4,Math.min(4,(+$('cwPos').value-CW_REQ)*0.12));
+  return Math.max(-4,Math.min(4, M_net(MASSES[state.massIdx],state.h)*12 ));}
+function isBalanced(){return Math.abs(M_net(MASSES[state.massIdx],state.h))<TOL_M && state.h>0.002;}
+
+function drawScene(){
+  ctx.clearRect(0,0,760,470);
+  const m=MASSES[state.massIdx], h=state.h, tilt=tiltDeg();
+  const wy=FACE_BOT-h*1000*S;
+  const rot=-tilt*Math.PI/180;
+
+  // base plate, adjustable feet, drain valve
+  ctx.fillStyle='#e3e8ee';ctx.fillRect(TANK_L-30,TANK_BOT,TANK_R-TANK_L+60,7);
+  ctx.fillStyle='#5c6373';
+  [TANK_L-16,PX-7,TANK_R-8].forEach(x=>{ctx.beginPath();
+    ctx.moveTo(x,TANK_BOT+7);ctx.lineTo(x+14,TANK_BOT+7);ctx.lineTo(x+11,TANK_BOT+18);
+    ctx.lineTo(x+3,TANK_BOT+18);ctx.closePath();ctx.fill();});
+  ctx.strokeStyle='#8790a0';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(TANK_R,TANK_BOT-10);ctx.lineTo(TANK_R+24,TANK_BOT-10);ctx.stroke();
+  ctx.fillStyle='#c02a2a';ctx.fillRect(TANK_R+9,TANK_BOT-19,10,7);
+  ctx.fillStyle='#7a8598';ctx.font='10px system-ui';ctx.textAlign='left';
+  ctx.fillText('drain valve',TANK_R+4,TANK_BOT+16);
+  // spirit level on the base plate
+  const bub=state.cal.feetOK?0:Math.max(-16,Math.min(16,(+($('feet')?$('feet').value:0))*0.4));
+  ctx.fillStyle='#f2f6fa';ctx.strokeStyle='#9aa4b3';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.roundRect(232,TANK_BOT+9,56,10,5);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='#c9d2dd';ctx.beginPath();ctx.moveTo(256,TANK_BOT+9);ctx.lineTo(256,TANK_BOT+19);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(264,TANK_BOT+9);ctx.lineTo(264,TANK_BOT+19);ctx.stroke();
+  ctx.fillStyle=Math.abs(bub)<=1.5?'#1a8f52':'#D64309';
+  ctx.beginPath();ctx.arc(260+bub,TANK_BOT+14,4,0,7);ctx.fill();
+  ctx.fillStyle='#7a8598';ctx.font='9px system-ui';ctx.textAlign='center';
+  ctx.fillText('spirit level',260,TANK_BOT+32);
+
+  // acrylic tank
+  ctx.fillStyle='rgba(240,244,249,.6)';
+  ctx.fillRect(TANK_L,TANK_TOP,TANK_R-TANK_L,TANK_BOT-TANK_TOP);
+
+  // pivot support bridge + knife edge
+  ctx.fillStyle='#c7ccd6';ctx.fillRect(PX-36,TANK_TOP-8,72,8);
+  ctx.fillStyle='#9aa4b3';ctx.fillRect(PX-5,PY+8,10,TANK_TOP-PY-16);
+  ctx.fillStyle='#5c6373';ctx.beginPath();
+  ctx.moveTo(PX-9,PY+9);ctx.lineTo(PX+9,PY+9);ctx.lineTo(PX,PY-2);ctx.closePath();ctx.fill();
+
+  // level-indicator reference post (fixed) with red datum mark
+  ctx.strokeStyle='#9aa4b3';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(92,TANK_BOT+7);ctx.lineTo(92,PY-12);ctx.stroke();
+  ctx.strokeStyle='#c02a2a';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(83,PY);ctx.lineTo(101,PY);ctx.stroke();
+
+  // ---------- rotating assembly ----------
+  ctx.save();ctx.translate(PX,PY);ctx.rotate(rot);
+  ctx.fillStyle='#8b97a8';ctx.fillRect(96-PX,-4,690-96,8);
+  ctx.fillStyle='#5c6373';ctx.fillRect(-124,-10,7,6);
+  const cwx=600+(+($('cwPos')?$('cwPos').value:62))*0.9-PX;
+  ctx.fillStyle='#37414f';ctx.beginPath();ctx.arc(cwx,0,17,0,7);ctx.fill();
+  ctx.fillStyle='#8b97a8';ctx.beginPath();ctx.arc(cwx,0,5,0,7);ctx.fill();
+  ctx.fillStyle='#1b2330';ctx.fillRect(102-PX,-16,4,32);
+  // weight hanger with brass masses
+  const hx=HANG_X-PX;
+  ctx.strokeStyle='#6b7280';ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(hx,4);ctx.lineTo(hx,72);ctx.stroke();
+  if(state.mode!=='setup'){
+    ctx.fillStyle='#b08d3e';
+    const nd=2+Math.floor(state.massIdx/3);
+    for(let i=0;i<nd;i++){ctx.beginPath();ctx.roundRect(hx-15,72+i*9,30,8,3);ctx.fill();}
+    ctx.fillStyle='#7a5b1e';ctx.font='600 10px system-ui';ctx.textAlign='center';
+    ctx.fillText(m+' g',hx,72+nd*9+13);
+  } else {
+    ctx.fillStyle='#8b97a8';ctx.fillRect(hx-13,72,26,4);   // empty hanger pan
+  }
+  // quadrant — quarter annulus, arcs centred on the pivot
+  ctx.beginPath();
+  ctx.arc(0,0,R2p,Math.PI/2,Math.PI,false);
+  ctx.lineTo(-R1p,0);
+  ctx.arc(0,0,R1p,Math.PI,Math.PI/2,true);
+  ctx.closePath();
+  ctx.fillStyle='#e8862e';ctx.strokeStyle='#b35f14';ctx.lineWidth=2;ctx.fill();ctx.stroke();
+  // mounting bracket joining the quadrant to the arm
+  ctx.fillStyle='#8b97a8';ctx.fillRect(-64,-2,9,Math.sqrt(R1p*R1p-55*55)+6);
+  // vertical end face (the measuring face)
+  ctx.strokeStyle='#7c3d05';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.moveTo(0,R1p);ctx.lineTo(0,R2p);ctx.stroke();
+  // depth scale strip (zero at the bottom edge of the face)
+  ctx.fillStyle='#fdfdfb';ctx.strokeStyle='#b9c0cc';ctx.lineWidth=1;
+  ctx.beginPath();ctx.rect(-10,R2p-180*S-6,20,180*S+8);ctx.fill();ctx.stroke();
+  ctx.font='7.5px system-ui';ctx.textAlign='center';
+  for(let d=0;d<=180;d+=20){const y=R2p-d*S;
+    ctx.strokeStyle='#5c6373';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(-10,y);ctx.lineTo(-5,y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(5,y);ctx.lineTo(10,y);ctx.stroke();
+    ctx.fillStyle='#1b2330';ctx.fillText(d,0,y+2.5);}
+  ctx.fillStyle='#fff';ctx.font='600 10px system-ui';
+  ctx.fillText('quadrant',-120,95);
+  ctx.restore();
+  // ---------- end rotating assembly ----------
+
+  // water (translucent, in front of the quadrant like the real tank)
+  if(h>0.0005){
+    const moving=state.fill||state.drain;
+    const grd=ctx.createLinearGradient(0,wy,0,TANK_BOT);
+    grd.addColorStop(0,'#9ec8ef');grd.addColorStop(1,'#5b9bd5');
+    ctx.fillStyle=grd;ctx.globalAlpha=.5;
+    ctx.beginPath();ctx.moveTo(TANK_L+2,wy);
+    for(let x=TANK_L+2;x<=TANK_R-2;x+=8){
+      const rip=(!REDUCED&&moving)?Math.sin(x*0.09+ripplePh)*1.6:0;
+      ctx.lineTo(x,wy+rip);}
+    ctx.lineTo(TANK_R-2,TANK_BOT-2);ctx.lineTo(TANK_L+2,TANK_BOT-2);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.strokeStyle='#3f7fb8';ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.moveTo(TANK_L+2,wy);ctx.lineTo(TANK_R-2,wy);ctx.stroke();
+  }
+
+  // wetted face highlight + F_R arrow (water pushes the face toward the hanger)
+  if(h>0.001&&wy<FACE_BOT-1){
+    const top=Math.max(wy,FACE_TOP);
+    ctx.strokeStyle='#0b4994';ctx.lineWidth=5;ctx.globalAlpha=.55;
+    ctx.beginPath();ctx.moveTo(PX+12,top);ctx.lineTo(PX+12,FACE_BOT);ctx.stroke();ctx.globalAlpha=1;
+    const cpBelowSurf = h<=D ? 2*h/3 : (h-D/2)+D*D/(12*(h-D/2));
+    const cpY=wy+cpBelowSurf*1000*S;
+    const Fmag=F_th(h), len=26+Fmag*7;
+    ctx.strokeStyle='#0033A0';ctx.fillStyle='#0033A0';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(PX+18+len,cpY);ctx.lineTo(PX+22,cpY);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(PX+28,cpY-5);ctx.lineTo(PX+17,cpY);ctx.lineTo(PX+28,cpY+5);ctx.closePath();ctx.fill();
+    ctx.font='600 11px system-ui';ctx.textAlign='left';
+    ctx.fillText('F_R = '+Fmag.toFixed(2)+' N',PX+24+len,cpY+4);
+  }
+
+  // W arrow under the hanger (run mode only)
+  if(state.mode!=='setup'){
+  ctx.strokeStyle='#c02a2a';ctx.fillStyle='#c02a2a';ctx.lineWidth=2;
+  const ay=PY+170;
+  ctx.beginPath();ctx.moveTo(HANG_X,ay);ctx.lineTo(HANG_X,ay+26);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(HANG_X-4,ay+20);ctx.lineTo(HANG_X,ay+28);ctx.lineTo(HANG_X+4,ay+20);ctx.closePath();ctx.fill();
+  ctx.font='600 11px system-ui';ctx.textAlign='center';
+  ctx.fillText('W = mg',HANG_X,ay+42);
+  }
+
+  // static labels, kept clear of every moving part
+  ctx.fillStyle='#7a8598';ctx.font='10px system-ui';ctx.textAlign='center';
+  ctx.fillText('knife-edge pivot',PX,92);
+  ctx.fillText('counterbalance',648,76);
+  ctx.fillText('level indicator',92,TANK_BOT+32);
+  ctx.font='10.5px system-ui';ctx.textAlign='left';
+  ctx.fillText('R₁ = 100 mm · R₂ = 200 mm · arcs centred on the pivot → only the vertical end face turns the beam',TANK_L-30,462);
+}
+
+/* ============================================================ SIM LOOP */
+let lastT=performance.now();
+function tick(now){
+  const dt=Math.min((now-lastT)/1000,0.05); lastT=now;
+  const sp=+$('speed').value;
+  const rate=0.004*sp;                       // m of depth per second
+  if(state.fill)  state.h=Math.min(0.185,state.h+rate*dt);
+  if(state.drain) state.h=Math.max(0,state.h-rate*dt);
+  if(state.drain&&state.h<=0){state.drain=false;setToggle($('drainBtn'),false);}
+  if(!REDUCED) ripplePh+=dt*6;
+  $('hLive').textContent='h = '+(state.h*1000).toFixed(1)+' mm';
+  const balanced=isBalanced();
+  $('tiltChip').textContent='tilt = '+tiltDeg().toFixed(2)+'°';
+  $('balChip').textContent=balanced?'BALANCED ✓ — record h':'not level';
+  $('balChip').style.background=balanced?'#e7f6ee':'#eef1f6';
+  $('balChip').style.color=balanced?'#1a8f52':'#5b6472';
+  $('record').disabled=!(balanced && state.rec[state.massIdx]==null);
+  if(state.mode==='setup'){
+    state.cal.feetOK=Math.abs(+$('feet').value)<=3;
+    state.cal.cwOK=Math.abs(+$('cwPos').value-CW_REQ)<=1.5;
+    state.cal.drained=state.h<=0.0006;
+    const allCal=state.cal.feetOK&&state.cal.cwOK&&state.cal.drained;
+    if(allCal&&!state.cal.done){state.cal.done=true;$('tabRun').disabled=false;
+      flash('Apparatus calibrated ✓ — open the "Run experiment" tab.','ok');}
+    $('balChip').textContent=state.cal.done?'calibrated ✓':'calibration in progress';
+    $('balChip').style.background=state.cal.done?'#e7f6ee':'#eef1f6';
+    $('balChip').style.color=state.cal.done?'#1a8f52':'#5b6472';
+    renderCalList();
+    $('record').disabled=true;
+  }
+  drawScene();
+  requestAnimationFrame(tick);
+}
+
+/* ============================================================ EVENTS */
+function setToggle(btn,on){btn.setAttribute('aria-pressed',on?'true':'false');}
+$('fillBtn').addEventListener('click',()=>{state.fill=!state.fill;if(state.fill)state.drain=false;
+  setToggle($('fillBtn'),state.fill);setToggle($('drainBtn'),false);});
+$('drainBtn').addEventListener('click',()=>{state.drain=!state.drain;if(state.drain)state.fill=false;
+  setToggle($('drainBtn'),state.drain);setToggle($('fillBtn'),false);});
+$('fineUp').addEventListener('click',()=>{state.h=Math.min(0.185,state.h+0.0005);});
+$('fineDn').addEventListener('click',()=>{state.h=Math.max(0,state.h-0.0005);});
+$('speed').addEventListener('input',e=>$('speedLbl').textContent=e.target.value+'×');
+massSel.addEventListener('change',e=>{state.massIdx=+e.target.value;renderTable();});
+$('record').addEventListener('click',()=>{
+  const i=state.massIdx;
+  const noise=(Math.random()*2-1)*0.0004;
+  state.rec[i]=state.h+noise;
+  flash('Recorded h = '+((state.rec[i])*1000).toFixed(1)+' mm for m = '+MASSES[i]+' g ✓','ok');
+  state.fill=false;state.drain=false;setToggle($('fillBtn'),false);setToggle($('drainBtn'),false);
+  const next=state.rec.findIndex(v=>v==null);
+  if(next>=0){state.massIdx=next;massSel.value=next;}
+  renderTable();
+});
+
+/* ============================================================ GUIDED CALC */
+function num(v){return typeof v==='number'&&isFinite(v);}
+function close(a,b,tol){return Math.abs(a-b)<=Math.abs(b)*tol+1e-9;}
+function unlockCalc(){
+  state.unlocked=true;$('calcLock').style.display='none';$('steps').style.display='block';
+  buildSteps();flash('All 10 depths recorded — data analysis unlocked below! ✓','ok');
+}
+function stepShell(n,ttl){return '<div class="step" id="st'+n+'"><div class="step-h">'+
+  '<span class="num" id="num'+n+'">'+n+'</span><span class="ttl">'+ttl+'</span></div>'+
+  '<div class="step-body" id="body'+n+'"></div></div>';}
+function markDone(n){$('num'+n).classList.add('done');$('num'+n).textContent='✓';}
+function buildSteps(){
+  $('steps').innerHTML =
+   stepShell(1,'Theoretical F_R — partially submerged (h < 100 mm)') +
+   stepShell(2,'Theoretical F_R — fully submerged (h > 100 mm)') +
+   stepShell(3,'Moment arm of F_R about the pivot (line of action)') +
+   stepShell(4,'Experimental F_R from the moment balance') +
+   stepShell(5,'Plot F_R vs h — theory line and experimental points') +
+   stepShell(6,'Interpret the results');
+  renderStep1();renderStep2();renderStep3();renderStep4();renderStep5();renderStep6();
+}
+function grid5(kind,idx0,unit,step){ // 5-column input grid over masses idx0..idx0+4
+  let h='<div class="grid5"><span class="hd">m (g)</span>';
+  for(let i=idx0;i<idx0+5;i++)h+='<span class="hd" style="text-align:center">'+MASSES[i]+'</span>';
+  h+='<span class="hd">'+unit+'</span>';
+  for(let i=idx0;i<idx0+5;i++)h+='<input id="'+kind+'_'+i+'" type="number" step="'+step+
+     '" aria-label="'+kind+' for mass '+MASSES[i]+' grams">';
+  h+='</div><div class="grid5" style="margin-top:3px"><span class="tag">h (mm)</span>';
+  for(let i=idx0;i<idx0+5;i++)h+='<span class="tag" style="text-align:center">'+(state.rec[i]*1000).toFixed(1)+'</span>';
+  h+='<span></span><span></span><span></span><span></span><span></span><span></span></div>';
+  return h;
+}
+
+/* ---- STEP 1: theory ps ---- */
+function renderStep1(){
+  $('body1').innerHTML=
+   '<div class="eq">F<sub>R</sub> = γ h<sub>c</sub> A = γ · <span class="frac"><span>h</span><span>2</span></span> · (h·b)'+
+   ' = <span class="frac"><span>γ b h²</span><span>2</span></span>&nbsp;&nbsp;(N),&nbsp; b = 0.075 m,&nbsp; γ = 9810 N/m³</div>'+
+   '<p class="tag">Only the wetted part of the face (height h) carries pressure — the pressure prism is a triangle. '+
+   'Use each recorded h converted to metres. Enter F to 3 decimals.</p>'+
+   grid5('Fps',0,'F (N)','0.001')+
+   '<button class="btn" onclick="checkStep1()">Check Step 1</button> '+
+   '<button class="linkbtn" onclick="hint(1)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg1" role="status" aria-live="polite"></div>';
+}
+function checkStep1(){
+  let ok=true;
+  for(let i=0;i<5;i++){const inp=$('Fps_'+i);const v=parseFloat(inp.value);
+    const t=GAM*B*state.rec[i]*state.rec[i]/2;
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.03)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg1');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — note F grows with h², not h: both the wetted area AND the average pressure grow with depth.';
+    state.thDone.ps=true;markDone(1);refreshPlots();}
+  else{m.className='msg err';m.textContent='Convert h from mm to m first. Then F = 9810 × 0.075 × h² ÷ 2.';}
+}
+
+/* ---- STEP 2: theory fs ---- */
+function renderStep2(){
+  $('body2').innerHTML=
+   '<div class="eq">F<sub>R</sub> = γ h<sub>c</sub> A = γ (h − <span class="frac"><span>D</span><span>2</span></span>) · (D·b)'+
+   '&nbsp;&nbsp;(N),&nbsp; D = 0.100 m</div>'+
+   '<p class="tag">Now the whole face (area D·b) is wetted and its centroid sits D/2 above the bottom, i.e. at depth '+
+   'h − D/2 below the surface.</p>'+
+   grid5('Ffs',5,'F (N)','0.001')+
+   '<button class="btn" onclick="checkStep2()">Check Step 2</button> '+
+   '<button class="linkbtn" onclick="hint(2)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg2" role="status" aria-live="polite"></div>';
+}
+function checkStep2(){
+  let ok=true;
+  for(let i=5;i<10;i++){const inp=$('Ffs_'+i);const v=parseFloat(inp.value);
+    const t=GAM*B*D*(state.rec[i]-D/2);
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.03)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg2');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — once the face is fully covered the area stops growing, so F now grows linearly with h.';
+    state.thDone.fs=true;markDone(2);refreshPlots();}
+  else{m.className='msg err';m.textContent='F = 9810 × (h − 0.05) × (0.100 × 0.075). Keep h in metres.';}
+}
+
+/* ---- STEP 3: moment arm ---- */
+function renderStep3(){
+  $('body3').innerHTML=
+   '<p class="tag">F_R acts horizontally at the <b>centre of pressure</b>, a distance y<sub>R</sub>−y<sub>c</sub> below '+
+   'the centroid. Measured from the <b>pivot</b> (which sits R₂ = 0.200 m above the bottom of the face), the moment arm is:</p>'+
+   '<div class="eq">partially: arm = R₂ − <span class="frac"><span>h</span><span>3</span></span>'+
+   '&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; fully: arm = R₂ − <span class="frac"><span>D</span><span>2</span></span>'+
+   ' + <span class="frac"><span>D²</span><span>12 (h − D/2)</span></span>&nbsp;&nbsp;(m)</div>'+
+   '<p class="tag">(For the triangular pressure prism the resultant acts h/3 above the bottom; for the fully-wetted face '+
+   'use the parallel-axis I<sub>xc</sub>/(h<sub>c</sub>A) shift below the centroid.) Enter to 4 decimals.</p>'+
+   '<div style="margin:8px 0 4px;font-weight:650;color:var(--bsu-blue)">Partially submerged</div>'+grid5('armp',0,'arm (m)','0.0001')+
+   '<div style="margin:8px 0 4px;font-weight:650;color:var(--bsu-blue)">Fully submerged</div>'+grid5('armf',5,'arm (m)','0.0001')+
+   '<button class="btn" onclick="checkStep3()">Check Step 3</button> '+
+   '<button class="linkbtn" onclick="hint(3)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg3" role="status" aria-live="polite"></div>';
+}
+function checkStep3(){
+  let ok=true;
+  for(let i=0;i<10;i++){const inp=$((i<5?'armp':'armf')+'_'+i);const v=parseFloat(inp.value);
+    const t=arm(state.rec[i]);
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.015)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg3');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — as h grows, the centre of pressure moves toward the centroid and the arm shrinks toward R₂ − D/2 = 0.150 m.';markDone(3);}
+  else{m.className='msg err';m.textContent='Partially: 0.200 − h/3. Fully: 0.150 + 0.100²/(12·(h − 0.05)). All in metres.';}
+}
+
+/* ---- STEP 4: experimental F ---- */
+function renderStep4(){
+  $('body4').innerHTML=
+   '<p class="tag">At balance the weight\'s moment equals the hydrostatic moment. The arcs are centred on the pivot, so '+
+   'pressure on the curved sides passes through the pivot — zero moment. Summing moments:</p>'+
+   '<div class="eq">m g L = F<sub>R</sub> · arm &nbsp;&nbsp;→&nbsp;&nbsp; F<sub>R,exp</sub> = '+
+   '<span class="frac"><span>m g L</span><span>arm</span></span>&nbsp;&nbsp;(N),&nbsp; L = 0.275 m</div>'+
+   '<p class="tag">Use each mass in kg and the arm you found in Step 3. Every correct value drops a point onto the Step-5 plots.</p>'+
+   '<div style="margin:8px 0 4px;font-weight:650;color:var(--bsu-blue)">Partially submerged</div>'+grid5('Fxp',0,'F (N)','0.001')+
+   '<div style="margin:8px 0 4px;font-weight:650;color:var(--bsu-blue)">Fully submerged</div>'+grid5('Fxf',5,'F (N)','0.001')+
+   '<button class="btn" onclick="checkStep4()">Check Step 4</button> '+
+   '<button class="linkbtn" onclick="hint(4)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg4" role="status" aria-live="polite"></div>';
+}
+function checkStep4(){
+  let ok=true,bad=0;
+  for(let i=0;i<10;i++){const inp=$((i<5?'Fxp':'Fxf')+'_'+i);const v=parseFloat(inp.value);
+    const t=MASSES[i]/1000*g*L/arm(state.rec[i]);
+    inp.classList.remove('cell-ok','cell-bad');
+    const good=num(v)&&close(v,t,0.03);
+    state.expOk[i]=good;
+    if(good){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;bad++;}}
+  const m=$('msg4');
+  if(ok){m.className='msg ok';m.textContent='All experimental forces correct ✓ — all ten points are plotted in Step 5. Compare them with your theory curves.';markDone(4);}
+  else{m.className='msg err';m.textContent=bad+' value(s) off. F = (m in kg) × 9.81 × 0.275 ÷ (arm from Step 3). Only correct values plot.';}
+  refreshPlots();
+}
+
+/* ---- STEP 5: plots ---- */
+function renderStep5(){
+  $('body5').innerHTML=
+   '<p class="tag">One plot per regime, as the report requires. The smooth <b>theory curve</b> appears once you finish '+
+   'Steps 1–2; each <b>experimental point</b> appears as you get it right in Step 4.</p>'+
+   '<div class="plots2">'+
+     '<canvas id="plotPS" width="330" height="270" role="img" aria-label="F R versus h, partially submerged"></canvas>'+
+     '<canvas id="plotFS" width="330" height="270" role="img" aria-label="F R versus h, fully submerged"></canvas>'+
+   '</div>'+
+   '<div style="margin-top:10px;font-weight:650">What shape is each curve?</div>'+
+   '<div class="tag">Partially submerged:</div>'+
+   '<div class="choice" id="shpPS">'+
+     '<button onclick="pick(\'shpPS\',0)">Linear (∝ h)</button>'+
+     '<button onclick="pick(\'shpPS\',1)">Parabolic (∝ h²)</button>'+
+     '<button onclick="pick(\'shpPS\',2)">Exponential</button></div>'+
+   '<div class="tag" style="margin-top:6px">Fully submerged:</div>'+
+   '<div class="choice" id="shpFS">'+
+     '<button onclick="pick(\'shpFS\',0)">Linear (∝ h)</button>'+
+     '<button onclick="pick(\'shpFS\',1)">Parabolic (∝ h²)</button>'+
+     '<button onclick="pick(\'shpFS\',2)">Exponential</button></div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep5()">Check shapes</button>'+
+   '<div class="msg" id="msg5" role="status" aria-live="polite"></div>';
+  refreshPlots();
+}
+const picks={};
+function pick(qid,i){picks[qid]=i;
+  document.querySelectorAll('#'+qid+' button').forEach((b,j)=>b.classList.toggle('sel',j===i));}
+function checkStep5(){
+  const m=$('msg5');
+  if(picks.shpPS==null||picks.shpFS==null){m.className='msg err';m.textContent='Answer both questions first.';return;}
+  if(picks.shpPS===1&&picks.shpFS===0){m.className='msg ok';
+    m.innerHTML='Correct ✓ — partially submerged F ∝ h² (area <i>and</i> mean pressure both grow with h); fully submerged '+
+    'the area is fixed so F ∝ h. That change in shape at h = 100 mm is exactly what your report must explain.';markDone(5);}
+  else{m.className='msg err';m.textContent='Look again: in which regime does the wetted area keep growing with h? What does that do to the curve?';}
+}
+function refreshPlots(){drawFHPlot('plotPS','ps');drawFHPlot('plotFS','fs');}
+function drawFHPlot(cid,regime){
+  const c=$(cid);if(!c)return;const p=c.getContext('2d');
+  const Wc=330,Hc=270;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,Wc,Hc);
+  const ps=regime==='ps';
+  const h0=ps?0:100, h1=ps?105:165, F1=ps?4:8.5;
+  const mL=42,mR=10,mT=18,mB=36,pw=Wc-mL-mR,ph=Hc-mT-mB;
+  const X=h=>mL+(h-h0)/(h1-h0)*pw, Y=F=>mT+ph-F/F1*ph;
+  p.strokeStyle='#eceff4';p.lineWidth=1;p.fillStyle='#7a8598';p.font='9.5px system-ui';
+  for(let i=0;i<=5;i++){const F=F1*i/5,y=Y(F);p.beginPath();p.moveTo(mL,y);p.lineTo(Wc-mR,y);p.stroke();
+    p.textAlign='right';p.fillText(F.toFixed(1),mL-4,y+3);}
+  for(let i=0;i<=4;i++){const h=h0+(h1-h0)*i/4,x=X(h);p.beginPath();p.moveTo(x,mT);p.lineTo(x,mT+ph);p.stroke();
+    p.textAlign='center';p.fillText(h.toFixed(0),x,mT+ph+13);}
+  p.fillStyle='#33405a';p.font='600 11px system-ui';p.textAlign='center';
+  p.fillText('h (mm) — '+(ps?'partially submerged':'fully submerged'),mL+pw/2,Hc-5);
+  p.save();p.translate(11,mT+ph/2);p.rotate(-Math.PI/2);p.fillText('F_R (N)',0,0);p.restore();
+  // theory curve
+  if(state.thDone[regime]){
+    p.strokeStyle='#0033A0';p.lineWidth=2;p.beginPath();
+    for(let i=0;i<=60;i++){const h=(h0+(h1-h0)*i/60)/1000;const F=F_th(h);
+      if(i===0)p.moveTo(X(h*1000),Y(F));else p.lineTo(X(h*1000),Y(F));}
+    p.stroke();
+    p.fillStyle='#0033A0';p.font='600 10px system-ui';p.textAlign='left';
+    p.fillText('theory',mL+6,mT+10);
+  }
+  // experimental points
+  const rng=ps?[0,5]:[5,10];
+  p.fillStyle='#D64309';
+  for(let i=rng[0];i<rng[1];i++){
+    if(state.expOk[i]){const h=state.rec[i]*1000;const F=MASSES[i]/1000*g*L/arm(state.rec[i]);
+      p.beginPath();p.arc(X(h),Y(F),4,0,7);p.fill();}}
+  p.font='600 10px system-ui';p.textAlign='left';p.fillStyle='#D64309';
+  p.fillText('● experiment',mL+6,mT+22);
+  if(!state.thDone[regime]&&!state.expOk.slice(rng[0],rng[1]).some(v=>v)){
+    p.fillStyle='#aab2c0';p.font='11px system-ui';p.textAlign='center';
+    p.fillText('Complete Steps 1–4 to fill this plot',mL+pw/2,mT+ph/2);}
+}
+
+/* ---- STEP 6: interpretation ---- */
+function renderStep6(){
+  $('body6').innerHTML=
+   '<div style="font-weight:650">If the tank held seawater (γ ≈ 10,050 N/m³) instead of fresh water, the F_R vs h curves would…</div>'+
+   '<div class="choice" id="q6a">'+
+     '<button onclick="pick(\'q6a\',0)">keep the same shape, scaled up — γ is the multiplier on every force</button>'+
+     '<button onclick="pick(\'q6a\',1)">change from parabolic to linear</button>'+
+     '<button onclick="pick(\'q6a\',2)">not change — γ cancels out</button></div>'+
+   '<div style="font-weight:650;margin-top:12px">Why is this experiment solved with hydrostatic forces and moments rather than buoyancy?</div>'+
+   '<div class="choice" id="q6b">'+
+     '<button onclick="pick(\'q6b\',0)">Buoyancy only exists for floating objects</button>'+
+     '<button onclick="pick(\'q6b\',1)">The block\'s curved sides are arcs centred on the pivot, so their pressure forces have no moment — the beam only feels the force on the plane end face, which a single buoyant force can\'t represent</button>'+
+     '<button onclick="pick(\'q6b\',2)">Buoyancy would give the same answer but is harder to compute</button></div>'+
+   '<button class="btn" style="margin-top:10px" onclick="checkStep6()">Check answers</button>'+
+   '<div class="msg" id="msg6" role="status" aria-live="polite"></div>';
+}
+function checkStep6(){
+  const m=$('msg6');
+  if(picks.q6a==null||picks.q6b==null){m.className='msg err';m.textContent='Answer both questions first.';return;}
+  if(picks.q6a===0&&picks.q6b===1){m.className='msg ok';
+    m.innerHTML='Both correct ✓ — γ scales the whole curve without changing its shape (F = γ·h<sub>c</sub>·A is linear in γ), '+
+    'and the pivot-centred arcs are the key design trick of this apparatus: they silence every pressure force except the one '+
+    'you are trying to measure. You are ready to write the report — all calculations for the appendix are on this page.';markDone(6);}
+  else{m.className='msg err';m.textContent='Not quite. Think about where γ appears in F = γ·h_c·A, and about which surfaces can exert a moment about the pivot.';}
+}
+
+/* ---- hints ---- */
+function hint(n){const m=$('msg'+n);m.className='msg info';
+  const H={1:'Convert the recorded depth from millimetres to metres. Multiply the specific weight (9810) by the face width (0.075) and by the depth squared, then divide by 2.',
+    2:'Take the depth minus half the face height (0.05 m) — that is the centroid depth. Multiply by the specific weight and the full face area (0.100 × 0.075).',
+    3:'Partially submerged: subtract one-third of the depth from 0.200. Fully submerged: start at 0.150 and add D squared over 12 times the centroid depth (h minus 0.05).',
+    4:'Convert the mass to kilograms, multiply by 9.81 and 0.275 to get the applied moment, then divide by the moment arm from Step 3.'};
+  m.textContent=H[n];}
+
+/* ============================================================ SETUP TAB + DOWNLOAD */
+function ckRow(ok,txt){return '<div class="ck'+(ok?' done':'')+'"><span class="dot">'+(ok?'✓':'')+'</span><span>'+txt+'</span></div>';}
+let calListCache='';
+function renderCalList(){
+  const c=state.cal;
+  const html='<b>Calibration checklist</b> — as you would before every real run:'+
+   ckRow(c.feetOK,'Level the base: adjust the feet until the spirit-level bubble is centred.')+
+   ckRow(c.drained,'Open the drain valve and empty the tank — start from a dry, known state.')+
+   ckRow(c.cwOK,'Zero the beam: with no mass and no water, slide the counterbalance until the arm is level (pointer on the red mark).')+
+   (c.done?'<div class="tag" style="color:var(--good);font-weight:650;margin-top:6px">Calibrated — the Run experiment tab is unlocked.</div>':'');
+  if(html!==calListCache){calListCache=html;$('calList').innerHTML=html;}
+}
+function setMode(mo){
+  if(mo==='run'&&!state.cal.done)return;
+  state.mode=mo;
+  $('tabSetup').setAttribute('aria-pressed',mo==='setup'?'true':'false');
+  $('tabRun').setAttribute('aria-pressed',mo==='run'?'true':'false');
+  $('calCtl').style.display=mo==='setup'?'flex':'none';
+  $('calList').style.display=mo==='setup'?'block':'none';
+  $('runCtl').style.display=mo==='run'?'flex':'none';
+}
+$('tabSetup').addEventListener('click',()=>setMode('setup'));
+$('tabRun').addEventListener('click',()=>setMode('run'));
+$('drainCal').addEventListener('click',()=>{state.drain=true;state.fill=false;});
+const PS_NAME='CE323_Fluids_Report_No1_Problem_Statement.html';
+const PS_DOC="<!DOCTYPE html><html><head><meta charset='utf-8'><title>CE 323 \u00b7 Fluids Report No. 1 \u2014 Problem Statements and Requirements</title><style>body{font-family:Georgia,'Times New Roman',serif;max-width:820px;margin:36px auto;line-height:1.5;color:#111;padding:0 16px}h1{font-size:21px}h2{font-size:17px;margin-top:26px;border-bottom:2px solid #0033A0;color:#0033A0;padding-bottom:3px}h3{font-size:15px}table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #555;padding:4px 10px;font-size:14px}th{background:#eef3fb}.meta{color:#555;font-size:13px}.eq{background:#f5f7fa;border-left:3px solid #0033A0;padding:6px 12px;margin:8px 0;font-style:italic}li{margin:4px 0}</style></head><body><h1>CE 323 \u00b7 Fluids Report No. 1 \u2014 Problem Statements and Requirements</h1><p class='meta'>CE 323 \u2014 Environmental and Fluids Laboratory \u00b7 1 CR Graded \u00b7 Boise State University</p>\n<p class='meta'>Adapted from: Munson, B.R., Okiishi, T.H., Huebsch, W.W., and A.P. Rothmayer, 2012, <i>Fundamentals of Fluid Mechanics</i>, 7th ed., John Wiley &amp; Sons, Inc.</p>\n<h2>Experiment 1 \u2014 Fluid Properties (Stormer viscometer)</h2>\n<h3>Objective</h3>\n<p>Some fluids can be classified as Newtonian, while others are non-Newtonian. The purpose of this experiment is to determine the shearing stress versus rate-of-strain characteristics of various liquids and to classify them as Newtonian or non-Newtonian fluids.</p>\n<h3>Background</h3>\n<p>A rotating-cylinder (<i>Stormer</i>) viscometer uses a falling weight, W, to cause the inner cylinder to rotate with an angular velocity, \u03c9. The dynamic viscosity, \u03bc, of the liquid is related to W and \u03c9 through W = K\u00b7\u03bc\u00b7\u03c9, where K is a constant that depends only on the geometry (including liquid depth) of the viscometer. K is typically determined using a calibration liquid of known viscosity; here it is computed from the device dimensions.</p>\n<h3>Equipment</h3>\n<p>Stormer viscometer (stationary outer cylinder, rotating concentric inner cylinder); stopwatch; drive weights; two liquids \u2014 castor oil (Device A) and motor oil (Device B).</p>\n<table><tr><th>Dimension</th><th>Device A (in)</th><th>Device B (in)</th></tr>\n<tr><td>Drive wheel diameter, d<sub>dw</sub></td><td>2.750</td><td>2.750</td></tr>\n<tr><td>Container diameter, d<sub>o</sub></td><td>5.735</td><td>5.740</td></tr>\n<tr><td>Inner cylinder diameter, d<sub>i</sub></td><td>5.435</td><td>5.575</td></tr>\n<tr><td>Inner cylinder height, l</td><td>6.000</td><td>6.000</td></tr></table>\n<h3>Experimental procedure</h3>\n<ol><li>Ensure the gap between the cylinders is filled with the test fluid (~200 mL; use the same volume for each test). Record room temperature (fluid temperature = room temperature).</li>\n<li>Ensure there is a mark ~40 cm up the string \u2014 this is the drop distance. Measure and record it.</li>\n<li>Select a drive mass m (too light \u2192 very slow to reach steady state; too heavy \u2192 displaces fluid). Observe a few trials to find a starting mass.</li>\n<li>Attach the drive weight, release it, and measure the time t to fall the recorded distance.</li>\n<li>Repeat three (3) times per mass and average. Record values for six (6) different masses.</li>\n<li>Repeat the entire procedure for the second fluid.</li></ol>\n<h3>Calculations</h3>\n<p class='eq'>\u03c9 = v<sub>dw</sub>/r<sub>i</sub> &nbsp;&nbsp;\u00b7&nbsp;&nbsp; \u03bc = W\u00b7r<sub>dw</sub>\u00b7(r<sub>o</sub> \u2212 r<sub>i</sub>) / (2\u03c0\u00b7r<sub>i</sub>\u00b3\u00b7l\u00b7\u03c9) &nbsp;&nbsp;\u00b7&nbsp;&nbsp; W = m\u00b7g</p>\n<p>Plot W (ordinate) versus \u03c9 (abscissa) for each fluid and draw a best-fit line through the data.</p>\n<h3>Results</h3>\n<ul><li>Determine \u03bc and the geometric constant K for Device A (castor oil); compare your \u03bc with a published value from a properly cited source.</li>\n<li>Determine \u03bc and K for Device B (motor oil); compare with a published value. Compare K<sub>A</sub> to K<sub>B</sub> and comment on the differences.</li>\n<li>Classify each fluid as Newtonian or non-Newtonian (shear-thinning or shear-thickening) based on your graphs.</li></ul>\n<h2>Experiment 2 \u2014 Hydrostatics</h2>\n<h3>Objective</h3>\n<p>A quarter-circle block with a vertical rectangular end is attached to a balance beam. Water in the tank puts a hydrostatic pressure force on the block, causing a clockwise moment about the pivot, balanced by the counterclockwise moment of a weight at the end of the beam. Determine the hydrostatic force F<sub>R</sub> acting on the surface as a function of water depth h.</p>\n<h3>Equipment</h3>\n<table><tr><th>Dimension</th><th>Measurement (mm)</th></tr>\n<tr><td>Balance beam length, L</td><td>275</td></tr><tr><td>Inner radius, R\u2081</td><td>100</td></tr>\n<tr><td>Outer radius, R\u2082</td><td>200</td></tr><tr><td>Width, b</td><td>75</td></tr></table>\n<h3>Experimental procedure</h3>\n<ol><li>Level the water tank.</li>\n<li>Adjust the counterweight so the beam is level with no weight on the beam and no water in the tank.</li>\n<li>Hang a known mass m on the beam and adjust the water level h so the beam becomes level again.</li>\n<li>Complete for ten (10) different masses: five (5) with the face fully submerged (fs) and five (5) partially submerged (ps).</li></ol>\n<h3>Calculations</h3>\n<p class='eq'>Theoretical: F<sub>R</sub> = \u03b3\u00b7h<sub>c</sub>\u00b7A. Determine the point of action (y<sub>R</sub> \u2212 y<sub>c</sub> below the centroid). Note the equations differ between h &lt; R\u2082\u2212R\u2081 (ps) and fully submerged (fs). Experimental: F<sub>R</sub> from summing moments about the pivot (the arc sides are centred on the pivot, so their pressure forces have no moment).</p>\n<p>Plot theoretical F<sub>R</sub> (ordinate) versus depth h (abscissa) with a best-fit curve, plus the experimentally determined forces on the same plot.</p>\n<h3>Results</h3>\n<ul><li>Create two plots (fs and ps), each with the experimental and theoretical F<sub>R</sub> versus h.</li>\n<li>Comment on potential sources of error. Are the lines the shape you expected?</li>\n<li>How does the specific weight affect the shape of the plots?</li>\n<li>Why is the F<sub>R</sub> vs h curve different when the end is fully vs partially submerged? What factors lead to the different curves?</li>\n<li>Why do we solve this problem using hydrostatic forces rather than buoyancy forces?</li></ul>\n<h2>Requirements</h2>\n<ul><li>Team member names; section of CE 323; date submission prepared.</li>\n<li>Brief responses and supporting explanations (complete sentences) to the <i>Results</i> section of each experiment.</li>\n<li>Supporting information: compile all calculations in an appendix; clearly show the initials of who performed and who checked the calculations; clearly note any modifications/deviations from the specified test method.</li></ul></body></html>";
+$('dlPS').addEventListener('click',()=>{const b=new Blob([PS_DOC],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=PS_NAME;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+renderCalList();setMode('setup');
+
+/* ============================================================ INIT */
+renderTable();
+requestAnimationFrame(t=>{lastT=t;tick(t);});
+window.addEventListener('resize',()=>{fitCanvas();if(state.unlocked)refreshPlots();});
+</script>
+</body>
+</html>

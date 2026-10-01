@@ -39,27 +39,32 @@
       if (!AC) return;
       if (!ctx) ctx = new AC();
       if (ctx.state === "suspended") ctx.resume();
+      /* A keyswitch-style click: a few milliseconds of high-passed noise for the "snap",
+         plus a very short high ping for the "tick". Press is lower and fuller, release is higher and lighter.
+         Nothing below ~1.5 kHz, so there is no thump. */
+      var up = kind === "up";
       var t = ctx.currentTime;
       var out = ctx.createGain();
-      out.gain.setValueAtTime(0.0001, t);
-      out.gain.exponentialRampToValueAtTime(kind === "up" ? 0.12 : 0.2, t + 0.002);
-      out.gain.exponentialRampToValueAtTime(0.0001, t + (kind === "up" ? 0.035 : 0.06));
+      out.gain.value = up ? 0.22 : 0.35;
       out.connect(ctx.destination);
-      /* a filtered noise burst for the click */
-      var len = Math.floor(ctx.sampleRate * 0.06);
+
+      var dur = up ? 0.006 : 0.009;
+      var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
       var buf = ctx.createBuffer(1, len, ctx.sampleRate);
       var d = buf.getChannelData(0);
-      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
       var src = ctx.createBufferSource(); src.buffer = buf;
-      var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = kind === "up" ? 2600 : 1800; bp.Q.value = 1.2;
-      src.connect(bp); bp.connect(out); src.start(t); src.stop(t + 0.07);
-      /* and a low thump underneath for the press */
-      if (kind !== "up") {
-        var o = ctx.createOscillator(); o.type = "sine";
-        o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.05);
-        var g = ctx.createGain(); g.gain.setValueAtTime(0.18, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
-        o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.07);
-      }
+      var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = up ? 4500 : 3000; hp.Q.value = 0.7;
+      var lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = up ? 9000 : 7000;
+      src.connect(hp); hp.connect(lp); lp.connect(out); src.start(t);
+
+      var o = ctx.createOscillator(); o.type = "triangle";
+      o.frequency.setValueAtTime(up ? 3400 : 2300, t);
+      o.frequency.exponentialRampToValueAtTime(up ? 2900 : 1700, t + 0.012);
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(up ? 0.10 : 0.16, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (up ? 0.012 : 0.018));
+      o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.03);
     } catch (e) {}
   }
   function paintSound() {

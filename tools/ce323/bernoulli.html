@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bernoulli's Law in a Tapered Duct — Virtual Lab (CE 323)</title>
+<style>
+  :root{
+    --bsu-blue:#0033A0; --bsu-orange:#D64309; --ink:#1b2330; --muted:#5b6472;
+    --line:#d8dee7; --bg:#f4f6f9; --panel:#ffffff; --good:#1a8f52; --bad:#c02a2a;
+    --good-bg:#e7f6ee; --bad-bg:#fbeaea; --accent:#eef3fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{background:var(--bsu-blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px}
+  header .logo{font-weight:800;letter-spacing:.5px;background:#fff;color:var(--bsu-blue);
+    padding:4px 9px;border-radius:5px;font-size:15px}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  header .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+  .wrap{max-width:1500px;margin:0 auto;padding:16px;display:grid;
+    grid-template-columns:minmax(430px,1.05fr) minmax(430px,1fr);gap:16px}
+  @media(max-width:1050px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 1px 3px rgba(20,30,50,.05);overflow:hidden}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;margin:0;
+    padding:10px 14px;background:var(--accent);border-bottom:1px solid var(--line);color:var(--bsu-blue)}
+  .pad{padding:14px}
+  .left,.right{display:flex;flex-direction:column;gap:16px}
+  canvas{display:block;width:100%;background:#fbfcfe;border-radius:8px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-top:12px}
+  .ctl{display:flex;flex-direction:column;gap:4px}
+  .ctl label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  select,input[type=number]{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#fff}
+  .btn{background:var(--bsu-orange);color:#fff;border:none;padding:9px 16px;border-radius:6px;
+    font-weight:650;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.06)}
+  .btn:disabled{background:#c3c8d0;cursor:not-allowed}
+  .btn.sec{background:#fff;color:var(--bsu-blue);border:1px solid var(--bsu-blue)}
+  .btn.sec:disabled{color:#9aa4b3;border-color:#d8dee7;background:#f6f8fb}
+  .btn.sec[aria-pressed="true"]{background:var(--bsu-blue);color:#fff}
+  :focus-visible{outline:3px solid #7aa7ff;outline-offset:2px;border-radius:4px}
+  .valve{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .valve input{width:170px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{border:1px solid var(--line);padding:4px 5px;text-align:center}
+  th{background:var(--accent);color:var(--bsu-blue);font-weight:650}
+  tr.active{outline:2px solid var(--bsu-orange);outline-offset:-2px}
+  .avg{font-weight:700;color:var(--bsu-blue)}
+  .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  .stopwatch{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;color:var(--bsu-blue)}
+  .step{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .step-h{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#fafbfd;
+    border-bottom:1px solid var(--line)}
+  .step-h .num{background:var(--bsu-blue);color:#fff;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+  .step-h .num.done{background:var(--good)}
+  .step-h .ttl{font-weight:650;font-size:13.5px}
+  .step-body{padding:12px}
+  .eq{background:#f7f9fc;border:1px solid var(--line);border-left:3px solid var(--bsu-blue);
+    padding:8px 11px;border-radius:5px;font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    font-size:15px;margin:8px 0;overflow-x:auto}
+  .eq .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}
+  .eq .frac >span:first-child{border-bottom:1.4px solid var(--ink);padding:0 5px}
+  .eq .frac >span:last-child{padding:0 5px}
+  sub{font-size:.72em} sup{font-size:.72em}
+  .rowin{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .rowin input{width:96px}
+  .tag{font-size:12px;color:var(--muted)}
+  .msg{padding:7px 10px;border-radius:6px;font-size:12.5px;margin-top:8px;display:none}
+  .msg.ok{background:var(--good-bg);color:var(--good);display:block}
+  .msg.err{background:var(--bad-bg);color:var(--bad);display:block}
+  .msg.info{background:#eaf1fb;color:var(--bsu-blue);display:block}
+  .linkbtn{background:none;border:none;color:var(--bsu-blue);text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0}
+  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;font-size:12.5px;align-items:center}
+  .grid7 .hd{font-weight:650;color:var(--bsu-blue);font-size:11.5px}
+  .grid7 input{width:100%;padding:5px}
+  .cell-ok{background:var(--good-bg)!important;border-color:var(--good)!important}
+  .cell-bad{background:var(--bad-bg)!important;border-color:var(--bad)!important}
+  .choice{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .choice button{flex:1 1 180px;padding:9px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  .choice button.sel{border-color:var(--bsu-orange);background:#fff5f0;font-weight:650}
+  .foot{font-size:11.5px;color:var(--muted);padding:10px 16px;text-align:center}
+  .note{background:#fff8ec;border:1px solid #f0dca8;border-radius:6px;padding:8px 11px;font-size:12.5px;margin-top:10px}
+  progress{width:120px;height:9px}
+  details.proc{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:12px;background:#fafbfd;font-size:12.5px}
+  details.proc summary{cursor:pointer;font-weight:650;color:var(--bsu-blue)}
+  .plots2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:640px){.plots2{grid-template-columns:1fr}}
+  .chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:650}
+  .statusbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .parttabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+  .speed{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .speed input{width:96px}
+  .ck{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0}
+  .ck .dot{width:18px;height:18px;border-radius:50%;background:#c3c8d0;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:0 0 auto}
+  .ck.done .dot{background:var(--good)}
+  /* site: let the two panels shrink on phones */
+  .wrap>*{min-width:0} @media(max-width:1050px){.wrap{grid-template-columns:minmax(0,1fr)}} table{max-width:100%}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">CE&nbsp;323</span>
+  <div>
+    <h1>Bernoulli's Law in a Tapered Duct — Virtual Fluids Laboratory</h1>
+    <div class="sub">Fluids Report No. 2 · steady flow through a venturi — compare velocities from pressure heads and from continuity</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: SIMULATION ================= -->
+  <div class="left">
+    <div class="panel">
+      <h2>Apparatus &amp; Measurement</h2>
+      <div class="pad">
+        <div class="parttabs" role="group" aria-label="Mode">
+          <button class="btn sec" id="tabSetup" aria-pressed="true">1 · Setup &amp; calibration</button>
+          <button class="btn sec" id="tabRun" aria-pressed="false" disabled title="Complete calibration first">2 · Run experiment</button>
+          <button class="btn sec" id="dlPS" style="margin-left:auto">⬇ Problem statement</button>
+        </div>
+        <canvas id="sim" width="760" height="470" role="img" aria-label="Animated Bernoulli venturi apparatus with six manometer tubes"></canvas>
+        <div class="statusbar" role="status" aria-live="polite">
+          <span class="chip" id="qChip" style="background:#eaf1fb;color:#0033A0">Q = 0.0 mL/s</span>
+          <span class="chip" id="dhChip" style="background:#eaf1fb;color:#0033A0">h₁−h₅ = 0 mm</span>
+          <span class="chip" id="tgtChip" style="background:#eef1f6;color:#5b6472">target ≈ 150 mm</span>
+        </div>
+        <div class="controls" id="calCtl">
+          <div class="ctl">
+            <label for="feet">Levelling feet</label>
+            <input type="range" id="feet" min="-50" max="50" step="1" value="26" aria-label="Levelling feet">
+          </div>
+          <div class="valve">
+            <label for="calValve">FCV — keep low while purging</label>
+            <input type="range" id="calValve" min="0" max="100" step="0.5" value="0" aria-label="Flow control valve during purge">
+            <span id="calValveLbl">0%</span>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="absBtn" aria-pressed="false">Open air-bleed screw (ABS)</button>
+          </div>
+        </div>
+        <div id="calList" class="note"></div>
+        <div class="controls" id="runCtl" style="display:none">
+          <div class="valve">
+            <label for="valve">Flow control valve (FCV)</label>
+            <input type="range" id="valve" min="0" max="100" step="0.5" value="0" aria-label="Flow control valve percent open">
+            <span id="valveLbl">0%</span>
+          </div>
+          <div class="valve">
+            <label for="probe">Total-head probe position</label>
+            <input type="range" id="probe" min="0" max="141.5" step="0.5" value="81" aria-label="Total-head probe distance from tap 1 in millimetres">
+            <span id="probeLbl">81 mm</span>
+          </div>
+          <div class="speed">
+            <label for="simSpeed">Sim speed</label>
+            <input type="range" id="simSpeed" min="1" max="10" step="1" value="4" aria-label="Simulation speed multiplier">
+            <span id="spdLbl">4×</span>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn" id="recordBtn" disabled>● Record manometers</button>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="collectBtn" disabled>⏱ Collect 4 L</button>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="reverseBtn" disabled aria-pressed="false">Reverse section (21°)</button>
+          </div>
+        </div>
+        <p class="hint" id="runHint"></p>
+        <details class="proc">
+          <summary>Procedure &amp; apparatus details</summary>
+          <p>The duct converges through the <b>14° taper</b> (taps h₁→h₅) then expands. Six manometers read static
+          pressure head at taps of diameter 25.0, 13.9, 11.8, 10.7, 10.0 and 25.0&nbsp;mm; the traversing <b>probe</b>
+          reads total head h<sub>total</sub>. For each run: set the FCV so h₁−h₅ hits the target (~150, 100, 50&nbsp;mm),
+          record the manometers, then — without touching the valve — time the collection of <b>4&nbsp;L</b> three times.
+          After all three runs you can reverse the section to watch the steeper <b>21° taper</b> converging (qualitative
+          observation for your discussion).</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: DATA + CALCS ================= -->
+  <div class="right">
+    <div class="panel">
+      <h2>Raw Data <span id="dataBadge" style="float:right;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>Collection volume = <b>4.0 L</b> &nbsp;·&nbsp; water 22 °C</div>
+          <div>Stopwatch: <span class="stopwatch" id="sw">0.00 s</span></div>
+        </div>
+        <table id="dataTable" aria-label="Manometer readings and collection times for each run"></table>
+        <p class="hint" id="progressHint" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Guided Data Analysis — you calculate, the tool checks</h2>
+      <div class="pad" id="calc">
+        <div class="note" id="calcLock">Complete all <b>3 runs</b> first (manometer readings + 3 timed collections each,
+          with the 14° taper converging). The analysis unlocks automatically.
+          <div style="margin-top:6px"><progress id="collProg" value="0" max="12"></progress>
+            <span id="collTxt">0 / 12 measurements</span></div></div>
+        <div id="steps" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  Virtual lab for CE&nbsp;323 (Environmental &amp; Fluids Laboratory), Boise State University · Dr.&nbsp;Sondra Miller.
+  Manometer levels are generated from the Bernoulli equation (with a realistic exit loss after the throat), so your two
+  velocity calculations should agree in the converging section — and disagree where real losses appear.
+</div>
+
+<script>
+/* ============================================================
+   PHYSICS (SI): h_i = h_total − v_i²/2g,  v_i = Q/A_i
+   Duct tap diameters (mm): 25.0, 13.9, 11.8, 10.7, 10.0, 25.0
+   Exit loss after throat makes h6 < h1 (real ducts are not frictionless).
+   ============================================================ */
+const g=9.81, VOL=0.004;                       // collection volume m³
+const DIAS=[25.0,13.9,11.8,10.7,10.0,25.0];    // mm, forward (14° converging)
+const AREA=DIAS.map(d=>Math.PI*Math.pow(d/1000,2)/4);
+const QMAX=1.55e-4;                            // m³/s at 100% valve
+const RUNS=[{target:150},{target:100},{target:50}];  // h1−h5 targets (mm)
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function Qof(valve){return valve/100*QMAX;}
+function htotOf(valve){return 0.050+0.0022*valve;}          // m — bench supply head rises with valve
+function headsOf(valve,rev){
+  const Q=Qof(valve), ht=htotOf(valve);
+  const dias=rev?DIAS.slice().reverse():DIAS;
+  const A=dias.map(d=>Math.PI*Math.pow(d/1000,2)/4);
+  const v=A.map(a=>Q/a);
+  const h=v.map(vi=>ht-vi*vi/(2*g));
+  const thr=Math.min(...A); const vth=Q/thr;
+  const lossE=(rev?0.25:0.15)*vth*vth/(2*g);   // exit loss (bigger for the steeper 21° diffuser)
+  h[5]-=lossE;
+  return {h,ht,Q,v,lossE};
+}
+function dh15(valve,rev){const o=headsOf(valve,rev);return (o.h[0]-o.h[4])*1000;}
+
+/* ============================================================ STATE */
+const state={
+  runIdx:0, reversed:false, collecting:false, locked:false,
+  mode:'setup', cal:{feetOK:false,air:1,absOpen:false,done:false},   // locked: valve frozen mid-run
+  // per run: heads (mm, recorded w/ noise), htot (mm), times[]
+  runs:RUNS.map(()=>({heads:null,htot:null,times:[]})),
+  vOk4:RUNS.map(()=>[false,false,false,false,false,false]),   // step-3 Eq4 velocities validated
+  vOk5:RUNS.map(()=>[false,false,false,false,false,false]),   // step-4 Eq5 velocities validated
+  unlocked:false
+};
+
+/* ============================================================ DOM */
+const $=id=>document.getElementById(id);
+const cvs=$('sim'), ctx=cvs.getContext('2d');
+let DPR=Math.min(window.devicePixelRatio||1,2);
+function fitCanvas(){DPR=Math.min(window.devicePixelRatio||1,2);
+  cvs.width=760*DPR;cvs.height=470*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+fitCanvas();
+
+/* ============================================================ DATA TABLE */
+function measCount(){let n=0;state.runs.forEach(r=>{if(r.heads)n++;n+=r.times.length;});return n;}
+function runDone(r){return r.heads&&r.times.length>=3;}
+function allDone(){return state.runs.every(runDone);}
+function avg(a){return a.length?a.reduce((s,x)=>s+x,0)/a.length:null;}
+function renderTable(){
+  let h='<tr><th>run</th><th>target h₁−h₅</th><th>h₁</th><th>h₂</th><th>h₃</th><th>h₄</th><th>h₅</th><th>h₆</th>'+
+        '<th>h<sub>tot</sub></th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th><th>t̄ (s)</th></tr>';
+  state.runs.forEach((r,i)=>{
+    const active=(i===state.runIdx&&!state.unlocked)?' class="active"':'';
+    h+='<tr'+active+'><td>'+(i+1)+'</td><td>'+RUNS[i].target+' mm</td>';
+    for(let j=0;j<6;j++) h+='<td>'+(r.heads?r.heads[j].toFixed(0):'—')+'</td>';
+    h+='<td>'+(r.htot!=null?r.htot.toFixed(0):'—')+'</td>';
+    for(let j=0;j<3;j++) h+='<td>'+(r.times[j]!=null?r.times[j].toFixed(1):'—')+'</td>';
+    h+='<td class="avg">'+(r.times.length===3?avg(r.times).toFixed(1):'—')+'</td></tr>';
+  });
+  h+='<tr><td colspan="13" style="font-size:11px;color:var(--muted)">manometer readings in mm of water · taps h₁…h₆ along the duct</td></tr>';
+  $('dataTable').innerHTML=h;
+  $('collProg').value=measCount();$('collTxt').textContent=measCount()+' / 12 measurements';
+  $('dataBadge').innerHTML='<span class="chip" style="background:#eaf1fb;color:var(--bsu-blue)">Run '+
+    Math.min(state.runIdx+1,3)+' of 3</span>';
+  if(allDone()&&!state.unlocked)unlockCalc();
+}
+let flashTimer=null;
+function flash(msg,type){
+  const el=$('progressHint');
+  el.innerHTML='<span style="color:'+(type==='ok'?'#1a8f52':type==='info'?'#0033A0':'#c02a2a')+'">'+msg+'</span>';
+  clearTimeout(flashTimer);flashTimer=setTimeout(updateHint,2600);
+}
+function updateHint(){
+  if(state.mode==='setup'){
+    $('runHint').innerHTML='<b>Setup:</b> level the bench feet, then purge the manometers — open the <b>ABS</b>, set the FCV to 5–30% and watch the air bubbles clear from the tubes, then close the ABS.';
+    $('progressHint').innerHTML='Calibration in progress.';return;
+  }
+  if(state.unlocked){
+    $('runHint').innerHTML='All runs complete ✓ — analysis unlocked. You may now <b>reverse the section</b> to watch the 21° taper converging (for your discussion of the steeper contraction).';
+    $('progressHint').innerHTML='✓ All 12 measurements collected.';return;
+  }
+  const r=state.runs[state.runIdx], tgt=RUNS[state.runIdx].target;
+  const cur=dh15(+$('valve').value,state.reversed);
+  let s='<b>Run '+(state.runIdx+1)+':</b> adjust the FCV until h₁−h₅ ≈ <b>'+tgt+' mm</b> (currently '+
+        cur.toFixed(0)+' mm), then record the manometers. Keep the total-head probe at or before the throat (≤ 81 mm).';
+  if(r.heads) s='<b>Run '+(state.runIdx+1)+':</b> readings recorded ✓ — now collect 4 L three times ('+
+        r.times.length+'/3 done). The valve is locked so the flow stays steady.';
+  $('runHint').innerHTML=s;
+  $('progressHint').innerHTML=measCount()+' / 12 measurements logged.';
+}
+
+/* ============================================================ DRAWING
+   Modeled on the Armfield F1-15 apparatus: white manometer panel with
+   top manifold and air valve, clear venturi test section below at the
+   real tap spacings, FCV at the inlet, collection tank at right. */
+const PAN={x0:150,x1:540,top:66,base:250};
+const TUBE_X=[0,1,2,3,4,5,6].map(i=>176+i*55);
+const DUCT={x0:170,x1:520,cy:330};
+const TAPMM=[0,60.28,68.68,73.18,81.08,141.54];
+const PXPERMM=(DUCT.x1-DUCT.x0)/141.54;
+const TAPX=TAPMM.map(d=>DUCT.x0+d*PXPERMM);
+const MSCALE=0.44;
+function ductHalf(x,rev){
+  const dias=rev?DIAS.slice().reverse():DIAS;
+  let i=0;while(i<4&&x>TAPX[i+1])i++;
+  const f=Math.min(Math.max((x-TAPX[i])/(TAPX[i+1]-TAPX[i]),0),1);
+  return (dias[i]+(dias[i+1]-dias[i])*f)*1.5/2;
+}
+let parts=[];for(let i=0;i<70;i++)parts.push({x:DUCT.x0+Math.random()*(DUCT.x1-DUCT.x0),y:Math.random()*2-1});
+let dispHeads=[0,0,0,0,0,0], dispHt=0, swT=0, airJit=0;
+
+function drawScene(dt){
+  ctx.clearRect(0,0,760,470);
+  const valve=state.mode==='setup'?+$('calValve').value:+$('valve').value, rev=state.reversed;
+  const o=headsOf(valve,rev);
+  const airF=state.cal.air;
+  if(!REDUCED)airJit+=dt*1.6;
+  for(let i=0;i<6;i++){
+    const tgtL=o.h[i]*1000*(1-0.35*airF)+airF*26*Math.sin(i*2.6+airJit);
+    dispHeads[i]+=(tgtL-dispHeads[i])*(REDUCED?1:Math.min(1,dt*4));
+  }
+  const pmm=+($('probe')?$('probe').value:81);
+  const htP=pmm<=81.08?o.ht:o.ht-o.lossE*(pmm-81.08)/(141.54-81.08);
+  dispHt+=(htP*1000-dispHt)*(REDUCED?1:Math.min(1,dt*4));
+
+  // ================= manometer panel =================
+  ctx.fillStyle='#fff';ctx.strokeStyle='#c9d2dd';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(PAN.x0-24,PAN.top-30,PAN.x1-PAN.x0+48,PAN.base-PAN.top+70,6);
+  ctx.fill();ctx.stroke();
+  ctx.fillStyle='#37414f';ctx.fillRect(PAN.x0-20,PAN.top-24,PAN.x1-PAN.x0+40,12);
+  ctx.fillStyle='#1b2330';
+  TUBE_X.forEach(x=>ctx.fillRect(x-4,PAN.top-30,8,8));
+  ctx.fillStyle=state.cal.absOpen?'#1a8f52':'#8790a0';ctx.fillRect(PAN.x1+20,PAN.top-22,16,8);
+  ctx.fillStyle='#7a8598';ctx.font='9px system-ui';ctx.textAlign='left';
+  ctx.fillText('ABS '+(state.cal.absOpen?'(open)':'(closed)'),PAN.x1-16,PAN.top-34);
+  ctx.font='8px system-ui';
+  for(let mm=0;mm<=400;mm+=50){
+    const y=PAN.base-mm*MSCALE;
+    ctx.strokeStyle=mm%100?'#f2f5f9':'#e2e8f0';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAN.x0-12,y);ctx.lineTo(PAN.x1+12,y);ctx.stroke();
+    if(mm%100===0){ctx.fillStyle='#aab2c0';ctx.textAlign='right';ctx.fillText(mm,PAN.x0-15,y+2.5);}
+  }
+  for(let i=0;i<7;i++){
+    const x=TUBE_X[i], val=i<6?dispHeads[i]:dispHt;
+    ctx.strokeStyle='#d6dde6';ctx.lineWidth=8;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x,PAN.top-10);ctx.lineTo(x,PAN.base);ctx.stroke();
+    ctx.strokeStyle='#f6f8fb';ctx.lineWidth=5.5;
+    ctx.beginPath();ctx.moveTo(x,PAN.top-10);ctx.lineTo(x,PAN.base);ctx.stroke();
+    const colH=Math.max(0,Math.min(PAN.base-PAN.top+6,val*MSCALE));
+    ctx.strokeStyle=i<6?'#5b9bd5':'#e08a4f';ctx.lineWidth=5.5;
+    ctx.beginPath();ctx.moveTo(x,PAN.base);ctx.lineTo(x,PAN.base-colH);ctx.stroke();
+    if(airF>0.02&&colH>16&&i<6){
+      ctx.strokeStyle='#fff';ctx.lineWidth=5.5;
+      for(let b2=0;b2<3;b2++){
+        const seg=((i*37+b2*53+airJit*22)%(colH-8))+4;
+        ctx.beginPath();ctx.moveTo(x,PAN.base-seg);ctx.lineTo(x,PAN.base-seg-4-5*airF);ctx.stroke();
+      }
+    }
+  }
+  ctx.fillStyle='#37414f';ctx.fillRect(PAN.x0-20,PAN.base,PAN.x1-PAN.x0+40,10);
+  ctx.textAlign='center';
+  for(let i=0;i<7;i++){
+    const x=TUBE_X[i];
+    ctx.fillStyle='#33405a';ctx.font='600 10px system-ui';
+    ctx.fillText(i<6?('h'+(i+1)):'h_tot',x,PAN.base+23);
+    ctx.fillStyle=i<6?'#0033A0':'#D64309';ctx.font='9.5px ui-monospace,monospace';
+    ctx.fillText((i<6?dispHeads[i]:dispHt).toFixed(0),x,PAN.base+36);
+  }
+
+  // ================= venturi test section =================
+  ctx.fillStyle='#6b7480';
+  ctx.fillRect(DUCT.x0-30,DUCT.cy-16,30,32);
+  ctx.fillRect(DUCT.x1,DUCT.cy-16,30,32);
+  ctx.beginPath();
+  ctx.moveTo(DUCT.x0,DUCT.cy-ductHalf(DUCT.x0,rev));
+  for(let x=DUCT.x0;x<=DUCT.x1;x+=5)ctx.lineTo(x,DUCT.cy-ductHalf(x,rev));
+  for(let x=DUCT.x1;x>=DUCT.x0;x-=5)ctx.lineTo(x,DUCT.cy+ductHalf(x,rev));
+  ctx.closePath();
+  const grd=ctx.createLinearGradient(DUCT.x0,0,DUCT.x1,0);
+  grd.addColorStop(0,'#bcd8f0');grd.addColorStop(.5,'#8fc0e8');grd.addColorStop(1,'#bcd8f0');
+  ctx.fillStyle=grd;ctx.fill();
+  ctx.strokeStyle='#5c8db8';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#7a8598';ctx.font='9.5px system-ui';ctx.textAlign='left';
+  ctx.fillText(rev?'21° taper converging (section reversed)':'14° taper converging',DUCT.x0-24,DUCT.cy+44);
+  // pressure-tap stubs (tubing runs up behind the panel)
+  ctx.strokeStyle='#9fb6ca';ctx.lineWidth=2;
+  for(let i=0;i<6;i++){
+    const tx=TAPX[i], ty=DUCT.cy-ductHalf(tx,rev);
+    ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx,ty-12);ctx.stroke();
+  }
+  ctx.fillStyle='#8a93a2';ctx.font='8px system-ui';ctx.textAlign='center';
+  for(let i=0;i<6;i++)ctx.fillText(i+1,TAPX[i],DUCT.cy+ductHalf(TAPX[i],rev)+12);
+  // total-head probe from the right union to the throat
+  const tipX=DUCT.x0+Math.min(141.54,pmm)*PXPERMM;
+  ctx.strokeStyle='#37414f';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(DUCT.x1+30,DUCT.cy);ctx.lineTo(tipX,DUCT.cy);ctx.stroke();
+  ctx.fillStyle='#D64309';ctx.beginPath();ctx.arc(tipX,DUCT.cy,3,0,7);ctx.fill();
+  ctx.fillStyle='#7a8598';ctx.font='9.5px system-ui';ctx.textAlign='left';
+  ctx.fillText('total-head probe → h_tot',DUCT.x1+34,DUCT.cy-24);
+  // inlet pipe + FCV handwheel
+  ctx.strokeStyle='#b9c0cc';ctx.lineWidth=6;
+  ctx.beginPath();ctx.moveTo(58,DUCT.cy);ctx.lineTo(DUCT.x0-30,DUCT.cy);ctx.stroke();
+  ctx.fillStyle='#8790a0';ctx.fillRect(94,DUCT.cy-9,12,18);
+  ctx.strokeStyle='#c02a2a';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(100,DUCT.cy-18,8,0,7);ctx.stroke();
+  ctx.fillStyle='#7a8598';ctx.font='9.5px system-ui';ctx.textAlign='center';
+  ctx.fillText('FCV',100,DUCT.cy+26);
+  ctx.fillStyle='#33405a';ctx.font='11px system-ui';
+  ctx.fillText('flow →',66,DUCT.cy-16);
+  // spirit level on the baseboard
+  const bubB=state.cal.feetOK?0:Math.max(-16,Math.min(16,(+($('feet')?$('feet').value:0))*0.4));
+  ctx.fillStyle='#f2f6fa';ctx.strokeStyle='#9aa4b3';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.roundRect(60,DUCT.cy+48,56,10,5);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='#c9d2dd';ctx.beginPath();ctx.moveTo(84,DUCT.cy+48);ctx.lineTo(84,DUCT.cy+58);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(92,DUCT.cy+48);ctx.lineTo(92,DUCT.cy+58);ctx.stroke();
+  ctx.fillStyle=Math.abs(bubB)<=1.5?'#1a8f52':'#D64309';
+  ctx.beginPath();ctx.arc(88+bubB,DUCT.cy+53,4,0,7);ctx.fill();
+  ctx.fillStyle='#7a8598';ctx.font='9px system-ui';ctx.textAlign='center';
+  ctx.fillText('spirit level',88,DUCT.cy+72);
+
+  // particles / reduced-motion arrows
+  if(valve>1){
+    parts.forEach(p=>{
+      const half=ductHalf(p.x,rev);
+      const a=Math.PI*Math.pow(half*2/1.5/1000,2)/4;
+      const vx=(REDUCED?0:o.Q/a*90);
+      p.x+=vx*dt;
+      if(p.x>DUCT.x1){p.x=DUCT.x0+2;p.y=Math.random()*2-1;}
+      ctx.fillStyle='rgba(11,73,148,.55)';
+      ctx.beginPath();ctx.arc(p.x,DUCT.cy+p.y*half*0.72,2.1,0,7);ctx.fill();
+    });
+    if(REDUCED){
+      [1,3,4].forEach(i=>{const x=TAPX[i];const len=10+o.v[i]*14;
+        ctx.strokeStyle='#0b4994';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(x-len/2,DUCT.cy);ctx.lineTo(x+len/2,DUCT.cy);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x+len/2-5,DUCT.cy-4);ctx.lineTo(x+len/2,DUCT.cy);
+        ctx.lineTo(x+len/2-5,DUCT.cy+4);ctx.stroke();});
+    }
+  }
+
+  // ================= collection tank =================
+  const tx=612,ty=366,tw=112,th=80;
+  ctx.strokeStyle='#b9c0cc';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(DUCT.x1+30,DUCT.cy);ctx.lineTo(tx+tw/2,DUCT.cy);ctx.lineTo(tx+tw/2,ty-4);ctx.stroke();
+  ctx.strokeStyle='#9aa4b3';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx,ty+th);ctx.lineTo(tx+tw,ty+th);ctx.lineTo(tx+tw,ty);ctx.stroke();
+  ctx.fillStyle='#7a8598';ctx.font='10.5px system-ui';ctx.textAlign='center';
+  ctx.fillText('collection tank (4 L)',tx+tw/2,ty+th+14);
+  if(state.collecting){
+    const frac=Math.min(1,collVol/VOL);
+    ctx.fillStyle='rgba(91,155,213,.8)';
+    ctx.fillRect(tx+2,ty+th-2-(th-4)*frac,tw-4,(th-4)*frac);
+    ctx.fillStyle='#0033A0';ctx.font='700 12px ui-monospace,monospace';
+    ctx.fillText((collVol*1000).toFixed(2)+' L',tx+tw/2,ty+16);
+  }
+}
+
+/* ============================================================ SIM LOOP + COLLECTION */
+let lastT=performance.now(), collVol=0, collTarget=0;
+function tick(now){
+  const dt=Math.min((now-lastT)/1000,0.05);lastT=now;
+  const sp=REDUCED?8:+$('simSpeed').value;
+  $('spdLbl').textContent=$('simSpeed').value+'×';
+  $('probeLbl').textContent=(+$('probe').value).toFixed(0)+' mm';
+  const valve=+$('valve').value;
+  $('valveLbl').textContent=valve.toFixed(0)+'%';
+  $('qChip').textContent='Q = '+(Qof(valve)*1e6).toFixed(1)+' mL/s';
+  const dhNow=dh15(valve,state.reversed);
+  $('dhChip').textContent='h₁−h₅ = '+dhNow.toFixed(0)+' mm';
+  if(!state.unlocked){
+    const tgtC=RUNS[state.runIdx].target;
+    const inR=Math.abs(dhNow-tgtC)<=4&&!state.reversed&&!state.runs[state.runIdx].heads;
+    $('tgtChip').textContent='target ≈ '+tgtC+' mm'+(inR?' ✓ in range — record':'');
+    $('tgtChip').style.background=inR?'#e7f6ee':'#eef1f6';
+    $('tgtChip').style.color=inR?'#1a8f52':'#5b6472';
+  } else {
+    $('tgtChip').textContent='all runs complete ✓';
+    $('tgtChip').style.background='#e7f6ee';$('tgtChip').style.color='#1a8f52';
+  }
+  if(state.collecting){
+    const rate=VOL/collTarget;                 // fill at implied true rate
+    collVol+=rate*dt*sp;
+    swT+=dt*sp;
+    $('sw').textContent=swT.toFixed(2)+' s';
+    if(collVol>=VOL)finishCollection();
+  }
+  // record button gating
+  if(!state.unlocked){
+    const r=state.runs[state.runIdx];
+    const tgt=RUNS[state.runIdx].target;
+    const inBand=Math.abs(dh15(valve,state.reversed)-tgt)<=4;
+    const probeOK=+$('probe').value<=81.5;
+    $('recordBtn').disabled=!( !r.heads && inBand && probeOK && !state.collecting && !state.reversed && state.mode==='run');
+    $('collectBtn').disabled=!( r.heads && r.times.length<3 && !state.collecting && state.mode==='run');
+  } else {$('recordBtn').disabled=true;$('collectBtn').disabled=true;}
+  $('valve').disabled=state.locked||state.collecting;
+  if(state.mode==='setup'){
+    $('calValveLbl').textContent=(+$('calValve').value).toFixed(0)+'%';
+    state.cal.feetOK=Math.abs(+$('feet').value)<=3;
+    const cv=+$('calValve').value;
+    if(state.cal.absOpen&&cv>=5&&cv<=30&&state.cal.air>0)state.cal.air=Math.max(0,state.cal.air-dt*0.25*sp);
+    if(state.cal.feetOK&&state.cal.air<=0&&!state.cal.absOpen&&!state.cal.done){
+      state.cal.done=true;$('tabRun').disabled=false;
+      flash('Apparatus levelled and purged ✓ — open the "Run experiment" tab.','ok');}
+    renderCalList();
+    $('recordBtn').disabled=true;$('collectBtn').disabled=true;
+  }
+  drawScene(dt);
+  requestAnimationFrame(tick);
+}
+function startCollection(){
+  const valve=+$('valve').value;
+  const Q=Qof(valve);
+  collTarget=VOL/Q*(1+(Math.random()*2-1)*0.015);
+  collVol=0;swT=0;state.collecting=true;
+}
+function finishCollection(){
+  state.collecting=false;
+  const r=state.runs[state.runIdx];
+  r.times.push(collTarget);
+  flash('Collected 4 L in '+collTarget.toFixed(1)+' s ✓ ('+r.times.length+'/3)','ok');
+  if(r.times.length>=3){
+    state.locked=false;
+    if(state.runIdx<2){state.runIdx++;flash('Run complete ✓ — set the valve for the next target.','ok');}
+  }
+  renderTable();updateHint();
+  $('sw').textContent='0.00 s';
+}
+
+/* ============================================================ EVENTS */
+$('valve').addEventListener('input',updateHint);
+$('recordBtn').addEventListener('click',()=>{
+  const valve=+$('valve').value;
+  const o=headsOf(valve,false);
+  const r=state.runs[state.runIdx];
+  r.heads=o.h.map(x=>x*1000+(Math.random()*2-1)*1.0);
+  const pmmR=+$('probe').value;
+  const htvR=pmmR<=81.08?o.ht:o.ht-o.lossE*(pmmR-81.08)/(141.54-81.08);
+  r.htot=htvR*1000+(Math.random()*2-1)*1.0;
+  state.locked=true;
+  flash('Manometers recorded ✓ — valve locked; now time three 4 L collections.','ok');
+  renderTable();updateHint();
+});
+$('collectBtn').addEventListener('click',startCollection);
+$('reverseBtn').addEventListener('click',()=>{
+  state.reversed=!state.reversed;
+  $('reverseBtn').setAttribute('aria-pressed',state.reversed?'true':'false');
+  $('reverseBtn').textContent=state.reversed?'Restore section (14°)':'Reverse section (21°)';
+  flash(state.reversed?'Section reversed — the 21° taper now converges. Watch how much larger the exit loss is (h₆ drops further).':'Section restored to 14° converging.','info');
+});
+
+/* ============================================================ GUIDED CALC */
+function num(v){return typeof v==='number'&&isFinite(v);}
+function close(a,b,tol){return Math.abs(a-b)<=Math.abs(b)*tol+1e-9;}
+function tbar(i){return avg(state.runs[i].times);}
+function Qtrue(i){return VOL/tbar(i);}                       // m³/s
+function v4true(i,j){                                        // Eq 4 velocity from recorded heads
+  const r=state.runs[i];
+  return Math.sqrt(Math.max(0,2*g*(r.htot-r.heads[j])/1000));
+}
+function v5true(i,j){return Qtrue(i)/AREA[j];}               // Eq 5 velocity
+const RCOL=['#0033A0','#D64309','#1a8f52'];
+
+function unlockCalc(){
+  state.unlocked=true;state.locked=false;
+  $('calcLock').style.display='none';$('steps').style.display='block';
+  $('reverseBtn').disabled=false;
+  buildSteps();renderTable();updateHint();
+}
+function stepShell(n,ttl){return '<div class="step" id="st'+n+'"><div class="step-h">'+
+  '<span class="num" id="num'+n+'">'+n+'</span><span class="ttl">'+ttl+'</span></div>'+
+  '<div class="step-body" id="body'+n+'"></div></div>';}
+function markDone(n){$('num'+n).classList.add('done');$('num'+n).textContent='✓';}
+function buildSteps(){
+  $('steps').innerHTML =
+   stepShell(1,'Volumetric flow rate Q for each run') +
+   stepShell(2,'Static pressure deflection along the duct') +
+   stepShell(3,'Velocity from pressure heads — Equation 4') +
+   stepShell(4,'Velocity from continuity — Equation 5') +
+   stepShell(5,'Compare the two methods — plots and RPD') +
+   stepShell(6,'Is the Bernoulli equation valid here?');
+  renderStep1();renderStep2();renderStep3();renderStep4();renderStep5();renderStep6();
+}
+
+/* ---- STEP 1: Q ---- */
+function renderStep1(){
+  let rows='';
+  for(let i=0;i<3;i++)rows+='<div class="rowin">Run '+(i+1)+' (t̄ = '+tbar(i).toFixed(1)+' s): '+
+    '<input id="Q_'+i+'" type="number" step="0.0001" aria-label="Flow rate for run '+(i+1)+'"><span class="tag">L/s</span></div>';
+  $('body1').innerHTML=
+   '<div class="eq">Q = <span class="frac"><span>V</span><span>t̄</span></span> = '+
+   '<span class="frac"><span>4.0 L</span><span>t̄</span></span>&nbsp;&nbsp;(L/s)</div>'+
+   '<p class="tag">Average the three collection times per run first (done for you in the table), then divide the volume '+
+   'by that average. Enter to 4 decimals.</p>'+rows+
+   '<button class="btn" onclick="checkStep1()">Check Step 1</button> '+
+   '<button class="linkbtn" onclick="hint(1)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg1" role="status" aria-live="polite"></div>';
+}
+function checkStep1(){
+  let ok=true;
+  for(let i=0;i<3;i++){const inp=$('Q_'+i);const v=parseFloat(inp.value);
+    const t=Qtrue(i)*1000;
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.025)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg1');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — you will convert these to m³/s (÷1000) when computing velocities in Step 4.';markDone(1);}
+  else{m.className='msg err';m.textContent='Q = 4.0 ÷ t̄ in litres per second. Use the averaged time for each run.';}
+}
+
+/* ---- STEP 2: deflection plot (auto) + observation ---- */
+function renderStep2(){
+  $('body2').innerHTML=
+   '<p class="tag">The plot below is drawn from <b>your recorded data</b>: static deflection h<sub>i</sub>−h₅ versus tap '+
+   'position i, one line per flow rate — exactly the first required graph of the report.</p>'+
+   '<canvas id="plotDef" width="620" height="280" role="img" aria-label="Static pressure deflection versus tap position for three runs"></canvas>'+
+   '<div style="margin-top:10px;font-weight:650">What does flow rate do to the pressure drop through the duct?</div>'+
+   '<div class="choice" id="q2">'+
+     '<button onclick="pick(\'q2\',0)">Higher Q → larger deflection everywhere, growing roughly with Q² (velocity head scales with v²)</button>'+
+     '<button onclick="pick(\'q2\',1)">Deflection is independent of Q — it only depends on the taper geometry</button>'+
+     '<button onclick="pick(\'q2\',2)">Higher Q → smaller deflection, because faster flow has less time to push on the walls</button></div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep2()">Check answer</button>'+
+   '<div class="msg" id="msg2" role="status" aria-live="polite"></div>';
+  drawDefPlot();
+}
+function drawDefPlot(){
+  const c=$('plotDef');if(!c)return;const p=c.getContext('2d');
+  const Wc=620,Hc=280;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,Wc,Hc);
+  const mL=52,mR=14,mT=16,mB=40,pw=Wc-mL-mR,ph=Hc-mT-mB;
+  let maxD=0;state.runs.forEach(r=>{for(let j=0;j<6;j++)maxD=Math.max(maxD,r.heads[j]-r.heads[4]);});
+  maxD*=1.1;
+  const X=i=>mL+(i)/(5)*pw, Y=d=>mT+ph-(d)/(maxD)*ph;
+  p.strokeStyle='#eceff4';p.lineWidth=1;p.fillStyle='#7a8598';p.font='10px system-ui';
+  for(let k=0;k<=5;k++){const d=maxD*k/5,y=Y(d);p.beginPath();p.moveTo(mL,y);p.lineTo(Wc-mR,y);p.stroke();
+    p.textAlign='right';p.fillText(d.toFixed(0),mL-5,y+3);}
+  for(let i=0;i<6;i++){const x=X(i);p.beginPath();p.moveTo(x,mT);p.lineTo(x,mT+ph);p.stroke();
+    p.textAlign='center';p.fillText('h'+(i+1),x,mT+ph+15);}
+  p.fillStyle='#33405a';p.font='600 12px system-ui';p.textAlign='center';
+  p.fillText('tap position along duct',mL+pw/2,Hc-6);
+  p.save();p.translate(13,mT+ph/2);p.rotate(-Math.PI/2);p.fillText('hᵢ − h₅ (mm)',0,0);p.restore();
+  state.runs.forEach((r,ri)=>{
+    p.strokeStyle=RCOL[ri];p.lineWidth=2;p.beginPath();
+    for(let j=0;j<6;j++){const y=Y(r.heads[j]-r.heads[4]);if(j===0)p.moveTo(X(j),y);else p.lineTo(X(j),y);}
+    p.stroke();
+    p.fillStyle=RCOL[ri];
+    for(let j=0;j<6;j++){p.beginPath();p.arc(X(j),Y(r.heads[j]-r.heads[4]),3.5,0,7);p.fill();}
+    p.font='600 10.5px system-ui';p.textAlign='left';
+    p.fillText('run '+(ri+1)+' ('+RUNS[ri].target+' mm)',mL+8,mT+14+ri*14);
+  });
+}
+function checkStep2(){
+  const m=$('msg2');
+  if(picks.q2==null){m.className='msg err';m.textContent='Pick an answer first.';return;}
+  if(picks.q2===0){m.className='msg ok';m.textContent='Correct ✓ — deflection is dynamic head converted from static head, and dynamic head scales with v² ∝ Q².';markDone(2);}
+  else{m.className='msg err';m.textContent='Compare your three lines: same duct, three flow rates. What happened to the deflections when Q went up?';}
+}
+
+/* ---- STEP 3: Eq 4 velocities ---- */
+function velGrid(kind,run){
+  let h='<div style="margin:8px 0 4px;font-weight:650;color:'+RCOL[run]+'">Run '+(run+1)+
+    ' &nbsp;<span class="tag">h_total = '+state.runs[run].htot.toFixed(0)+' mm</span></div>';
+  h+='<div class="grid7"><span class="hd">tap</span>';
+  for(let j=0;j<6;j++)h+='<span class="hd" style="text-align:center">h'+(j+1)+'</span>';
+  h+='<span class="hd">v (m/s)</span>';
+  for(let j=0;j<6;j++)h+='<input id="'+kind+'_'+run+'_'+j+'" type="number" step="0.001" aria-label="'+
+     kind+' velocity run '+(run+1)+' tap '+(j+1)+'">';
+  h+='</div>';
+  if(kind==='v4'){h+='<div class="grid7" style="margin-top:3px"><span class="tag">hᵢ (mm)</span>';
+    for(let j=0;j<6;j++)h+='<span class="tag" style="text-align:center">'+state.runs[run].heads[j].toFixed(0)+'</span>';
+    h+='<span></span>'+'<span></span>'.repeat(6)+'</div>';}
+  return h;
+}
+function renderStep3(){
+  $('body3').innerHTML=
+   '<div class="eq">h<sub>total</sub> = h<sub>i</sub> + <span class="frac"><span>v<sub>i</sub>²</span><span>2g</span></span>'+
+   '&nbsp;&nbsp;→&nbsp;&nbsp; v<sub>i</sub> = √( 2g·(h<sub>total</sub> − h<sub>i</sub>) )&nbsp;&nbsp;(m/s), heads in metres</div>'+
+   '<p class="tag">Use the probe\'s h<sub>total</sub> and each static head from <b>your</b> table — convert mm → m before '+
+   'taking the square root. Enter to 3 decimals. Correct values plot in Step 5 (left plot).</p>'+
+   velGrid('v4',0)+velGrid('v4',1)+velGrid('v4',2)+
+   '<button class="btn" onclick="checkStep3()">Check Step 3</button> '+
+   '<button class="linkbtn" onclick="hint(3)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg3" role="status" aria-live="polite"></div>';
+}
+function checkStep3(){
+  let ok=true,bad=0;
+  for(let i=0;i<3;i++)for(let j=0;j<6;j++){
+    const inp=$('v4_'+i+'_'+j);const v=parseFloat(inp.value);
+    const t=v4true(i,j);
+    inp.classList.remove('cell-ok','cell-bad');
+    const good=num(v)&&close(v,t,0.03);
+    state.vOk4[i][j]=good;
+    if(good){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;bad++;}}
+  const m=$('msg3');
+  if(ok){m.className='msg ok';m.textContent='All 18 velocities correct ✓ — notice v peaks at the throat (h₅), where static head is lowest.';markDone(3);}
+  else{m.className='msg err';m.textContent=bad+' value(s) off. Convert heads to metres: v = √(2 × 9.81 × (h_total − hᵢ)). Only correct values plot.';}
+  refreshVPlots();
+}
+
+/* ---- STEP 4: Eq 5 velocities ---- */
+function renderStep4(){
+  let dia='<table style="margin:6px 0"><tr><th>tap</th><th>h₁</th><th>h₂</th><th>h₃</th><th>h₄</th><th>h₅</th><th>h₆</th></tr>'+
+    '<tr><td style="text-align:left">diameter (mm)</td>';
+  DIAS.forEach(d=>dia+='<td>'+d.toFixed(1)+'</td>');dia+='</tr></table>';
+  $('body4').innerHTML=
+   '<div class="eq">Q = v<sub>i</sub> A<sub>i</sub> &nbsp;→&nbsp; v<sub>i</sub> = '+
+   '<span class="frac"><span>Q</span><span>A<sub>i</sub></span></span>,&nbsp;&nbsp;A<sub>i</sub> = '+
+   '<span class="frac"><span>π d<sub>i</sub>²</span><span>4</span></span>&nbsp;&nbsp;(Q in m³/s, d in m)</div>'+dia+
+   '<p class="tag">Use the measured Q for each run (Step 1, converted to m³/s). This method needs no pressure data at all '+
+   '— just conservation of mass. Enter to 3 decimals. Correct values plot in Step 5 (right plot).</p>'+
+   velGrid('v5',0)+velGrid('v5',1)+velGrid('v5',2)+
+   '<button class="btn" onclick="checkStep4()">Check Step 4</button> '+
+   '<button class="linkbtn" onclick="hint(4)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg4" role="status" aria-live="polite"></div>';
+}
+function checkStep4(){
+  let ok=true,bad=0;
+  for(let i=0;i<3;i++)for(let j=0;j<6;j++){
+    const inp=$('v5_'+i+'_'+j);const v=parseFloat(inp.value);
+    const t=v5true(i,j);
+    inp.classList.remove('cell-ok','cell-bad');
+    const good=num(v)&&close(v,t,0.03);
+    state.vOk5[i][j]=good;
+    if(good){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;bad++;}}
+  const m=$('msg4');
+  if(ok){m.className='msg ok';m.textContent='All 18 velocities correct ✓ — same peak at the throat, from a completely independent method.';markDone(4);}
+  else{m.className='msg err';m.textContent=bad+' value(s) off. A = π d²/4 with d in metres; v = (Q in m³/s) ÷ A. Only correct values plot.';}
+  refreshVPlots();
+}
+
+/* ---- STEP 5: plots + RPD ---- */
+function renderStep5(){
+  let rows='';
+  for(let i=0;i<3;i++)rows+='<div class="rowin">Run '+(i+1)+' RPD at the throat (h₅): '+
+    '<input id="rpd_'+i+'" type="number" step="0.01" aria-label="Relative percent difference run '+(i+1)+'"><span class="tag">%</span></div>';
+  $('body5').innerHTML=
+   '<p class="tag">Velocity vs position, three runs per plot — the report\'s two required velocity graphs. Points appear '+
+   'as you validate them in Steps 3 and 4.</p>'+
+   '<div class="plots2">'+
+     '<canvas id="plotV4" width="330" height="260" role="img" aria-label="Velocity from heads versus position"></canvas>'+
+     '<canvas id="plotV5" width="330" height="260" role="img" aria-label="Velocity from flow rate versus position"></canvas>'+
+   '</div>'+
+   '<p class="tag" style="margin-top:8px">The maximum velocity is at the throat (tap 5). Compare the two methods there '+
+   'with the relative percent difference:</p>'+
+   '<div class="eq">RPD = <span class="frac"><span>|v<sub>Eq4</sub> − v<sub>Eq5</sub>|</span>'+
+   '<span>(v<sub>Eq4</sub> + v<sub>Eq5</sub>)/2</span></span> × 100%</div>'+rows+
+   '<button class="btn" onclick="checkStep5()">Check RPD</button> '+
+   '<button class="linkbtn" onclick="hint(5)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg5" role="status" aria-live="polite"></div>';
+  refreshVPlots();
+}
+function refreshVPlots(){drawVPlot('plotV4','v4');drawVPlot('plotV5','v5');}
+function drawVPlot(cid,kind){
+  const c=$(cid);if(!c)return;const p=c.getContext('2d');
+  const Wc=330,Hc=260;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,Wc,Hc);
+  const mL=40,mR=10,mT=18,mB=38,pw=Wc-mL-mR,ph=Hc-mT-mB;
+  const vmax=2.2;
+  const X=i=>mL+i/5*pw, Y=v=>mT+ph-v/vmax*ph;
+  p.strokeStyle='#eceff4';p.lineWidth=1;p.fillStyle='#7a8598';p.font='9.5px system-ui';
+  for(let k=0;k<=4;k++){const v=vmax*k/4,y=Y(v);p.beginPath();p.moveTo(mL,y);p.lineTo(Wc-mR,y);p.stroke();
+    p.textAlign='right';p.fillText(v.toFixed(1),mL-4,y+3);}
+  for(let i=0;i<6;i++){const x=X(i);p.beginPath();p.moveTo(x,mT);p.lineTo(x,mT+ph);p.stroke();
+    p.textAlign='center';p.fillText(i+1,x,mT+ph+13);}
+  p.fillStyle='#33405a';p.font='600 11px system-ui';p.textAlign='center';
+  p.fillText(kind==='v4'?'v from heads (Eq 4) — position':'v from Q/A (Eq 5) — position',mL+pw/2,Hc-5);
+  p.save();p.translate(11,mT+ph/2);p.rotate(-Math.PI/2);p.fillText('v (m/s)',0,0);p.restore();
+  const okArr=kind==='v4'?state.vOk4:state.vOk5;
+  const tf=kind==='v4'?v4true:v5true;
+  let any=false;
+  for(let i=0;i<3;i++){
+    p.fillStyle=RCOL[i];p.strokeStyle=RCOL[i];p.lineWidth=1.6;
+    let started=false;
+    for(let j=0;j<6;j++){
+      if(okArr[i][j]){any=true;const x=X(j),y=Y(tf(i,j));
+        p.beginPath();p.arc(x,y,3.5,0,7);p.fill();}}
+    // connect line only when full row validated
+    if(okArr[i].every(v=>v)){p.beginPath();
+      for(let j=0;j<6;j++){const x=X(j),y=Y(tf(i,j));if(j===0)p.moveTo(x,y);else p.lineTo(x,y);}p.stroke();}
+  }
+  if(!any){p.fillStyle='#aab2c0';p.font='11px system-ui';p.textAlign='center';
+    p.fillText('Points appear as you validate '+(kind==='v4'?'Step 3':'Step 4'),mL+pw/2,mT+ph/2);}
+}
+function checkStep5(){
+  let ok=true;
+  for(let i=0;i<3;i++){const inp=$('rpd_'+i);const v=parseFloat(inp.value);
+    const a=v4true(i,4),b=v5true(i,4);
+    const t=Math.abs(a-b)/((a+b)/2)*100;
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&(close(v,t,0.10)||Math.abs(v-t)<0.5)){inp.classList.add('cell-ok');}
+    else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg5');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — small RPDs at the throat: the two independent methods agree within a few percent in the converging section.';markDone(5);}
+  else{m.className='msg err';m.textContent='Take the two throat (tap 5) velocities for each run — one from Step 3, one from Step 4 — difference over mean, times 100.';}
+}
+
+/* ---- STEP 6: validity MC ---- */
+const picks={};
+function pick(qid,i){picks[qid]=i;
+  document.querySelectorAll('#'+qid+' button').forEach((b,j)=>b.classList.toggle('sel',j===i));}
+function renderStep6(){
+  $('body6').innerHTML=
+   '<div style="font-weight:650">Taps 1→5 (converging flow): does your data support the Bernoulli equation?</div>'+
+   '<div class="choice" id="q6a">'+
+     '<button onclick="pick(\'q6a\',0)">Yes — static head fell exactly as velocity head rose, and the two velocity methods agree closely, as expected for accelerating converging flow with little loss</button>'+
+     '<button onclick="pick(\'q6a\',1)">No — Bernoulli requires the heads to stay constant along the duct</button>'+
+     '<button onclick="pick(\'q6a\',2)">Cannot tell without measuring the water temperature</button></div>'+
+   '<div style="font-weight:650;margin-top:12px">Tap 6 has the same diameter as tap 1 — why is h₆ noticeably lower than h₁?</div>'+
+   '<div class="choice" id="q6b">'+
+     '<button onclick="pick(\'q6b\',0)">The manometer tube at position 6 is thinner</button>'+
+     '<button onclick="pick(\'q6b\',1)">Energy is lost in the diverging (expanding) section — friction and flow separation — so total head drops; Bernoulli\'s frictionless assumption breaks down there</button>'+
+     '<button onclick="pick(\'q6b\',2)">Water compresses at the throat and never recovers its pressure</button></div>'+
+   '<button class="btn" style="margin-top:10px" onclick="checkStep6()">Check answers</button>'+
+   '<div class="msg" id="msg6" role="status" aria-live="polite"></div>';
+}
+function checkStep6(){
+  const m=$('msg6');
+  if(picks.q6a==null||picks.q6b==null){m.className='msg err';m.textContent='Answer both questions first.';return;}
+  if(picks.q6a===0&&picks.q6b===1){m.className='msg ok';
+    m.innerHTML='Both correct ✓ — Bernoulli holds well where flow accelerates smoothly (converging), and fails where it '+
+    'decelerates (diverging) because real fluids lose energy to friction and separation. Water is essentially '+
+    'incompressible at these speeds. Reverse the section on the left to see the 21° case, then write it up — every '+
+    'number for the appendix is on this page.';markDone(6);}
+  else{m.className='msg err';m.textContent='Re-examine: where along the duct did the two velocity methods agree? And what happens to real flows in expanding sections?';}
+}
+
+/* ---- hints ---- */
+function hint(n){const m=$('msg'+n);m.className='msg info';
+  const H={1:'Divide 4.0 litres by the average of the three collection times for that run.',
+    3:'Subtract each static head from the probe\'s total head, convert that difference from millimetres to metres, multiply by 2 and by 9.81, then take the square root.',
+    4:'Compute each tap\'s area from its diameter in metres (pi times d squared over 4). Divide the run\'s flow rate in cubic metres per second (L/s ÷ 1000) by that area.',
+    5:'Subtract the two throat velocities, drop the sign, divide by their average, multiply by 100.'};
+  m.textContent=H[n];}
+
+/* ============================================================ SETUP TAB + DOWNLOAD */
+function ckRow(ok,txt){return '<div class="ck'+(ok?' done':'')+'"><span class="dot">'+(ok?'✓':'')+'</span><span>'+txt+'</span></div>';}
+let calCache='';
+function renderCalList(){
+  const c=state.cal;
+  const html='<b>Calibration checklist</b> — the real pre-run purge procedure:'+
+   ckRow(c.feetOK,'Level the apparatus on the bench: adjust the feet until the spirit-level bubble is centred.')+
+   ckRow(c.air<=0,'Purge the manometers: open the ABS with the FCV at 5–30% and let the trapped air clear ('+Math.round((1-c.air)*100)+'% purged). No purging happens at zero or high flow.')+
+   ckRow(c.air<=0&&!c.absOpen,'Close the ABS once no air remains — flow through the ABS should now be zero.')+
+   (c.done?'<div class="tag" style="color:var(--good);font-weight:650;margin-top:6px">Calibrated — the Run experiment tab is unlocked.</div>':'');
+  if(html!==calCache){calCache=html;$('calList').innerHTML=html;}
+}
+function setMode(mo){
+  if(mo==='run'&&!state.cal.done)return;
+  state.mode=mo;
+  $('tabSetup').setAttribute('aria-pressed',mo==='setup'?'true':'false');
+  $('tabRun').setAttribute('aria-pressed',mo==='run'?'true':'false');
+  $('calCtl').style.display=mo==='setup'?'flex':'none';
+  $('calList').style.display=mo==='setup'?'block':'none';
+  $('runCtl').style.display=mo==='run'?'flex':'none';
+  updateHint();
+}
+$('tabSetup').addEventListener('click',()=>setMode('setup'));
+$('tabRun').addEventListener('click',()=>setMode('run'));
+$('absBtn').addEventListener('click',()=>{state.cal.absOpen=!state.cal.absOpen;
+  $('absBtn').setAttribute('aria-pressed',state.cal.absOpen?'true':'false');
+  $('absBtn').textContent=state.cal.absOpen?'Close air-bleed screw (ABS)':'Open air-bleed screw (ABS)';});
+const PS_NAME='CE323_Fluids_Report_No2_Problem_Statement.html';
+const PS_DOC="<!DOCTYPE html><html><head><meta charset='utf-8'><title>CE 323 \u00b7 Fluids Report No. 2 \u2014 Problem Statements and Requirements</title><style>body{font-family:Georgia,'Times New Roman',serif;max-width:820px;margin:36px auto;line-height:1.5;color:#111;padding:0 16px}h1{font-size:21px}h2{font-size:17px;margin-top:26px;border-bottom:2px solid #0033A0;color:#0033A0;padding-bottom:3px}h3{font-size:15px}table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #555;padding:4px 10px;font-size:14px}th{background:#eef3fb}.meta{color:#555;font-size:13px}.eq{background:#f5f7fa;border-left:3px solid #0033A0;padding:6px 12px;margin:8px 0;font-style:italic}li{margin:4px 0}</style></head><body><h1>CE 323 \u00b7 Fluids Report No. 2 \u2014 Problem Statements and Requirements</h1><p class='meta'>CE 323 \u2014 Environmental and Fluids Laboratory \u00b7 1 CR Graded \u00b7 Boise State University</p>\n<p class='meta'>Adapted from: Habib Ahmari and Shah Md Imran Kabir, <i>Applied Fluid Mechanics Lab Manual</i>, 2019, Mavs Open Press.</p>\n<h2>Bernoulli's Law</h2>\n<h3>Objective</h3>\n<p>Investigate the validity of the Bernoulli equation when applied to the steady flow of water in a tapered duct.</p>\n<h3>Background</h3>\n<p class='eq'>h\u2081 + v\u2081\u00b2/2g = h\u2082 + v\u2082\u00b2/2g (Eq. 3) &nbsp;\u00b7&nbsp; h<sub>total</sub> = h<sub>i</sub> + v<sub>i</sub>\u00b2/2g (Eq. 4) &nbsp;\u00b7&nbsp; Q = v<sub>i</sub>\u00b7A<sub>i</sub> (Eq. 5)</p>\n<p>Static pressure head is measured by six manometers tapped into the venturi; total head by a probe traversed along the centreline. Velocity computed from Eq. 4 (heads) can be compared to velocity from Eq. 5 (flow rate and area).</p>\n<h3>Equipment</h3>\n<p>Hydraulics bench, Bernoulli apparatus (tapered circular duct: 14\u00b0 included angle on one side, 21\u00b0 on the other; unions at each end allow reversal), stopwatch.</p>\n<table><tr><th>Manometer</th><th>h1</th><th>h2</th><th>h3</th><th>h4</th><th>h5</th><th>h6</th></tr>\n<tr><td>Test-section diameter (mm)</td><td>25.0</td><td>13.9</td><td>11.8</td><td>10.7</td><td>10.0</td><td>25.0</td></tr>\n<tr><td>Distance from tap 1 (mm)</td><td>0</td><td>60.28</td><td>68.68</td><td>73.18</td><td>81.08</td><td>141.54</td></tr></table>\n<h3>Experimental procedure</h3>\n<ol><li>Confirm the bench flow valve is shut. Connect water and level the apparatus so its base is horizontal; ensure the 14\u00b0 tapered section converges in the flow direction.</li>\n<li>Turn on the pump and slowly increase flow; confirm water flows through the apparatus.</li>\n<li>Open the air-bleed screw (ABS) at low flow and begin closing the flow-control valve (FCV) until water flows through the manometer tubes. Tap/shake the tubes to free trapped air.</li>\n<li>Open the FCV until flow through the ABS stops.</li>\n<li>Adjust flow to create a sizeable (~150 mm) head difference between h\u2081 and h\u2085. Record all manometers.</li>\n<li>Measure flow rate by timing collection of 4 L, three (3) times, and average.</li>\n<li>Repeat for two more head differences (~100 mm and ~50 mm).</li>\n<li>Reverse the test section (21\u00b0 converging) and repeat, observing the effect of the steeper contraction.</li></ol>\n<h3>Calculations</h3>\n<ul><li>Plot static pressure deflection h<sub>i</sub>\u2212h\u2085 versus position i for each flow rate; discuss the effect of flow rate on pressure drop.</li>\n<li>Calculate velocity two ways: (a) from head measurements (Eq. 4); (b) from measured flow rate and area (Eq. 5).</li>\n<li>Create two velocity plots (v<sub>i</sub> vs position i, all three flow rates, first six positions): one per method.</li>\n<li>Determine maximum velocity for each flow rate from each method; compare by relative percent difference (RPD) and comment.</li></ul>\n<h2>Requirements</h2>\n<ul><li>Team member names; section of CE 323; date prepared.</li>\n<li>Brief responses (complete sentences): validity of Bernoulli for convergent flow; comparison of the two velocity methods \u2014 does it validate the Bernoulli equation?; is this what you expected \u2014 why or why not, and how do the values differ?</li>\n<li>Supporting information: all calculations and graphs in an appendix; initials of who performed and who checked calculations; note any deviations from the test method.</li></ul></body></html>";
+$('dlPS').addEventListener('click',()=>{const b=new Blob([PS_DOC],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=PS_NAME;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+renderCalList();setMode('setup');
+
+/* ============================================================ INIT */
+renderTable();updateHint();
+requestAnimationFrame(t=>{lastT=t;tick(t);});
+window.addEventListener('resize',()=>{fitCanvas();if(state.unlocked){refreshVPlots();drawDefPlot();}});
+</script>
+</body>
+</html>

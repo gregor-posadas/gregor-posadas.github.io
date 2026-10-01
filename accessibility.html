@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility · Gregor Posadas</title>
+<meta name="description" content="How this site is built to be accessible: WCAG 2.2 AA target, readable type, contrast, color-independent design, keyboard and screen reader support, and the design system behind it.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://gregor-posadas.github.io/accessibility.html">
+<link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/accessibility.html">
+<link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/accessibility.html">
+<link rel="alternate" hreflang="x-default" href="https://gregor-posadas.github.io/accessibility.html">
+<meta property="og:title" content="Accessibility · Gregor Posadas">
+<meta property="og:description" content="How this site is built to be accessible: WCAG 2.2 AA target, readable type, contrast, color-independent design, keyboard and screen reader support, and the design system behind it.">
+<meta property="og:url" content="https://gregor-posadas.github.io/accessibility.html">
+<meta property="og:image" content="https://gregor-posadas.github.io/assets/img/headshot.jpg">
+<link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' fill='%23fff' text-anchor='middle'%3EGP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+<script>try { var t = localStorage.getItem("gp.theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band" role="banner">
+  <div class="band__inner">
+    <a class="brand" href="./">
+      <span class="brand__name">Gregor Posadas</span>
+      <span class="brand__sub">Environmental Engineering, UC Berkeley</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="./">About</a>
+      <a href="research.html">Research</a>
+      <a href="publications.html">Publications</a>
+      <a href="cv.html">CV</a>
+      <a href="tatay.html">Tatay</a>
+      <a href="accessibility.html" aria-current="page">Accessibility</a>
+    </nav>
+    <div class="band__tools">
+      <a class="tool" href="tl/accessibility.html" lang="tl" hreflang="tl">Filipino</a>
+      <button type="button" class="tool" id="sound-toggle" aria-pressed="true" data-on="Sound on" data-off="Sound off"><span class="tool__state">Sound on</span></button>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-dark="Dark mode" data-light="Light mode">Dark mode</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <div class="head">
+      <h1>Accessibility</h1>
+      <p>This site is meant to be read by everyone, including people who use screen readers, keyboards, magnification, or who see color differently. Here is what that means in practice, how it is tested, and the design choices behind it.</p>
+    </div>
+
+    <section class="section" aria-labelledby="std-h">
+      <h2 id="std-h">The standard</h2>
+      <p class="rt-p">The target is the <a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines (WCAG) 2.2</a> at level AA. Every page, in English and Filipino and in both light and dark mode, is checked with the open-source <a href="https://github.com/dequelabs/axe-core">axe-core</a> engine against WCAG 2.0, 2.1, and 2.2 A and AA rules, and currently reports no violations. Automated checks catch only part of the picture, so the site is also checked by hand with the keyboard alone, at a 390-pixel phone width, in print, and in grayscale.</p>
+      <p class="rt-p">If something on this site does not work for you, please <a href="mailto:gregorposadas@berkeley.edu?subject=Website%20accessibility">email me</a> and I will fix it.</p>
+    </section>
+
+    <section class="section" aria-labelledby="feat-h">
+      <h2 id="feat-h">What is built in</h2>
+      <ul class="legend">
+        <li><b>Readable type</b><span>Every word is set in Atkinson Hyperlegible Next, a typeface designed with the Braille Institute so that easily confused letters and numbers (I, l, 1; O, 0; b, d) look distinct. Body text is 18 pixels with generous line spacing, and lines are capped at about 70 characters.</span></li>
+        <li><b>Strong contrast</b><span>Body text is 15.6 to 1 against the background in light mode and 21 to 1 in dark mode, well above the 4.5 to 1 that AA requires. Secondary text is at least 7.1 to 1, which meets the stricter AAA level.</span></li>
+        <li><b>Color is never the only signal</b><span>The site is deliberately near-black and off-white. Nothing depends on telling red from green or blue from purple. Links are underlined, the current page is marked with a bar and bold text, and on/off states use words and filled or hollow dots.</span></li>
+        <li><b>Light and dark</b><span>The site follows your device's light or dark setting, and the button in the header lets you switch. Your choice is remembered on your device only.</span></li>
+        <li><b>Keyboard</b><span>Everything can be reached with Tab and activated with Enter or Space. A thick blue focus ring (at least 4.6 to 1 against the background) shows where you are, and a "Skip to content" link is the first thing the keyboard reaches.</span></li>
+        <li><b>Screen readers</b><span>Pages use proper landmarks (header, navigation, main, footer) and one heading outline per page. Every photograph and graphic has a written description. Decorative shapes are hidden from assistive technology.</span></li>
+        <li><b>Touch</b><span>Buttons and links are at least 48 pixels tall, larger than the 24-pixel minimum in WCAG 2.2, and nothing scrolls sideways on a phone.</span></li>
+        <li><b>Motion</b><span>Buttons sink about 4 pixels when pressed. If your device asks for reduced motion, the animation is removed and click sounds start switched off.</span></li>
+        <li><b>Sound</b><span>Buttons make a short click when pressed. The sounds are generated in the browser, last under a hundredth of a second, never carry information, and can be turned off with the "Sound" button in the header.</span></li>
+        <li><b>Two languages</b><span>Every page has a Filipino version, and each page links to its counterpart. Text in the other language is tagged so screen readers pronounce it correctly.</span></li>
+        <li><b>Print</b><span>Printing hides the header and buttons and prints black on white.</span></li>
+        <li><b>Privacy</b><span>No trackers, analytics, cookies, or third-party scripts. The only thing stored is your theme and sound choice, on your own device.</span></li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="known-h">
+      <h2 id="known-h">Known limits</h2>
+      <p class="rt-p">The <a href="research.html#sims-h">CE 323 virtual labs</a> are visual simulations drawn on a canvas. Their controls are keyboard-accessible and each drawing has a text description, but following the apparatus itself depends on sight. The Pinoy Scientists cards are images of text; their full text is in each image's description. The publications link to journal pages that I do not control.</p>
+    </section>
+
+    <section class="section" aria-labelledby="style-h">
+      <h2 id="style-h">Design style</h2>
+      <p class="rt-p">The design borrows from transit signage, the kind of sign you can read while walking past it. A black band holds the name and navigation. Sections open with a heavy rule. Information sits in framed boxes or on a "departure board" of rows, and timelines are drawn as a train line with stations. Buttons stand slightly off the page and sink when pressed, the way a physical button does. It is the same visual system as the Microbe Busters team hub I built for a Development Engineering course.</p>
+      <p class="rt-p">The rules behind it are simple. One typeface in two weights. Five type sizes. Near-black ink on warm paper in light mode, white on black in dark mode. Color is used for focus only, never to carry meaning.</p>
+      <h3 class="rt-h">Palette</h3>
+      <p class="section__note">Each swatch shows the light value, then the dark value. Ratios are contrast against the page background.</p>
+      <ul class="palette">
+        <li><span class="swatch" style="--sw:#1b1a17" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#ffffff" aria-hidden="true"></span><span><b>Ink</b> · headings and body text<br><span class="swatch__meta">Light #1b1a17 (15.6:1) · Dark #ffffff (21:1)</span></span></li>
+        <li><span class="swatch" style="--sw:#4d4a43" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#c9c9c9" aria-hidden="true"></span><span><b>Secondary ink</b> · captions, dates, notes<br><span class="swatch__meta">Light #4d4a43 (7.9:1) · Dark #c9c9c9 (12.7:1)</span></span></li>
+        <li><span class="swatch" style="--sw:#f6f2e9" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#000000" aria-hidden="true"></span><span><b>Paper</b> · page background<br><span class="swatch__meta">Light #f6f2e9 (n/a) · Dark #000000 (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#fcfaf5" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#121212" aria-hidden="true"></span><span><b>Surface</b> · cards and boxes<br><span class="swatch__meta">Light #fcfaf5 (n/a) · Dark #121212 (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#ece6d8" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#1c1c1c" aria-hidden="true"></span><span><b>Sunk</b> · hover and quotes<br><span class="swatch__meta">Light #ece6d8 (n/a) · Dark #1c1c1c (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#d4ccbb" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#3d3d3d" aria-hidden="true"></span><span><b>Rule</b> · thin dividers<br><span class="swatch__meta">Light #d4ccbb (n/a) · Dark #3d3d3d (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#0072b2" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#56b4e9" aria-hidden="true"></span><span><b>Focus</b> · keyboard focus ring<br><span class="swatch__meta">Light #0072b2 (4.6:1) · Dark #56b4e9 (9.1:1)</span></span></li>
+      </ul>
+      <p class="rt-p">The focus blue comes from the Okabe and Ito palette, which was designed to stay distinguishable for people with the common forms of color vision deficiency.</p>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Gregor Posadas · Berkeley, California</p>
+    <p>Set in Atkinson Hyperlegible Next. <a href="accessibility.html">How this site is built for accessibility</a>.</p>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

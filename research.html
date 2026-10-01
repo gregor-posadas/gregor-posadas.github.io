@@ -34,6 +34,7 @@
       <a href="publications.html">Publications</a>
       <a href="cv.html">CV</a>
       <a href="tatay.html">Tatay</a>
+      <a href="accessibility.html">Accessibility</a>
     </nav>
     <div class="band__tools">
       <a class="tool" href="tl/research.html" lang="tl" hreflang="tl">Filipino</a>
@@ -68,7 +69,7 @@
         <li class="row">
           <div class="row__main">
             <p class="row__title">Barriers to technology adoption in small and rural water systems</p>
-            <p class="row__meta"><span>Water Finance Exchange (WFX)</span><span>Research fellow</span></p>
+            <p class="row__meta"><span>Water Finance Exchange (WFX)</span><span>Research fellow · <a href="https://waterfx.org/gregor-posadas/">WFX profile</a></span></p>
             <div class="row__body"><p>A multi-stakeholder interview study across utility operators, technology vendors, consulting engineers, technical assistance providers, and policy experts, analyzed with matrix coding to surface why promising technologies stall before reaching small communities. Alongside it, a regionalization cost analysis for Tennessee's Duck River watershed, built from permit records and historical State Revolving Fund requests.</p></div>
           </div>
           <div class="row__side"><span class="row__day">2025 to 2026</span><span class="row__rel">Washington, D.C. / remote</span></div>
@@ -106,10 +107,18 @@
       <h2 id="tools-h">Projects and tools</h2>
       <p class="section__note">Open and free to use. Code is on GitHub.</p>
       <div class="signs">
-        <a class="sign" href="https://gregor-posadas.github.io/bahawatch/"><span class="bullet" aria-hidden="true">BW</span><span><span class="sign__name">BahaWatch flood dashboard</span><span class="sign__role">A proof-of-concept web dashboard showing how a network of low-cost household water-level sensors could produce live flood maps for Philippine neighborhoods. No accounts, free hosting, plain language in six languages.</span><span class="sign__meta">github.com/gregor-posadas/bahawatch · MIT</span></span></a>
+        <a class="sign" href="https://gregor-posadas.github.io/bahawatch/"><span class="bullet" aria-hidden="true">BW</span><span><span class="sign__name">BahaWatch flood dashboard</span><span class="sign__role">BahaWatch is a community flood-sensing project led by Noam Anglo; I build its web dashboard. A proof-of-concept showing how a network of low-cost household water-level sensors could produce live flood maps for Philippine neighborhoods. No accounts, free hosting, plain language in six languages.</span><span class="sign__meta">github.com/gregor-posadas/bahawatch · MIT</span></span></a>
         <a class="sign" href="https://isoremoval.streamlit.app"><span class="bullet" aria-hidden="true">Iso</span><span><span class="sign__name">Settling column isoremoval curve generator</span><span class="sign__role">An open learning tool that turns raw settling column data into isoremoval curves. Adopted in an environmental engineering course at Boise State.</span><span class="sign__meta">isoremoval.streamlit.app · github.com/gregor-posadas/isoremoval</span></span></a>
         <a class="sign" href="https://github.com/gregor-posadas/wwtp-network-visualization"><span class="bullet" aria-hidden="true">WW</span><span><span class="sign__name">WWTP statistical framework and visualization tool</span><span class="sign__role">Python tool for wastewater plant data: bootstrapped correlation analysis across Pearson, Spearman, and Kendall methods, false-discovery-rate correction, heatmaps, and network diagrams of parameter relationships.</span><span class="sign__meta">github.com/gregor-posadas/wwtp-network-visualization</span></span></a>
         <a class="sign" href="https://github.com/gregor-posadas/Sedimentation-Basin-Generator"><span class="bullet" aria-hidden="true">SB</span><span><span class="sign__name">Sedimentation basin generator</span><span class="sign__role">A sedimentation basin sizing tool for educational use (not certified for engineering design).</span><span class="sign__meta">github.com/gregor-posadas/Sedimentation-Basin-Generator</span></span></a>
+      </div>
+      <h3 class="rt-h" id="sims-h">Virtual fluids laboratories for CE 323</h3>
+      <p class="rt-p">Four browser-based simulations of the Boise State CE 323 fluids experiments, built while I taught the lab. Each one walks through setup and calibration, lets you run the experiment and record readings, and then checks your own calculations against the simulated apparatus. They run entirely in the browser with no accounts or installs.</p>
+      <div class="signs">
+        <a class="sign" href="tools/ce323/viscometer.html"><span class="bullet" aria-hidden="true">μ</span><span><span class="sign__name">Stormer viscometer</span><span class="sign__role">Measure dynamic viscosity of two oils with a falling-weight drive and decide whether each behaves as a Newtonian fluid.</span><span class="sign__meta">Fluids Report 1 · fluid properties</span></span></a>
+        <a class="sign" href="tools/ce323/hydrostatics.html"><span class="bullet" aria-hidden="true">F</span><span><span class="sign__name">Hydrostatic force on a plane surface</span><span class="sign__role">Balance a quarter-circle block on a beam by filling the tank, then relate the resultant force to water depth.</span><span class="sign__meta">Fluids Report 1 · hydrostatics</span></span></a>
+        <a class="sign" href="tools/ce323/bernoulli.html"><span class="bullet" aria-hidden="true">V</span><span><span class="sign__name">Bernoulli's law in a tapered duct</span><span class="sign__role">Run steady flow through a venturi and compare velocities from manometer heads with velocities from continuity.</span><span class="sign__meta">Fluids Report 2 · energy equation</span></span></a>
+        <a class="sign" href="tools/ce323/pipe-fittings.html"><span class="bullet" aria-hidden="true">K</span><span><span class="sign__name">Energy losses in pipe fittings</span><span class="sign__role">Find minor-loss coefficients for bends, a contraction, an enlargement, and a gate valve across a range of flows.</span><span class="sign__meta">Fluids Report 3 · minor losses</span></span></a>
       </div>
     </section>
 
@@ -120,7 +129,7 @@
           <div class="row__main">
             <p class="row__title">Lab instructor, CE 323: Environmental and Fluids Laboratory</p>
             <p class="row__meta"><span>Boise State University</span></p>
-            <div class="row__body"><p>Led hands-on sessions on water and wastewater quality testing (BOD, turbidity, pH, dissolved oxygen) and fluid mechanics, and taught students to analyze experimental data with statistical and graphical methods.</p></div>
+            <div class="row__body"><p>Led hands-on sessions on water and wastewater quality testing (BOD, turbidity, pH, dissolved oxygen) and fluid mechanics, and taught students to analyze experimental data with statistical and graphical methods. Built the <a href="#sims-h">virtual fluids laboratories</a> above for the course.</p></div>
           </div>
           <div class="row__side"><span class="row__day">Fall 2025</span></div>
         </li>
@@ -147,7 +156,7 @@
 <footer class="foot">
   <div class="wrap">
     <p>Gregor Posadas · Berkeley, California</p>
-    <p>Set in Atkinson Hyperlegible Next. Built to be readable on paper, in grayscale, and with a screen reader.</p>
+    <p>Set in Atkinson Hyperlegible Next. <a href="accessibility.html">How this site is built for accessibility</a>.</p>
   </div>
 </footer>
 <script src="assets/site.js"></script>

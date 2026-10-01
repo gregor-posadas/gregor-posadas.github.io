@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stormer Viscometer — Virtual Lab (CE 323)</title>
+<style>
+  :root{
+    --bsu-blue:#0033A0; --bsu-orange:#D64309; --ink:#1b2330; --muted:#5b6472;
+    --line:#d8dee7; --bg:#f4f6f9; --panel:#ffffff; --good:#1a8f52; --bad:#c02a2a;
+    --good-bg:#e7f6ee; --bad-bg:#fbeaea; --accent:#eef3fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{background:var(--bsu-blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px}
+  header .logo{font-weight:800;letter-spacing:.5px;background:#fff;color:var(--bsu-blue);
+    padding:4px 9px;border-radius:5px;font-size:15px}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  header .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+  .wrap{max-width:1500px;margin:0 auto;padding:16px;display:grid;
+    grid-template-columns:minmax(430px,1.05fr) minmax(430px,1fr);gap:16px}
+  @media(max-width:1050px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 1px 3px rgba(20,30,50,.05);overflow:hidden}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;margin:0;
+    padding:10px 14px;background:var(--accent);border-bottom:1px solid var(--line);color:var(--bsu-blue)}
+  .pad{padding:14px}
+  .left{display:flex;flex-direction:column;gap:16px}
+  .right{display:flex;flex-direction:column;gap:16px}
+  canvas{display:block;width:100%;background:#fbfcfe;border-radius:8px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-top:12px}
+  .ctl{display:flex;flex-direction:column;gap:4px}
+  .ctl label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  select,input[type=number]{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#fff}
+  .btn{background:var(--bsu-orange);color:#fff;border:none;padding:9px 16px;border-radius:6px;
+    font-weight:650;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.06)}
+  .btn:disabled{background:#c3c8d0;cursor:not-allowed}
+  .btn.sec{background:#fff;color:var(--bsu-blue);border:1px solid var(--bsu-blue)}
+  .btn.sec:disabled{color:#9aa4b3;border-color:#d8dee7;background:#f6f8fb}
+  .speed{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .speed input{width:96px}
+  .fluidbadge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+  th{background:var(--accent);color:var(--bsu-blue);font-weight:650}
+  td.mass{font-weight:600;background:#fafbfd}
+  tr.active{outline:2px solid var(--bsu-orange);outline-offset:-2px}
+  .avg{font-weight:700;color:var(--bsu-blue)}
+  .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  .stopwatch{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;color:var(--bsu-blue)}
+  .step{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .step-h{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#fafbfd;
+    border-bottom:1px solid var(--line)}
+  .step-h .num{background:var(--bsu-blue);color:#fff;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+  .step-h .num.done{background:var(--good)}
+  .step-h .ttl{font-weight:650;font-size:13.5px}
+  .step-body{padding:12px}
+  .eq{background:#f7f9fc;border:1px solid var(--line);border-left:3px solid var(--bsu-blue);
+    padding:8px 11px;border-radius:5px;font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    font-size:15px;margin:8px 0;overflow-x:auto}
+  .eq .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}
+  .eq .frac >span:first-child{border-bottom:1.4px solid var(--ink);padding:0 5px}
+  .eq .frac >span:last-child{padding:0 5px}
+  sub{font-size:.72em}
+  .rowin{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .rowin input{width:96px}
+  .tag{font-size:12px;color:var(--muted)}
+  .msg{padding:7px 10px;border-radius:6px;font-size:12.5px;margin-top:8px;display:none}
+  .msg.ok{background:var(--good-bg);color:var(--good);display:block}
+  .msg.err{background:var(--bad-bg);color:var(--bad);display:block}
+  .msg.info{background:#eaf1fb;color:var(--bsu-blue);display:block}
+  .linkbtn{background:none;border:none;color:var(--bsu-blue);text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0}
+  .grid6{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;font-size:12.5px;align-items:center}
+  .grid6 .hd{font-weight:650;color:var(--bsu-blue);font-size:11.5px}
+  .grid6 input{width:100%;padding:5px}
+  .cell-ok{background:var(--good-bg)!important;border-color:var(--good)!important}
+  .cell-bad{background:var(--bad-bg)!important;border-color:var(--bad)!important}
+  .choice{display:flex;gap:8px;margin-top:6px}
+  .choice button{flex:1;padding:9px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  .choice button.sel{border-color:var(--bsu-orange);background:#fff5f0;font-weight:650}
+  .foot{font-size:11.5px;color:var(--muted);padding:10px 16px;text-align:center}
+  .note{background:#fff8ec;border:1px solid #f0dca8;border-radius:6px;padding:8px 11px;font-size:12.5px;margin-top:10px}
+  progress{width:120px;height:9px}
+  .statusbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .parttabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+  .ck{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0}
+  .ck .dot{width:18px;height:18px;border-radius:50%;background:#c3c8d0;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:0 0 auto}
+  .ck.done .dot{background:#1a8f52}
+  .statusbar .chip{display:inline-block;background:#eaf1fb;color:#0033A0;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:650}
+  /* site: let the two panels shrink on phones */
+  .wrap>*{min-width:0} @media(max-width:1050px){.wrap{grid-template-columns:minmax(0,1fr)}} table{max-width:100%}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">CE&nbsp;323</span>
+  <div>
+    <h1>Stormer Viscometer — Virtual Fluids Laboratory</h1>
+    <div class="sub">Fluids Report No. 1 · Fluid Properties · determine dynamic viscosity &amp; classify Newtonian behavior</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: SIMULATION ================= -->
+  <div class="left">
+    <div class="panel">
+      <h2>Apparatus &amp; Measurement</h2>
+      <div class="pad">
+        <div class="parttabs" role="group" aria-label="Mode">
+          <button class="btn sec" id="tabSetup" aria-pressed="true">1 · Setup &amp; calibration</button>
+          <button class="btn sec" id="tabRun" aria-pressed="false" disabled title="Complete calibration first">2 · Run experiment</button>
+          <button class="btn sec" id="dlPS" style="margin-left:auto">⬇ Problem statement</button>
+        </div>
+        <canvas id="sim" width="760" height="440" role="img" aria-label="Animated Stormer viscometer with falling drive weight and rotating inner cylinder"></canvas>
+        <div class="statusbar" role="status" aria-live="polite">
+          <span class="chip" id="swChip">⏱ 0.00 s</span>
+          <span class="chip" id="omChip">ω ≈ 0.00 rad/s</span>
+          <span class="chip" id="trChip">Trial 0 of 3</span>
+        </div>
+        <div class="controls" id="calCtl">
+          <div class="ctl">
+            <label>Test fluid volume</label>
+            <div style="display:flex;gap:6px">
+              <button class="btn sec" id="addFluid">+25&nbsp;mL</button>
+              <button class="btn sec" id="rmFluid">−25&nbsp;mL</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <label for="markPos">String mark distance</label>
+            <input type="range" id="markPos" min="20" max="60" step="0.5" value="28" aria-label="String mark distance in centimetres">
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="tempBtn">Read room thermometer</button>
+          </div>
+        </div>
+        <div id="calList" class="note"></div>
+        <div class="controls" id="runCtl" style="display:none">
+          <div class="ctl">
+            <label>Device / Fluid</label>
+            <select id="device">
+              <option value="A">Device A — Castor oil</option>
+              <option value="B">Device B — Motor oil</option>
+            </select>
+          </div>
+          <div class="ctl">
+            <label>Drive mass, m</label>
+            <select id="mass"></select>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn" id="release">▶ Release weight</button>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="resetTrial">Reset current fluid</button>
+          </div>
+          <div class="speed">
+            <span>Speed</span>
+            <input type="range" id="speed" min="1" max="10" step="1" value="4">
+            <span id="speedLbl">4×</span>
+          </div>
+        </div>
+        <p class="hint">Pick a mass, release the drive weight, and it falls the marked <b>40&nbsp;cm</b> while the inner
+          cylinder spins up to a steady angular velocity. The stopwatch records the fall time. Do <b>3 trials</b> for
+          each of the <b>6 masses</b>, for <b>both fluids</b> — exactly as in the physical lab.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: DATA + CALCS ================= -->
+  <div class="right">
+    <div class="panel">
+      <h2>Raw Data <span id="dataFluid" style="float:right;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>String drop length, L = <b>0.400 m</b> &nbsp;·&nbsp; Room temp = <b>22 °C</b></div>
+          <div>Stopwatch: <span class="stopwatch" id="sw">0.00 s</span></div>
+        </div>
+        <table id="dataTable"></table>
+        <p class="hint" id="progressHint"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Guided Data Analysis — you calculate, the tool checks</h2>
+      <div class="pad" id="calc">
+        <div class="note" id="calcLock">Collect all data first: <b>3 trials × 6 masses</b> for
+          <b>both</b> Device A (castor oil) and Device B (motor oil). The analysis unlocks automatically.
+          <div style="margin-top:6px"><progress id="collProg" value="0" max="36"></progress>
+            <span id="collTxt">0 / 36 trials</span></div></div>
+        <div id="steps" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  Virtual lab for CE&nbsp;323 (Environmental &amp; Fluids Laboratory), Boise State University · Dr.&nbsp;Sondra Miller.
+  Simulated data is generated from the governing viscometer physics so your worked calculations recover the true fluid
+  viscosity. Target reference values — castor oil ≈ 650 mPa·s, SAE 30 motor oil ≈ 440 mPa·s.
+</div>
+
+<script>
+/* ============================================================
+   PHYSICS / GEOMETRY  (all SI internally)
+   K = 2*pi*r_i^3*l / (r_dw*(r_o - r_i));   W = K*mu*omega;   omega = v_dw / r_i
+   ============================================================ */
+const IN=0.0254, g=9.81, L=0.40;
+const DEV={
+  A:{name:'Castor oil', color:'#e9d27a', colorDark:'#c9ad46', d_dw:2.750,d_o:5.735,d_i:5.435,l:6.000,
+     mu:0.65, refTxt:'&#8776; 650&#8211;1000 mPa&#183;s (natural oil, ~20&#8211;25 &#176;C)'},
+  B:{name:'Motor oil', color:'#b5762e', colorDark:'#8a591f', d_dw:2.750,d_o:5.740,d_i:5.575,l:6.000,
+     mu:0.44, refTxt:'SAE 30 &#8776; 440 mPa&#183;s at 20 &#176;C'}
+};
+for(const k in DEV){const d=DEV[k];
+  d.r_dw=d.d_dw*IN/2; d.r_o=d.d_o*IN/2; d.r_i=d.d_i*IN/2; d.L_cyl=d.l*IN;
+  d.K=2*Math.PI*Math.pow(d.r_i,3)*d.L_cyl/(d.r_dw*(d.r_o-d.r_i));
+}
+const MASSES=[50,100,150,200,250,300]; // grams
+function trueTime(devKey,mg){const d=DEV[devKey];const m=mg/1000;const W=m*g;
+  const omega=W/(d.K*d.mu); const v=omega*d.r_i; return L/v;}
+function measTime(devKey,mg){const t=trueTime(devKey,mg);
+  const noise=1+ (Math.random()*2-1)*0.025; return t*noise;}
+
+/* ============================================================ STATE */
+const state={
+  device:'A', massIdx:0,
+  mode:'setup', cal:{vol:0,temp:false,done:false},
+  data:{A:MASSES.map(()=>[]), B:MASSES.map(()=>[])},
+  omegaOk:{A:MASSES.map(()=>false), B:MASSES.map(()=>false)}, // per-point omega validated in Step 1
+  trend:{A:{added:false,eq:false,r2:false}, B:{added:false,eq:false,r2:false}}, // Excel-style trendline state
+  running:false, unlocked:false
+};
+
+/* ============================================================ DOM refs */
+const $=id=>document.getElementById(id);
+const massSel=$('mass'); MASSES.forEach((m,i)=>{const o=document.createElement('option');o.value=i;o.textContent=m+' g';massSel.appendChild(o);});
+const cvs=$('sim'), ctx=cvs.getContext('2d');
+let DPR=Math.min(window.devicePixelRatio||1,2);
+function fitCanvas(){DPR=Math.min(window.devicePixelRatio||1,2);
+  cvs.width=760*DPR; cvs.height=440*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);}
+fitCanvas();
+
+/* ============================================================ DATA TABLE */
+function trialsDone(devKey){return state.data[devKey].reduce((s,a)=>s+a.length,0);}
+function totalDone(){return trialsDone('A')+trialsDone('B');}
+function avg(a){return a.length? a.reduce((s,x)=>s+x,0)/a.length : null;}
+
+function renderTable(){
+  const dk=state.device, d=DEV[dk];
+  $('dataFluid').innerHTML='<span class="fluidbadge" style="background:'+d.color+
+    ';color:#3a2f0a">Device '+dk+' — '+d.name+'</span>';
+  let h='<tr><th>m (g)</th><th>W = mg (N)</th><th>t&#8321; (s)</th><th>t&#8322; (s)</th><th>t&#8323; (s)</th><th>t&#772; (s)</th></tr>';
+  MASSES.forEach((m,i)=>{
+    const tr=state.data[dk][i]; const a=avg(tr);
+    const active=(i===state.massIdx)?' class="active"':'';
+    h+='<tr'+active+'><td class="mass">'+m+'</td><td>'+(m/1000*g).toFixed(3)+'</td>';
+    for(let j=0;j<3;j++) h+='<td>'+(tr[j]!=null?tr[j].toFixed(2):'—')+'</td>';
+    h+='<td class="avg">'+(a!=null?a.toFixed(2):'—')+'</td></tr>';
+  });
+  $('dataTable').innerHTML=h;
+  const done=trialsDone(dk);
+  $('progressHint').innerHTML='Device '+dk+': <b>'+done+'/18</b> trials logged.'+
+    (done<18?' Keep going — 3 per mass.':' ✓ This fluid is complete.');
+  $('collProg').value=totalDone(); $('collTxt').textContent=totalDone()+' / 36 trials';
+  if(totalDone()>=36 && !state.unlocked){unlockCalc();}
+}
+
+/* ============================================================ ANIMATION */
+let anim=null;
+function drawScene(fallFrac, omega, angle, tDisp){
+  ctx.clearRect(0,0,760,440);
+  const d=DEV[state.device];
+  const tankX=250, tankY=150, tankW=250, tankH=250;
+  ctx.fillStyle='#33405a'; ctx.font='600 13px system-ui';
+  ctx.textAlign='left'; ctx.fillText('Stormer viscometer — cross-section', 20, 24);
+  ctx.fillStyle='#7a8598'; ctx.font='12px system-ui';
+  ctx.fillText('Device '+state.device+' · '+d.name, 20, 42);
+
+  // drive wheel / drum (top)
+  const drumX=150, drumY=95, drumR=34;
+  ctx.strokeStyle='#9aa4b3'; ctx.lineWidth=6; ctx.beginPath();
+  ctx.moveTo(drumX,50); ctx.lineTo(drumX,drumY); ctx.stroke();
+  ctx.fillStyle='#c7ccd6'; ctx.fillRect(drumX-60,44,120,8);
+  ctx.strokeStyle='#b9c0cc'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(drumX,drumY); ctx.lineTo(drumX,tankY-6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(drumX,tankY-6); ctx.lineTo(tankX+tankW/2,tankY-6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(tankX+tankW/2,tankY-6); ctx.lineTo(tankX+tankW/2,tankY+18); ctx.stroke();
+  ctx.fillStyle='#7f8794'; ctx.beginPath(); ctx.arc(drumX,drumY,drumR,0,7); ctx.fill();
+  ctx.fillStyle='#aeb6c2'; ctx.beginPath(); ctx.arc(drumX,drumY,drumR-7,0,7); ctx.fill();
+  ctx.strokeStyle='#5c6373'; ctx.lineWidth=2;
+  for(let i=0;i<8;i++){const a=angle+i*Math.PI/4;
+    ctx.beginPath();ctx.moveTo(drumX+Math.cos(a)*(drumR-9),drumY+Math.sin(a)*(drumR-9));
+    ctx.lineTo(drumX+Math.cos(a)*(drumR-2),drumY+Math.sin(a)*(drumR-2));ctx.stroke();}
+  ctx.fillStyle='#5c6373';ctx.beginPath();ctx.arc(drumX,drumY,4,0,7);ctx.fill();
+  ctx.fillStyle='#7a8598';ctx.font='11px system-ui';ctx.textAlign='right';
+  ctx.fillText('drive wheel', drumX-44, drumY+4);
+
+  // ruler
+  const rulX=232, top=drumY+drumR-6, drop=200;
+  ctx.strokeStyle='#c2c8d2'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(rulX,top);ctx.lineTo(rulX,top+drop);ctx.stroke();
+  ctx.fillStyle='#8a93a2';ctx.font='10px system-ui';ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const y=top+drop*i/4;ctx.beginPath();ctx.moveTo(rulX-5,y);ctx.lineTo(rulX,y);ctx.stroke();
+    ctx.fillText((i*10)+' cm', rulX-7, y+3);}
+  const markCm=state.mode==='setup'?(+($('markPos')?$('markPos').value:40)):40;
+  const markY=top+drop*markCm/40;
+  ctx.strokeStyle=d.colorDark;ctx.setLineDash([4,3]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(rulX-14,Math.min(markY,top+drop));ctx.lineTo(rulX+18,Math.min(markY,top+drop));ctx.stroke();ctx.setLineDash([]);
+
+  // cord + falling weight
+  const weightY=top+drop*fallFrac;
+  ctx.strokeStyle='#6b7280';ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(drumX+drumR,drumY);ctx.lineTo(drumX+drumR,weightY);ctx.stroke();
+  const wx=drumX+drumR;
+  ctx.fillStyle='#37414f';ctx.strokeStyle='#222';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(wx-2,weightY);ctx.lineTo(wx+2,weightY);ctx.stroke();
+  ctx.beginPath();ctx.roundRect(wx-16,weightY, 32, 26, 4);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='600 11px system-ui';ctx.textAlign='center';
+  ctx.fillText(MASSES[state.massIdx]+'g', wx, weightY+17);
+
+  // tank + fluid + cylinders
+  ctx.fillStyle='#eef2f7';ctx.strokeStyle='#9aa4b3';ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(tankX,tankY,tankW,tankH,6);ctx.fill();ctx.stroke();
+  const volNow=state.mode==='setup'?state.cal.vol:200;
+  const fl=tankY+tankH-10-Math.min(1,volNow/230)*(tankH-38);
+  if(volNow>3){
+    const grd=ctx.createLinearGradient(0,fl,0,tankY+tankH);
+    grd.addColorStop(0,d.color);grd.addColorStop(1,d.colorDark);
+    ctx.fillStyle=grd;ctx.beginPath();ctx.roundRect(tankX+4,fl,tankW-8,tankH-(fl-tankY)-4,4);ctx.fill();
+    ctx.strokeStyle=d.colorDark;ctx.globalAlpha=.5;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(tankX+4,fl);ctx.lineTo(tankX+tankW-4,fl);ctx.stroke();ctx.globalAlpha=1;
+  }
+  ctx.fillStyle='#7a8598';ctx.font='11px system-ui';ctx.textAlign='left';
+  ctx.fillText('~'+Math.round(volNow)+' mL '+d.name, tankX+10, tankY+tankH+16);
+  ctx.textAlign='right';ctx.fillText('stationary outer cylinder', tankX+tankW-6, tankY-8);
+
+  const cx=tankX+tankW/2, cyTop=tankY+18, cyH=tankH-40, cyW=(d.r_i/d.r_o)*(tankW-30);
+  ctx.fillStyle='#dfe4ec';ctx.strokeStyle='#8790a0';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(cx-cyW/2,cyTop,cyW,cyH,5);ctx.fill();ctx.stroke();
+  ctx.save();ctx.beginPath();ctx.roundRect(cx-cyW/2,cyTop,cyW,cyH,5);ctx.clip();
+  ctx.strokeStyle='#aab2c0';ctx.lineWidth=6;
+  for(let i=-3;i<=6;i++){const ph=(angle*0.6+i*0.9)%(Math.PI*2);
+    const x=cx-cyW/2 + ((Math.sin(ph)*0.5+0.5))*cyW;
+    ctx.globalAlpha=0.35+0.3*Math.cos(ph);
+    ctx.beginPath();ctx.moveTo(x,cyTop);ctx.lineTo(x,cyTop+cyH);ctx.stroke();}
+  ctx.globalAlpha=1;ctx.restore();
+  ctx.fillStyle='#5c6373';ctx.font='11px system-ui';ctx.textAlign='center';
+  ctx.fillText('rotating inner cylinder', cx, cyTop+cyH/2);
+  ctx.fillText('ω', cx, cyTop+cyH/2+16);
+  ctx.fillStyle='#7a8598';ctx.font='10px system-ui';
+  ctx.fillText('gap '+((d.r_o-d.r_i)*1000).toFixed(2)+' mm', cx, tankY+tankH-6);
+
+  // live readouts shown in the HTML chips under the canvas
+  document.getElementById('swChip').textContent='⏱ '+tDisp.toFixed(2)+' s';
+  document.getElementById('omChip').textContent='ω ≈ '+omega.toFixed(2)+' rad/s';
+  document.getElementById('trChip').textContent='Trial '+Math.min(3,state.data[state.device][state.massIdx].length+(state.running?1:0))+' of 3';
+}
+
+function releaseWeight(){
+  if(state.running) return;
+  if(!state.cal.done||state.mode==='setup'){flash('Complete Setup &amp; calibration first.','info');return;}
+  const dk=state.device, i=state.massIdx;
+  if(state.data[dk][i].length>=3){flash('That mass already has 3 trials. Pick another mass.','info');return;}
+  state.running=true; $('release').disabled=true;
+  const tMeas=measTime(dk,MASSES[i]);
+  const d=DEV[dk]; const omega=(MASSES[i]/1000*g)/(d.K*d.mu);
+  const speed=+$('speed').value;
+  let simT=0, angle=0, last=performance.now();
+  function frame(now){
+    const dt=(now-last)/1000; last=now; simT+=dt*speed;
+    const frac=Math.min(simT/tMeas,1);
+    angle+=omega*dt*speed;
+    $('sw').textContent=Math.min(simT,tMeas).toFixed(2)+' s';
+    drawScene(frac, omega, angle, Math.min(simT,tMeas));
+    if(frac<1){anim=requestAnimationFrame(frame);}
+    else{
+      state.data[dk][i].push(tMeas); state.running=false; $('release').disabled=false;
+      renderTable();
+      if(state.data[dk][i].length>=3){
+        const next=state.data[dk].findIndex(a=>a.length<3);
+        if(next>=0){state.massIdx=next; massSel.value=next;}
+      }
+      drawScene(1, omega, angle, tMeas); renderTable();
+      flash('Recorded t = '+tMeas.toFixed(2)+' s  (mass '+MASSES[i]+' g, '+d.name+')','ok');
+    }
+  }
+  anim=requestAnimationFrame(frame);
+}
+
+let flashTimer=null;
+function flash(msg,type){
+  const el=$('progressHint');
+  el.innerHTML='<span style="color:'+(type==='ok'?'#1a8f52':type==='info'?'#0033A0':'#c02a2a')+'">'+msg+'</span>';
+  clearTimeout(flashTimer); flashTimer=setTimeout(renderTable,2200);
+}
+
+/* ============================================================ EVENTS */
+$('device').addEventListener('change',e=>{state.device=e.target.value;
+  const next=state.data[state.device].findIndex(a=>a.length<3);
+  state.massIdx=next>=0?next:0; massSel.value=state.massIdx;
+  drawInit(); renderTable();});
+massSel.addEventListener('change',e=>{state.massIdx=+e.target.value;drawInit();renderTable();});
+$('release').addEventListener('click',releaseWeight);
+$('speed').addEventListener('input',e=>$('speedLbl').textContent=e.target.value+'×');
+$('resetTrial').addEventListener('click',()=>{
+  if(confirm('Clear all logged trials for Device '+state.device+' ('+DEV[state.device].name+')?')){
+    state.data[state.device]=MASSES.map(()=>[]); state.massIdx=0; massSel.value=0;
+    drawInit(); renderTable();}
+});
+function drawInit(){const d=DEV[state.device];
+  const omega=(MASSES[state.massIdx]/1000*g)/(d.K*d.mu);
+  drawScene(0, omega, 0, 0); $('sw').textContent='0.00 s';}
+
+/* ============================================================ GUIDED CALC */
+function num(v){return typeof v==='number'&&isFinite(v);}
+function close(a,b,tol){return Math.abs(a-b)<=Math.abs(b)*tol+1e-9;}
+
+function unlockCalc(){
+  state.unlocked=true; $('calcLock').style.display='none'; $('steps').style.display='block';
+  buildSteps(); flash('All 36 trials collected — data analysis unlocked below! ✓','ok');
+}
+function buildSteps(){
+  $('steps').innerHTML =
+   stepShell(1,'Compute angular velocity ω for each mass') +
+   stepShell(2,'Compute drive weight W = m·g for each mass') +
+   stepShell(3,'Plot W vs ω and add a trend-line the Excel way (both fluids)') +
+   stepShell(4,'Compute the geometric constant K from the device dimensions') +
+   stepShell(5,'Solve for dynamic viscosity μ = slope ÷ K, and compare to published values') +
+   stepShell(6,'Classify each fluid: Newtonian or non-Newtonian?');
+  renderStep1(); renderStep2(); renderStep3(); renderStep4(); renderStep5(); renderStep6();
+}
+function stepShell(n,ttl){return '<div class="step" id="st'+n+'"><div class="step-h">'+
+  '<span class="num" id="num'+n+'">'+n+'</span><span class="ttl">'+ttl+'</span></div>'+
+  '<div class="step-body" id="body'+n+'"></div></div>';}
+function markDone(n){$('num'+n).classList.add('done');$('num'+n).textContent='✓';}
+
+/* ---- STEP 1: omega per mass ---- */
+function renderStep1(){
+  const html='<div class="eq">v<sub>dw</sub> = L ⁄ t̄ &nbsp;&nbsp;→&nbsp;&nbsp; ω = '+
+    '<span class="frac"><span>v<sub>dw</sub></span><span>r<sub>i</sub></span></span>'+
+    ' &nbsp; (rad/s), &nbsp; with L = 0.400 m</div>'+
+    '<p class="tag">Use each fluid\'s own r<sub>i</sub>. Enter ω (rad/s) to 3 decimals for every mass, then Check. '+
+    'Each correct value plots its point over in Step 3.</p>'+
+    fluidGrid('omega','A')+fluidGrid('omega','B')+
+    '<button class="btn" onclick="checkStep1()">Check Step 1</button> '+
+    '<button class="linkbtn" onclick="hint(1)">Show me the formula in words</button>'+
+    '<div class="msg" id="msg1"></div>';
+  $('body1').innerHTML=html;
+}
+function fluidGrid(kind,dk){
+  const d=DEV[dk];
+  let h='<div style="margin:8px 0 4px;font-weight:650;color:'+d.colorDark+'">Device '+dk+' — '+d.name+
+        ' &nbsp;<span class="tag">r<sub>i</sub>='+d.r_i.toFixed(5)+' m</span></div>';
+  h+='<div class="grid6"><span class="hd">m (g)</span>';
+  MASSES.forEach(m=>h+='<span class="hd" style="text-align:center">'+m+'</span>');
+  h+='<span class="hd">'+(kind==='omega'?'ω (rad/s)':'W (N)')+'</span>';
+  MASSES.forEach((m,i)=>h+='<input id="'+kind+'_'+dk+'_'+i+'" type="number" step="0.001">');
+  h+='</div>';
+  if(kind==='omega'){h+='<div class="grid6" style="margin-top:3px"><span class="tag">t̄ (s)</span>';
+    MASSES.forEach((m,i)=>{const a=avg(state.data[dk][i]);h+='<span class="tag" style="text-align:center">'+(a?a.toFixed(2):'—')+'</span>';});
+    h+='<span></span>'+MASSES.map(()=>'<span></span>').join('')+'</div>';}
+  return h;
+}
+function checkStep1(){
+  let allok=true, bad=0;
+  for(const dk of ['A','B']){const d=DEV[dk];
+    MASSES.forEach((m,i)=>{
+      const inp=$('omega_'+dk+'_'+i); const val=parseFloat(inp.value);
+      const a=avg(state.data[dk][i]); const truev=(L/a)/d.r_i;
+      inp.classList.remove('cell-ok','cell-bad');
+      const ok=num(val)&&close(val,truev,0.03);
+      state.omegaOk[dk][i]=ok;
+      if(ok){inp.classList.add('cell-ok');}
+      else{inp.classList.add('cell-bad');allok=false;bad++;}
+    });
+  }
+  const msg=$('msg1');
+  if(allok){msg.className='msg ok';msg.textContent='All ω values correct. ✓ Notice higher mass → higher ω. Each point is now plotted in Step 3.';markDone(1);}
+  else{msg.className='msg err';msg.textContent=bad+' value(s) off. Only the correct ones plot in Step 3. Reminder: v_dw = 0.400 ⁄ t̄, then ω = v_dw ⁄ r_i (use the device\'s r_i).';}
+  if($('plot')){drawPlot(); refreshTrendButtons();}
+}
+
+/* ---- STEP 2: W = mg ---- */
+function renderStep2(){
+  const html='<div class="eq">W = m · g,&nbsp; g = 9.81 m/s²,&nbsp; m in kilograms (÷1000 from grams)</div>'+
+    '<p class="tag">The masses are the same for both devices, so W comes out identical — fill in both fluids to build each series\' y-axis.</p>'+
+    fluidGrid('W','A')+fluidGrid('W','B')+
+    '<button class="btn" onclick="checkStep2()">Check Step 2</button> '+
+    '<button class="linkbtn" onclick="hint(2)">Show me the formula in words</button>'+
+    '<div class="msg" id="msg2"></div>';
+  $('body2').innerHTML=html;
+}
+function checkStep2(){
+  let allok=true;
+  ['A','B'].forEach(dk=>{MASSES.forEach((m,i)=>{const inp=$('W_'+dk+'_'+i);if(!inp)return;
+    const val=parseFloat(inp.value);const truev=m/1000*g;
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(val)&&close(val,truev,0.02)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');allok=false;}});});
+  const msg=$('msg2');
+  if(allok){msg.className='msg ok';msg.textContent='Correct. ✓ These W values are the y-axis for each fluid\'s plot.';markDone(2);}
+  else{msg.className='msg err';msg.textContent='Check unit conversion: 100 g = 0.100 kg, then ×9.81. Fill in both Device A and Device B.';}
+}
+
+/* ---- STEP 3: dynamic plot + simulated-Excel trendline ---- */
+function regression(xs,ys){const n=xs.length;const sx=xs.reduce((a,b)=>a+b,0),sy=ys.reduce((a,b)=>a+b,0);
+  const sxx=xs.reduce((a,b)=>a+b*b,0),sxy=xs.reduce((a,b,i)=>a+b*ys[i],0);
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);const intercept=(sy-slope*sx)/n;return{slope,intercept};}
+function dataFor(dk){const xs=[],ys=[];MASSES.forEach((m,i)=>{const a=avg(state.data[dk][i]);
+  xs.push((L/a)/DEV[dk].r_i); ys.push(m/1000*g);});return{xs,ys};}
+function rSquared(xs,ys){const {slope,intercept}=regression(xs,ys);
+  const my=ys.reduce((a,b)=>a+b,0)/ys.length;let ssr=0,sst=0;
+  xs.forEach((x,i)=>{const f=slope*x+intercept;ssr+=(ys[i]-f)*(ys[i]-f);sst+=(ys[i]-my)*(ys[i]-my);});
+  return sst===0?1:1-ssr/sst;}
+
+function renderStep3(){
+  const html='<p class="tag">Each data point appears on the plot the moment you correctly compute its ω back in '+
+    '<b>Step 1</b> — so work through Step 1 first and watch the graph fill in. Once all six points for a fluid are '+
+    'shown, add a linear trend-line <b>the same way you would in Excel</b>, then read the slope from the displayed '+
+    'equation (units N·s/rad).</p>'+
+    '<canvas id="plot" width="620" height="330"></canvas>'+
+    '<p class="tag" style="margin:6px 0 3px">In Excel you right-click the series → <i>Add Trendline…</i>. Simulate it here:</p>'+
+    '<div id="xlbar" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 2px">'+
+      '<button class="btn sec" id="trendBtnA" onclick="openTrend(\'A\')" disabled>➕ Add Trendline — Device A</button>'+
+      '<button class="btn sec" id="trendBtnB" onclick="openTrend(\'B\')" disabled>➕ Add Trendline — Device B</button>'+
+    '</div>'+
+    '<div id="trendDlg"></div>'+
+    '<div class="rowin">Slope, Device A (castor): <input id="slopeA" type="number" step="0.001">'+
+    '<span class="tag">N·s/rad</span></div>'+
+    '<div class="rowin">Slope, Device B (motor): <input id="slopeB" type="number" step="0.001">'+
+    '<span class="tag">N·s/rad</span></div>'+
+    '<button class="btn" onclick="checkStep3()">Check slopes</button>'+
+    '<div class="msg" id="msg3"></div>';
+  $('body3').innerHTML=html; drawPlot(); refreshTrendButtons();
+}
+function refreshTrendButtons(){
+  ['A','B'].forEach(dk=>{const btn=$('trendBtn'+dk);if(!btn)return;
+    const ready=state.omegaOk[dk].every(v=>v);
+    if(state.trend[dk].added){btn.disabled=false;btn.textContent='✎ Edit Trendline — Device '+dk;}
+    else{btn.disabled=!ready;
+      btn.textContent=ready?('➕ Add Trendline — Device '+dk):('Compute all six ω first — Device '+dk);}
+  });
+}
+function closeTrend(){document.getElementById('trendDlg').innerHTML='';}
+function openTrend(dk){const d=DEV[dk];
+  $('trendDlg').innerHTML=
+   '<div style="border:1px solid #b9c0cc;border-radius:8px;max-width:360px;margin:6px 0;box-shadow:0 4px 14px rgba(0,0,0,.14)">'+
+   '<div style="background:#217346;color:#fff;padding:8px 12px;font-weight:650;font-size:12.5px;border-radius:8px 8px 0 0">'+
+     'Format Trendline — Device '+dk+' series ('+d.name+')</div>'+
+   '<div style="padding:12px;font-size:12.5px">'+
+     '<div style="font-weight:650;margin-bottom:5px">Trendline Options</div>'+
+     ['Linear','Exponential','Logarithmic','Polynomial (Order 2)'].map(t=>
+       '<label style="display:block;margin:3px 0"><input type="radio" name="tt'+dk+'" value="'+t+'"> '+t+'</label>').join('')+
+     '<hr style="border:none;border-top:1px solid var(--line);margin:10px 0">'+
+     '<label style="display:block;margin:4px 0"><input type="checkbox" id="dispEq'+dk+'"> Display Equation on chart</label>'+
+     '<label style="display:block;margin:4px 0"><input type="checkbox" id="dispR'+dk+'"> Display R-squared value on chart</label>'+
+     '<div style="margin-top:12px;text-align:right">'+
+       '<button class="btn sec" onclick="closeTrend()">Cancel</button> '+
+       '<button class="btn" onclick="applyTrend(\''+dk+'\')">Apply</button></div>'+
+     '<div class="msg" id="tmsg'+dk+'"></div>'+
+   '</div></div>';
+}
+function applyTrend(dk){
+  const sel=document.querySelector('input[name=tt'+dk+']:checked');
+  const type=sel?sel.value:null;
+  const tm=$('tmsg'+dk);
+  if(!type){tm.className='msg err';tm.textContent='Pick a trendline type first.';return;}
+  if(type!=='Linear'){tm.className='msg err';
+    tm.textContent='A '+type.toLowerCase()+' trendline fits these data poorly — the points fall on a straight line. Choose Linear.';return;}
+  state.trend[dk].added=true;
+  state.trend[dk].eq=$('dispEq'+dk).checked;
+  state.trend[dk].r2=$('dispR'+dk).checked;
+  drawPlot(); refreshTrendButtons(); closeTrend();
+  const m=$('msg3');m.className='msg info';
+  m.innerHTML='Linear trend-line added for Device '+dk+'. '+
+    (state.trend[dk].eq
+      ? 'Read its slope — the number multiplying x in the displayed equation — and enter it below.'
+      : 'You left <b>Display Equation on chart</b> unchecked, so no equation shows. Click “Edit Trendline” and tick that box to reveal the slope.');
+}
+function drawPlot(){
+  const c=$('plot');if(!c)return;const p=c.getContext('2d');
+  const W=620,H=330;c.width=W*DPR;c.height=H*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,W,H);
+  const mL=54,mR=16,mT=16,mB=42, pw=W-mL-mR, ph=H-mT-mB;
+  let maxW=0,maxO=0;['A','B'].forEach(dk=>{const {xs,ys}=dataFor(dk);
+    maxO=Math.max(maxO,...xs);maxW=Math.max(maxW,...ys);});
+  maxO*=1.08;maxW*=1.08;
+  const X=o=>mL+o/maxO*pw, Y=w=>mT+ph-w/maxW*ph;
+  p.strokeStyle='#eceff4';p.lineWidth=1;p.fillStyle='#7a8598';p.font='10px system-ui';p.textAlign='right';
+  for(let i=0;i<=5;i++){const w=maxW*i/5;const y=Y(w);p.beginPath();p.moveTo(mL,y);p.lineTo(W-mR,y);p.stroke();
+    p.fillText(w.toFixed(1),mL-6,y+3);}
+  p.textAlign='center';
+  for(let i=0;i<=5;i++){const o=maxO*i/5;const x=X(o);p.beginPath();p.moveTo(x,mT);p.lineTo(x,mT+ph);p.stroke();
+    p.fillText(o.toFixed(2),x,mT+ph+16);}
+  p.fillStyle='#33405a';p.font='600 12px system-ui';
+  p.fillText('angular velocity  ω  (rad/s)',mL+pw/2,H-6);
+  p.save();p.translate(14,mT+ph/2);p.rotate(-Math.PI/2);p.fillText('drive weight  W  (N)',0,0);p.restore();
+  const anyPts=state.omegaOk.A.some(v=>v)||state.omegaOk.B.some(v=>v);
+  if(!anyPts){p.fillStyle='#aab2c0';p.font='13px system-ui';p.textAlign='center';
+    p.fillText('Compute ω in Step 1 — points will appear here as you go.',mL+pw/2,mT+ph/2);}
+  ['A','B'].forEach(dk=>{const d=DEV[dk];const {xs,ys}=dataFor(dk);const {slope,intercept}=regression(xs,ys);
+    if(state.trend[dk].added){
+      p.strokeStyle=d.colorDark;p.lineWidth=2;p.beginPath();
+      p.moveTo(X(0),Y(intercept));p.lineTo(X(maxO),Y(slope*maxO+intercept));p.stroke();}
+    p.fillStyle=d.colorDark;
+    xs.forEach((x,i)=>{if(state.omegaOk[dk][i]){p.beginPath();p.arc(X(x),Y(ys[i]),4,0,7);p.fill();}});
+    if(state.trend[dk].added && state.trend[dk].eq){
+      let txt='Device '+dk+':  y = '+slope.toFixed(3)+'x + '+intercept.toFixed(3);
+      if(state.trend[dk].r2) txt+='   R² = '+rSquared(xs,ys).toFixed(4);
+      const yPos=(dk==='A')?mT+16:mT+34;
+      p.font='600 11px system-ui';p.textAlign='left';
+      const tw=p.measureText(txt).width;
+      p.fillStyle='rgba(255,255,255,.86)';p.fillRect(mL+8,yPos-11,tw+8,15);
+      p.fillStyle=d.colorDark;p.fillText(txt,mL+12,yPos);}
+  });
+  p.textAlign='left';p.font='11px system-ui';
+  ['A','B'].forEach((dk,i)=>{const d=DEV[dk];p.fillStyle=d.colorDark;
+    p.fillRect(W-mR-150,mT+ph-34+i*16,10,10);p.fillStyle='#33405a';
+    p.fillText('Device '+dk+' — '+d.name,W-mR-135,mT+ph-25+i*16);});
+}
+function checkStep3(){
+  if(!state.trend.A.added||!state.trend.B.added){const m=$('msg3');m.className='msg err';
+    m.textContent='Add a linear trend-line to BOTH series first (use the Add Trendline buttons), then read each slope.';return;}
+  const rA=regression(dataFor('A').xs,dataFor('A').ys), rB=regression(dataFor('B').xs,dataFor('B').ys);
+  const vA=parseFloat($('slopeA').value), vB=parseFloat($('slopeB').value);
+  let ok=true;[['slopeA',vA,rA.slope],['slopeB',vB,rB.slope]].forEach(([id,v,t])=>{
+    $(id).classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.04)){$(id).classList.add('cell-ok');}else{$(id).classList.add('cell-bad');ok=false;}});
+  const msg=$('msg3');
+  if(ok){msg.className='msg ok';msg.innerHTML='Both slopes match the fit. ✓ Castor oil\'s slope is steeper — a hint it\'s more viscous. Remember slope = K·μ.';markDone(3);}
+  else{msg.className='msg err';msg.textContent='Read the slope as the coefficient of x in the displayed equation (or rise/run of the line).';}
+}
+
+/* ---- STEP 4: geometric K ---- */
+function renderStep4(){
+  const eq='<div class="eq">K = '+
+    '<span class="frac"><span>2π · r<sub>i</sub>³ · l</span><span>r<sub>dw</sub> · (r<sub>o</sub> − r<sub>i</sub>)</span></span>'+
+    '&nbsp; (units: m²)</div>';
+  let dims='<table style="margin:6px 0"><tr><th>dimension</th><th>Device A (m)</th><th>Device B (m)</th></tr>';
+  const rows=[['r<sub>dw</sub> (drive-wheel radius)','r_dw'],['r<sub>o</sub> (container radius)','r_o'],
+    ['r<sub>i</sub> (inner-cyl radius)','r_i'],['l (inner-cyl height)','L_cyl']];
+  rows.forEach(([lab,key])=>{dims+='<tr><td style="text-align:left">'+lab+'</td><td>'+DEV.A[key].toFixed(5)+
+    '</td><td>'+DEV.B[key].toFixed(5)+'</td></tr>';});
+  dims+='</table>';
+  const html=eq+dims+
+    '<div class="rowin">K for Device A: <input id="KA" type="number" step="0.0001"><span class="tag">m²</span></div>'+
+    '<div class="rowin">K for Device B: <input id="KB" type="number" step="0.0001"><span class="tag">m²</span></div>'+
+    '<button class="btn" onclick="checkStep4()">Check K</button> '+
+    '<button class="linkbtn" onclick="hint(4)">Show me the formula in words</button>'+
+    '<div class="msg" id="msg4"></div>';
+  $('body4').innerHTML=html;
+}
+function checkStep4(){
+  const vA=parseFloat($('KA').value),vB=parseFloat($('KB').value);let ok=true;
+  [['KA',vA,DEV.A.K],['KB',vB,DEV.B.K]].forEach(([id,v,t])=>{$(id).classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.02)){$(id).classList.add('cell-ok');}else{$(id).classList.add('cell-bad');ok=false;}});
+  const msg=$('msg4');
+  if(ok){msg.className='msg ok';msg.innerHTML='Correct. ✓ K depends only on geometry — not on the fluid. Note K<sub>B</sub>&gt;K<sub>A</sub> (Device B has a much smaller gap).';markDone(4);}
+  else{msg.className='msg err';msg.innerHTML='Cube r<sub>i</sub>, multiply by l and 2π; divide by r<sub>dw</sub>·(r<sub>o</sub>−r<sub>i</sub>). Keep everything in metres.';}
+}
+
+/* ---- STEP 5: mu ---- */
+function renderStep5(){
+  const html='<div class="eq">slope = K · μ &nbsp;→&nbsp; μ = '+
+    '<span class="frac"><span>slope</span><span>K</span></span>&nbsp; (Pa·s).&nbsp; 1 Pa·s = 1000 mPa·s</div>'+
+    '<div class="rowin">μ, castor oil (Device A): <input id="muA" type="number" step="0.001"><span class="tag">Pa·s</span></div>'+
+    '<div class="rowin">μ, motor oil (Device B): <input id="muB" type="number" step="0.001"><span class="tag">Pa·s</span></div>'+
+    '<button class="btn" onclick="checkStep5()">Check viscosity</button> '+
+    '<button class="linkbtn" onclick="hint(5)">Show me the formula in words</button>'+
+    '<div class="msg" id="msg5"></div>'+
+    '<div class="note" id="refBox" style="display:none"></div>';
+  $('body5').innerHTML=html;
+}
+function checkStep5(){
+  const rA=regression(dataFor('A').xs,dataFor('A').ys),rB=regression(dataFor('B').xs,dataFor('B').ys);
+  const tA=rA.slope/DEV.A.K, tB=rB.slope/DEV.B.K;
+  const vA=parseFloat($('muA').value),vB=parseFloat($('muB').value);let ok=true;
+  [['muA',vA,tA],['muB',vB,tB]].forEach(([id,v,t])=>{$(id).classList.remove('cell-ok','cell-bad');
+    if(num(v)&&close(v,t,0.05)){$(id).classList.add('cell-ok');}else{$(id).classList.add('cell-bad');ok=false;}});
+  const msg=$('msg5');
+  if(ok){msg.className='msg ok';msg.innerHTML='Viscosities recovered. ✓';markDone(5);
+    const rb=$('refBox');rb.style.display='block';
+    rb.innerHTML='<b>Compare with published values (required in your report):</b><br>'+
+      '• Castor oil — your μ ≈ '+(tA*1000).toFixed(0)+' mPa·s vs published '+DEV.A.refTxt+'<br>'+
+      '• Motor oil — your μ ≈ '+(tB*1000).toFixed(0)+' mPa·s vs published '+DEV.B.refTxt+
+      '<br><span class="tag">Cite a proper source for these published ranges in your appendix.</span>';
+  } else{msg.className='msg err';msg.textContent='μ = (slope from Step 3) ÷ (K from Step 4), for the matching device.';}
+}
+
+/* ---- STEP 6: classify ---- */
+let choice6={A:null,B:null};
+function renderStep6(){
+  const html='<p class="tag">Look at the shape of each W vs ω curve. For a Newtonian fluid, shear stress ∝ '+
+    'rate of strain, so W vs ω is a <b>straight line through the origin</b> (constant slope). '+
+    'Shear-thinning/thickening fluids curve. Classify each fluid:</p>'+
+    classifyBlock('A')+classifyBlock('B')+
+    '<button class="btn" onclick="checkStep6()">Check classification</button>'+
+    '<div class="msg" id="msg6"></div>';
+  $('body6').innerHTML=html;
+}
+function classifyBlock(dk){const d=DEV[dk];
+  return '<div style="margin-top:8px;font-weight:650;color:'+d.colorDark+'">Device '+dk+' — '+d.name+'</div>'+
+    '<div class="choice" id="ch'+dk+'">'+
+    '<button onclick="pick6(\''+dk+'\',\'newt\')">Newtonian</button>'+
+    '<button onclick="pick6(\''+dk+'\',\'thin\')">Non-Newtonian: shear-thinning</button>'+
+    '<button onclick="pick6(\''+dk+'\',\'thick\')">Non-Newtonian: shear-thickening</button></div>';
+}
+function pick6(dk,v){choice6[dk]=v;
+  document.querySelectorAll('#ch'+dk+' button').forEach(b=>b.classList.remove('sel'));
+  const idx={newt:0,thin:1,thick:2}[v];document.querySelectorAll('#ch'+dk+' button')[idx].classList.add('sel');}
+function checkStep6(){const msg=$('msg6');
+  if(choice6.A==='newt'&&choice6.B==='newt'){msg.className='msg ok';
+    msg.innerHTML='Correct. ✓ Both curves are straight lines through the origin, so both oils are <b>Newtonian</b> — constant viscosity independent of shear rate. That is why a single slope (and single μ) describes each fluid.';markDone(6);}
+  else if(!choice6.A||!choice6.B){msg.className='msg err';msg.textContent='Classify both fluids first.';}
+  else{msg.className='msg err';msg.textContent='Re-examine the plots: are they straight (constant slope) or curved? A straight line through the origin means Newtonian.';}
+}
+
+/* ---- hints (formula in words, never the answer) ---- */
+function hint(n){const m=$('msg'+n);m.className='msg info';
+  const H={1:'For each mass: divide the 0.400 m drop by the average time to get the weight\'s speed v_dw, then divide that speed by the inner-cylinder radius r_i to get ω in rad/s.',
+    2:'Convert each mass from grams to kilograms (divide by 1000), then multiply by 9.81 m/s².',
+    4:'Cube the inner-cylinder radius, multiply by the cylinder height and by 2π. Divide that by the drive-wheel radius times the gap (r_o minus r_i). Everything in metres gives K in m².',
+    5:'The trend-line slope equals K times μ. So divide the slope you read in Step 3 by the K you found in Step 4 — matching each device to its own numbers.'};
+  m.textContent=H[n];}
+
+/* ============================================================ SETUP TAB + DOWNLOAD */
+function ckRow(ok,txt){return '<div class="ck'+(ok?' done':'')+'"><span class="dot">'+(ok?'✓':'')+'</span><span>'+txt+'</span></div>';}
+function calCheck(){
+  const volOK=state.cal.vol>=190&&state.cal.vol<=210;
+  const mark=+$('markPos').value, markOK=Math.abs(mark-40)<=0.5;
+  const all=volOK&&markOK&&state.cal.temp;
+  if(all&&!state.cal.done){state.cal.done=true;$('tabRun').disabled=false;
+    flash('Viscometer ready ✓ — open the "Run experiment" tab.','ok');}
+  $('calList').innerHTML='<b>Calibration checklist</b> — as you would before every real run:'+
+   ckRow(volOK,'Fill the annular gap with ~200 mL of test fluid (accept 190–210 mL; currently '+Math.round(state.cal.vol)+' mL). Use the same volume for every test.')+
+   ckRow(markOK,'Set the string mark to 40.0 cm (currently '+mark.toFixed(1)+' cm) — this is the drop length L used in every calculation.')+
+   ckRow(state.cal.temp,'Read the room thermometer — the fluid is at room temperature. '+(state.cal.temp?'Recorded: 22 °C.':''))+
+   (state.cal.done?'<div class="tag" style="color:#1a8f52;font-weight:650;margin-top:6px">Calibrated — the Run experiment tab is unlocked.</div>':'');
+}
+function setMode(mo){
+  if(mo==='run'&&!state.cal.done)return;
+  state.mode=mo;
+  $('tabSetup').setAttribute('aria-pressed',mo==='setup'?'true':'false');
+  $('tabRun').setAttribute('aria-pressed',mo==='run'?'true':'false');
+  $('calCtl').style.display=mo==='setup'?'flex':'none';
+  $('calList').style.display=mo==='setup'?'block':'none';
+  $('runCtl').style.display=mo==='run'?'flex':'none';
+  $('release').disabled=(mo==='setup');
+  $('resetTrial').disabled=(mo==='setup');
+  drawInit();
+}
+$('tabSetup').addEventListener('click',()=>setMode('setup'));
+$('tabRun').addEventListener('click',()=>setMode('run'));
+$('addFluid').addEventListener('click',()=>{state.cal.vol=Math.min(230,state.cal.vol+25);calCheck();drawInit();});
+$('rmFluid').addEventListener('click',()=>{state.cal.vol=Math.max(0,state.cal.vol-25);calCheck();drawInit();});
+$('markPos').addEventListener('input',()=>{calCheck();drawInit();});
+$('tempBtn').addEventListener('click',()=>{state.cal.temp=true;flash('Room temperature read: 22 °C — this is the fluid temperature.','ok');calCheck();});
+const PS_NAME='CE323_Fluids_Report_No1_Problem_Statement.html';
+const PS_DOC="<!DOCTYPE html><html><head><meta charset='utf-8'><title>CE 323 \u00b7 Fluids Report No. 1 \u2014 Problem Statements and Requirements</title><style>body{font-family:Georgia,'Times New Roman',serif;max-width:820px;margin:36px auto;line-height:1.5;color:#111;padding:0 16px}h1{font-size:21px}h2{font-size:17px;margin-top:26px;border-bottom:2px solid #0033A0;color:#0033A0;padding-bottom:3px}h3{font-size:15px}table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #555;padding:4px 10px;font-size:14px}th{background:#eef3fb}.meta{color:#555;font-size:13px}.eq{background:#f5f7fa;border-left:3px solid #0033A0;padding:6px 12px;margin:8px 0;font-style:italic}li{margin:4px 0}</style></head><body><h1>CE 323 \u00b7 Fluids Report No. 1 \u2014 Problem Statements and Requirements</h1><p class='meta'>CE 323 \u2014 Environmental and Fluids Laboratory \u00b7 1 CR Graded \u00b7 Boise State University</p>\n<p class='meta'>Adapted from: Munson, B.R., Okiishi, T.H., Huebsch, W.W., and A.P. Rothmayer, 2012, <i>Fundamentals of Fluid Mechanics</i>, 7th ed., John Wiley &amp; Sons, Inc.</p>\n<h2>Experiment 1 \u2014 Fluid Properties (Stormer viscometer)</h2>\n<h3>Objective</h3>\n<p>Some fluids can be classified as Newtonian, while others are non-Newtonian. The purpose of this experiment is to determine the shearing stress versus rate-of-strain characteristics of various liquids and to classify them as Newtonian or non-Newtonian fluids.</p>\n<h3>Background</h3>\n<p>A rotating-cylinder (<i>Stormer</i>) viscometer uses a falling weight, W, to cause the inner cylinder to rotate with an angular velocity, \u03c9. The dynamic viscosity, \u03bc, of the liquid is related to W and \u03c9 through W = K\u00b7\u03bc\u00b7\u03c9, where K is a constant that depends only on the geometry (including liquid depth) of the viscometer. K is typically determined using a calibration liquid of known viscosity; here it is computed from the device dimensions.</p>\n<h3>Equipment</h3>\n<p>Stormer viscometer (stationary outer cylinder, rotating concentric inner cylinder); stopwatch; drive weights; two liquids \u2014 castor oil (Device A) and motor oil (Device B).</p>\n<table><tr><th>Dimension</th><th>Device A (in)</th><th>Device B (in)</th></tr>\n<tr><td>Drive wheel diameter, d<sub>dw</sub></td><td>2.750</td><td>2.750</td></tr>\n<tr><td>Container diameter, d<sub>o</sub></td><td>5.735</td><td>5.740</td></tr>\n<tr><td>Inner cylinder diameter, d<sub>i</sub></td><td>5.435</td><td>5.575</td></tr>\n<tr><td>Inner cylinder height, l</td><td>6.000</td><td>6.000</td></tr></table>\n<h3>Experimental procedure</h3>\n<ol><li>Ensure the gap between the cylinders is filled with the test fluid (~200 mL; use the same volume for each test). Record room temperature (fluid temperature = room temperature).</li>\n<li>Ensure there is a mark ~40 cm up the string \u2014 this is the drop distance. Measure and record it.</li>\n<li>Select a drive mass m (too light \u2192 very slow to reach steady state; too heavy \u2192 displaces fluid). Observe a few trials to find a starting mass.</li>\n<li>Attach the drive weight, release it, and measure the time t to fall the recorded distance.</li>\n<li>Repeat three (3) times per mass and average. Record values for six (6) different masses.</li>\n<li>Repeat the entire procedure for the second fluid.</li></ol>\n<h3>Calculations</h3>\n<p class='eq'>\u03c9 = v<sub>dw</sub>/r<sub>i</sub> &nbsp;&nbsp;\u00b7&nbsp;&nbsp; \u03bc = W\u00b7r<sub>dw</sub>\u00b7(r<sub>o</sub> \u2212 r<sub>i</sub>) / (2\u03c0\u00b7r<sub>i</sub>\u00b3\u00b7l\u00b7\u03c9) &nbsp;&nbsp;\u00b7&nbsp;&nbsp; W = m\u00b7g</p>\n<p>Plot W (ordinate) versus \u03c9 (abscissa) for each fluid and draw a best-fit line through the data.</p>\n<h3>Results</h3>\n<ul><li>Determine \u03bc and the geometric constant K for Device A (castor oil); compare your \u03bc with a published value from a properly cited source.</li>\n<li>Determine \u03bc and K for Device B (motor oil); compare with a published value. Compare K<sub>A</sub> to K<sub>B</sub> and comment on the differences.</li>\n<li>Classify each fluid as Newtonian or non-Newtonian (shear-thinning or shear-thickening) based on your graphs.</li></ul>\n<h2>Experiment 2 \u2014 Hydrostatics</h2>\n<h3>Objective</h3>\n<p>A quarter-circle block with a vertical rectangular end is attached to a balance beam. Water in the tank puts a hydrostatic pressure force on the block, causing a clockwise moment about the pivot, balanced by the counterclockwise moment of a weight at the end of the beam. Determine the hydrostatic force F<sub>R</sub> acting on the surface as a function of water depth h.</p>\n<h3>Equipment</h3>\n<table><tr><th>Dimension</th><th>Measurement (mm)</th></tr>\n<tr><td>Balance beam length, L</td><td>275</td></tr><tr><td>Inner radius, R\u2081</td><td>100</td></tr>\n<tr><td>Outer radius, R\u2082</td><td>200</td></tr><tr><td>Width, b</td><td>75</td></tr></table>\n<h3>Experimental procedure</h3>\n<ol><li>Level the water tank.</li>\n<li>Adjust the counterweight so the beam is level with no weight on the beam and no water in the tank.</li>\n<li>Hang a known mass m on the beam and adjust the water level h so the beam becomes level again.</li>\n<li>Complete for ten (10) different masses: five (5) with the face fully submerged (fs) and five (5) partially submerged (ps).</li></ol>\n<h3>Calculations</h3>\n<p class='eq'>Theoretical: F<sub>R</sub> = \u03b3\u00b7h<sub>c</sub>\u00b7A. Determine the point of action (y<sub>R</sub> \u2212 y<sub>c</sub> below the centroid). Note the equations differ between h &lt; R\u2082\u2212R\u2081 (ps) and fully submerged (fs). Experimental: F<sub>R</sub> from summing moments about the pivot (the arc sides are centred on the pivot, so their pressure forces have no moment).</p>\n<p>Plot theoretical F<sub>R</sub> (ordinate) versus depth h (abscissa) with a best-fit curve, plus the experimentally determined forces on the same plot.</p>\n<h3>Results</h3>\n<ul><li>Create two plots (fs and ps), each with the experimental and theoretical F<sub>R</sub> versus h.</li>\n<li>Comment on potential sources of error. Are the lines the shape you expected?</li>\n<li>How does the specific weight affect the shape of the plots?</li>\n<li>Why is the F<sub>R</sub> vs h curve different when the end is fully vs partially submerged? What factors lead to the different curves?</li>\n<li>Why do we solve this problem using hydrostatic forces rather than buoyancy forces?</li></ul>\n<h2>Requirements</h2>\n<ul><li>Team member names; section of CE 323; date submission prepared.</li>\n<li>Brief responses and supporting explanations (complete sentences) to the <i>Results</i> section of each experiment.</li>\n<li>Supporting information: compile all calculations in an appendix; clearly show the initials of who performed and who checked the calculations; clearly note any modifications/deviations from the specified test method.</li></ul></body></html>";
+$('dlPS').addEventListener('click',()=>{const b=new Blob([PS_DOC],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=PS_NAME;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+calCheck();setMode('setup');
+
+/* ============================================================ INIT */
+drawInit(); renderTable();
+window.addEventListener('resize',()=>{fitCanvas();drawInit();if(state.unlocked)drawPlot();});
+</script>
+</body>
+</html>

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy Losses in Pipe Fittings — Virtual Lab (CE 323)</title>
+<style>
+  :root{
+    --bsu-blue:#0033A0; --bsu-orange:#D64309; --ink:#1b2330; --muted:#5b6472;
+    --line:#d8dee7; --bg:#f4f6f9; --panel:#ffffff; --good:#1a8f52; --bad:#c02a2a;
+    --good-bg:#e7f6ee; --bad-bg:#fbeaea; --accent:#eef3fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{background:var(--bsu-blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px}
+  header .logo{font-weight:800;letter-spacing:.5px;background:#fff;color:var(--bsu-blue);
+    padding:4px 9px;border-radius:5px;font-size:15px}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  header .sub{font-size:12.5px;opacity:.85;margin-top:2px}
+  .wrap{max-width:1500px;margin:0 auto;padding:16px;display:grid;
+    grid-template-columns:minmax(430px,1.05fr) minmax(430px,1fr);gap:16px}
+  @media(max-width:1050px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 1px 3px rgba(20,30,50,.05);overflow:hidden}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;margin:0;
+    padding:10px 14px;background:var(--accent);border-bottom:1px solid var(--line);color:var(--bsu-blue)}
+  .pad{padding:14px}
+  .left,.right{display:flex;flex-direction:column;gap:16px}
+  canvas{display:block;width:100%;background:#fbfcfe;border-radius:8px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-top:12px}
+  .ctl{display:flex;flex-direction:column;gap:4px}
+  .ctl label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  select,input[type=number]{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:#fff}
+  .btn{background:var(--bsu-orange);color:#fff;border:none;padding:9px 16px;border-radius:6px;
+    font-weight:650;cursor:pointer;font-size:14px}
+  .btn:hover{filter:brightness(1.06)}
+  .btn:disabled{background:#c3c8d0;cursor:not-allowed}
+  .btn.sec{background:#fff;color:var(--bsu-blue);border:1px solid var(--bsu-blue)}
+  .btn.sec:disabled{color:#9aa4b3;border-color:#d8dee7;background:#f6f8fb}
+  .btn.sec[aria-pressed="true"]{background:var(--bsu-blue);color:#fff}
+  :focus-visible{outline:3px solid #7aa7ff;outline-offset:2px;border-radius:4px}
+  .valve{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .valve input{width:150px}
+  table{border-collapse:collapse;width:100%;font-size:11.5px}
+  th,td{border:1px solid var(--line);padding:3px 4px;text-align:center}
+  th{background:var(--accent);color:var(--bsu-blue);font-weight:650}
+  tr.active{outline:2px solid var(--bsu-orange);outline-offset:-2px}
+  .avg{font-weight:700;color:var(--bsu-blue)}
+  .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  .stopwatch{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;color:var(--bsu-blue)}
+  .step{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .step-h{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#fafbfd;
+    border-bottom:1px solid var(--line)}
+  .step-h .num{background:var(--bsu-blue);color:#fff;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:0 0 auto}
+  .step-h .num.done{background:var(--good)}
+  .step-h .ttl{font-weight:650;font-size:13.5px}
+  .step-body{padding:12px}
+  .eq{background:#f7f9fc;border:1px solid var(--line);border-left:3px solid var(--bsu-blue);
+    padding:8px 11px;border-radius:5px;font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    font-size:15px;margin:8px 0;overflow-x:auto}
+  .eq .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}
+  .eq .frac >span:first-child{border-bottom:1.4px solid var(--ink);padding:0 5px}
+  .eq .frac >span:last-child{padding:0 5px}
+  sub{font-size:.72em} sup{font-size:.72em}
+  .rowin{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .rowin input{width:96px}
+  .tag{font-size:12px;color:var(--muted)}
+  .msg{padding:7px 10px;border-radius:6px;font-size:12.5px;margin-top:8px;display:none}
+  .msg.ok{background:var(--good-bg);color:var(--good);display:block}
+  .msg.err{background:var(--bad-bg);color:var(--bad);display:block}
+  .msg.info{background:#eaf1fb;color:var(--bsu-blue);display:block}
+  .linkbtn{background:none;border:none;color:var(--bsu-blue);text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0}
+  .gridN{display:grid;gap:5px;font-size:12.5px;align-items:center}
+  .gridN .hd{font-weight:650;color:var(--bsu-blue);font-size:11.5px}
+  .gridN input{width:100%;padding:5px}
+  .cell-ok{background:var(--good-bg)!important;border-color:var(--good)!important}
+  .cell-bad{background:var(--bad-bg)!important;border-color:var(--bad)!important}
+  .choice{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .choice button{flex:1 1 180px;padding:9px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  .choice button.sel{border-color:var(--bsu-orange);background:#fff5f0;font-weight:650}
+  .foot{font-size:11.5px;color:var(--muted);padding:10px 16px;text-align:center}
+  .note{background:#fff8ec;border:1px solid #f0dca8;border-radius:6px;padding:8px 11px;font-size:12.5px;margin-top:10px}
+  progress{width:120px;height:9px}
+  details.proc{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:12px;background:#fafbfd;font-size:12.5px}
+  details.proc summary{cursor:pointer;font-weight:650;color:var(--bsu-blue)}
+  .plots2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:640px){.plots2{grid-template-columns:1fr}}
+  .chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:650}
+  .statusbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .speed{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .speed input{width:96px}
+  .ck{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0}
+  .ck .dot{width:18px;height:18px;border-radius:50%;background:#c3c8d0;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:0 0 auto}
+  .ck.done .dot{background:var(--good)}
+  .parttabs{display:flex;gap:8px;margin-bottom:10px}
+  /* site: let the two panels shrink on phones */
+  .wrap>*{min-width:0} @media(max-width:1050px){.wrap{grid-template-columns:minmax(0,1fr)}} table{max-width:100%}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">CE&nbsp;323</span>
+  <div>
+    <h1>Energy Losses in Pipe Fittings — Virtual Fluids Laboratory</h1>
+    <div class="sub">Fluids Report No. 3 · minor head loss coefficient K for bends, a contraction, an enlargement and a gate valve</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ================= LEFT: SIMULATION ================= -->
+  <div class="left">
+    <div class="panel">
+      <h2>Apparatus &amp; Measurement</h2>
+      <div class="pad">
+        <div class="parttabs" role="group" aria-label="Experiment part">
+          <button class="btn sec" id="tabS" aria-pressed="true">1 · Setup &amp; calibration</button>
+          <button class="btn sec" id="tabA" aria-pressed="false" disabled title="Complete calibration first">2 · Part A — six fittings</button>
+          <button class="btn sec" id="tabB" aria-pressed="false" disabled>3 · Part B — gate valve</button>
+          <button class="btn sec" id="dlPS" style="margin-left:auto">⬇ Problem statement</button>
+        </div>
+        <canvas id="sim" width="760" height="520" role="img" aria-label="Animated pipe fittings apparatus with twelve manometers and differential pressure gauge"></canvas>
+        <div class="statusbar" role="status" aria-live="polite">
+          <span class="chip" id="qChip" style="background:#eaf1fb;color:#0033A0">Q = 0 mL/s</span>
+          <span class="chip" id="mChip" style="background:#eaf1fb;color:#0033A0">mitre Δh = 0 mm</span>
+          <span class="chip" id="tgtChip" style="background:#eef1f6;color:#5b6472">target</span>
+        </div>
+        <div class="controls">
+          <div class="ctl" id="feetCtl">
+            <label for="feet">Levelling feet</label>
+            <input type="range" id="feet" min="-50" max="50" step="1" value="-24" aria-label="Levelling feet">
+          </div>
+          <div class="ctl" id="absCtl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="absBtn" aria-pressed="false">Open air-bleed screw (ABS)</button>
+          </div>
+          <div class="valve" id="fcvCtl">
+            <label for="valve">Flow control valve (FCV)</label>
+            <input type="range" id="valve" min="0" max="100" step="0.5" value="0" aria-label="Flow control valve percent open">
+            <span id="valveLbl">0%</span>
+          </div>
+          <div class="valve" id="gateCtl" style="display:none">
+            <label for="gate">Gate valve — % closed</label>
+            <input type="range" id="gate" min="0" max="95" step="0.5" value="35" aria-label="Gate valve percent closed">
+            <span id="gateLbl">0%</span>
+          </div>
+          <div class="ctl" id="clampCtl" style="display:none">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="clampBtn" aria-pressed="false">Clamp mitre tappings</button>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn" id="recordBtn" disabled>● Record readings</button>
+          </div>
+          <div class="ctl">
+            <label>&nbsp;</label>
+            <button class="btn sec" id="collectBtn" disabled>⏱ Collect 4 L</button>
+          </div>
+          <div class="speed">
+            <label for="simSpeed">Sim speed</label>
+            <input type="range" id="simSpeed" min="1" max="10" step="1" value="4" aria-label="Simulation speed multiplier">
+            <span id="spdLbl">4×</span>
+          </div>
+        </div>
+        <div id="calList" class="note"></div>
+        <p class="hint" id="runHint"></p>
+        <details class="proc">
+          <summary>Apparatus details &amp; procedure</summary>
+          <p>Pipe internal diameter <b>18.3&nbsp;mm</b> everywhere except the enlargement outlet / contraction inlet
+          (<b>24.0&nbsp;mm</b>). Manometer pairs: enlargement h₁–h₂ · contraction h₃–h₄ · long bend h₅–h₆ ·
+          short bend h₇–h₈ · elbow h₉–h₁₀ · mitre h₁₁–h₁₂. The gate valve (between h₁₀ and h₁₁) is read with the
+          <b>differential pressure gauge</b> instead (1&nbsp;bar = 10.2&nbsp;m of water).</p>
+          <p><b>Part A</b> (gate valve fully open): set the FCV to each of three flows using the mitre Δh target, record
+          all 12 manometers, then time three 4&nbsp;L collections. <b>Part B</b> (mitre tappings clamped, FCV fully open):
+          close the gate valve until the gauge reads 0.3, 0.6, then 0.9&nbsp;bar; record the gauge and time three 4&nbsp;L
+          collections each. Water temperature 22&nbsp;°C.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: DATA + CALCS ================= -->
+  <div class="right">
+    <div class="panel">
+      <h2>Raw Data <span id="dataBadge" style="float:right;text-transform:none;letter-spacing:0"></span></h2>
+      <div class="pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>Collection volume = <b>4.0 L</b> &nbsp;·&nbsp; water <b>22 °C</b> (ν = 0.955 × 10⁻⁶ m²/s)</div>
+          <div>Stopwatch: <span class="stopwatch" id="sw">0.00 s</span></div>
+        </div>
+        <div id="tables"></div>
+        <p class="hint" id="progressHint" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Guided Data Analysis — you calculate, the tool checks</h2>
+      <div class="pad" id="calc">
+        <div class="note" id="calcLock">Complete <b>Part A</b> (3 trials: manometers + 3 timed collections each) and
+          <b>Part B</b> (3 gauge settings: gauge + 3 timed collections each). The analysis unlocks automatically.
+          <div style="margin-top:6px"><progress id="collProg" value="0" max="24"></progress>
+            <span id="collTxt">0 / 24 measurements</span></div></div>
+        <div id="steps" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  Virtual lab for CE&nbsp;323 (Environmental &amp; Fluids Laboratory), Boise State University · Dr.&nbsp;Sondra Miller.
+  Manometer levels are generated from published minor-loss physics (Δh = K·v²/2g plus the velocity-head correction at the
+  area changes), so your worked K values land on realistic fitting coefficients.
+</div>
+
+<script>
+/* ============================================================
+   PHYSICS (SI).  Pipe D = 0.0183 m; enlargement outlet / contraction
+   inlet D = 0.0240 m.  Δh_fitting = K·v²/2g (v in the 18.3 mm pipe).
+   Enlargement/contraction measured Δh needs the velocity-head
+   correction (Eq 5).  Gate valve read by gauge: 1 bar = 10.2 m water.
+   ============================================================ */
+const g=9.81, VOL=0.004, NU=0.955e-6;
+const Dp=0.0183, De=0.0240;
+const Ap=Math.PI*Dp*Dp/4, Ae=Math.PI*De*De/4;
+const AR2=Math.pow(Ap/Ae,2);                    // (Ap/Ae)² = 0.338
+const FIT=[
+  {id:'enl', name:'Enlargement', taps:'h₁–h₂',  K:0.175, col:'#0033A0'},
+  {id:'con', name:'Contraction', taps:'h₃–h₄',  K:0.29,  col:'#D64309'},
+  {id:'lng', name:'Long bend',   taps:'h₅–h₆',  K:0.44,  col:'#1a8f52'},
+  {id:'sht', name:'Short bend',  taps:'h₇–h₈',  K:0.72,  col:'#7048a8'},
+  {id:'elb', name:'Elbow',       taps:'h₉–h₁₀', K:0.94,  col:'#8a591f'},
+  {id:'mit', name:'Mitre',       taps:'h₁₁–h₁₂',K:1.10,  col:'#0e7c86'}
+];
+const KGATE_OPEN=0.2;
+const QMAXA=3.3e-4;                             // Part A FCV wide open
+const TRIALS_A=[{Q:3.0e-4},{Q:2.4e-4},{Q:1.8e-4}];
+TRIALS_A.forEach(t=>{const v=t.Q/Ap;t.mitre=(1.10*v*v/(2*g))*1000;}); // target mitre Δh mm
+const TRIALS_B=[{bar:0.30},{bar:0.60},{bar:0.90}];
+const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function vhOf(Q){const v=Q/Ap;return v*v/(2*g);}          // velocity head, m
+function QofA(valve){return valve/100*QMAXA;}
+function gateBar(s){return 1.2*Math.pow(s/100,2);}         // s = % closed
+function QofB(s){return Math.max(0.4e-4,(4.565-2.732*s/100)*1e-4);}
+function manoLevels(Q,gateK){                              // 12 levels (m)
+  const vh=vhOf(Q);
+  const fr=0.004*Math.pow(Q/3.0e-4,2);                     // pipe-run friction per segment
+  // flow order (as on the real frame): long bend → enlargement →
+  // contraction → short bend → elbow → gate valve → mitre
+  const h=new Array(12);
+  h[11]=0.060;                                             // h12 — mitre outlet
+  h[10]=h[11]+1.10*vh;                                     // h11
+  h[9]=h[10]+fr+gateK*vh;                                  // h10 (gate valve between h10 & h11)
+  h[8]=h[9]+0.94*vh;                                       // h9 — elbow
+  h[7]=h[8]+fr;                                            // h8
+  h[6]=h[7]+0.72*vh;                                       // h7 — short bend
+  h[3]=h[6]+fr;                                            // h4
+  h[2]=h[3]+(0.29+(1-AR2))*vh;                             // h3 — contraction (measured drop)
+  h[1]=h[2]+fr;                                            // h2
+  h[0]=h[1]+(0.175-(1-AR2))*vh;                            // h1 — enlargement (h1 < h2)
+  h[5]=h[0]+fr;                                            // h6
+  h[4]=h[5]+0.44*vh;                                       // h5 — long bend
+  return h;
+}
+
+/* ============================================================ STATE */
+const state={
+  part:'S', tA:0, tB:0, collecting:false, locked:false,
+  cal:{feetOK:false,gateOK:false,air:1,absOpen:false,done:false}, clamped:false,
+  A:TRIALS_A.map(()=>({heads:null,times:[]})),             // heads: 12 readings (mm)
+  B:TRIALS_B.map(()=>({bar:null,times:[]})),
+  kOkA:[false,false,false,false,false,false],              // step-4 K validated (trial 1 per fitting)
+  fillA:{dh:false,corr:false,K:false},                     // Excel fill-down done flags
+  bOk:false,                                               // step-6 complete
+  unlocked:false
+};
+
+/* ============================================================ DOM */
+const $=id=>document.getElementById(id);
+const cvs=$('sim'), ctx=cvs.getContext('2d');
+let DPR=Math.min(window.devicePixelRatio||1,2);
+function fitCanvas(){DPR=Math.min(window.devicePixelRatio||1,2);
+  cvs.width=760*DPR;cvs.height=520*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+fitCanvas();
+
+/* ============================================================ DATA TABLES */
+function avg(a){return a.length?a.reduce((s,x)=>s+x,0)/a.length:null;}
+function trialDoneA(t){return t.heads&&t.times.length>=3;}
+function trialDoneB(t){return t.bar!=null&&t.times.length>=3;}
+function partAdone(){return state.A.every(trialDoneA);}
+function partBdone(){return state.B.every(trialDoneB);}
+function measCount(){let n=0;
+  state.A.forEach(t=>{if(t.heads)n++;n+=t.times.length;});
+  state.B.forEach(t=>{if(t.bar!=null)n++;n+=t.times.length;});return n;}
+function renderTables(){
+  let html='<div style="font-weight:650;color:var(--bsu-blue);margin-bottom:4px">Part A — fittings (gate valve open)</div>';
+  html+='<table aria-label="Part A manometer readings and times"><tr><th>trial</th>';
+  for(let j=1;j<=12;j++)html+='<th>h'+j+'</th>';
+  html+='<th>t₁</th><th>t₂</th><th>t₃</th><th>t̄ (s)</th></tr>';
+  state.A.forEach((t,i)=>{
+    const active=(state.part==='A'&&i===state.tA&&!state.unlocked)?' class="active"':'';
+    html+='<tr'+active+'><td>'+(i+1)+'</td>';
+    for(let j=0;j<12;j++)html+='<td>'+(t.heads?t.heads[j].toFixed(0):'—')+'</td>';
+    for(let j=0;j<3;j++)html+='<td>'+(t.times[j]!=null?t.times[j].toFixed(1):'—')+'</td>';
+    html+='<td class="avg">'+(t.times.length===3?avg(t.times).toFixed(1):'—')+'</td></tr>';
+  });
+  html+='</table><div style="font-size:11px;color:var(--muted);margin:2px 0 10px">manometer readings in mm of water</div>';
+  html+='<div style="font-weight:650;color:var(--bsu-blue);margin-bottom:4px">Part B — gate valve (mitre tappings clamped)</div>';
+  html+='<table aria-label="Part B gauge readings and times"><tr><th>target</th><th>gauge Δp (bar)</th><th>t₁</th><th>t₂</th><th>t₃</th><th>t̄ (s)</th></tr>';
+  state.B.forEach((t,i)=>{
+    const active=(state.part==='B'&&i===state.tB&&!state.unlocked)?' class="active"':'';
+    html+='<tr'+active+'><td>'+TRIALS_B[i].bar.toFixed(1)+' bar</td><td>'+(t.bar!=null?t.bar.toFixed(3):'—')+'</td>';
+    for(let j=0;j<3;j++)html+='<td>'+(t.times[j]!=null?t.times[j].toFixed(1):'—')+'</td>';
+    html+='<td class="avg">'+(t.times.length===3?avg(t.times).toFixed(1):'—')+'</td></tr>';
+  });
+  html+='</table>';
+  $('tables').innerHTML=html;
+  $('collProg').value=measCount();$('collTxt').textContent=measCount()+' / 24 measurements';
+  $('dataBadge').innerHTML='<span class="chip" style="background:#eaf1fb;color:var(--bsu-blue)">Part '+state.part+'</span>';
+  $('tabA').disabled=!state.cal.done;
+  $('tabB').disabled=!(partAdone()&&state.cal.done);
+  if(partAdone()&&partBdone()&&!state.unlocked)unlockCalc();
+}
+let flashTimer=null;
+function flash(msg,type){
+  const el=$('progressHint');
+  el.innerHTML='<span style="color:'+(type==='ok'?'#1a8f52':type==='info'?'#0033A0':'#c02a2a')+'">'+msg+'</span>';
+  clearTimeout(flashTimer);flashTimer=setTimeout(updateHint,2800);
+}
+function updateHint(){
+  if(state.part==='S'&&!state.unlocked){
+    $('runHint').innerHTML='<b>Setup:</b> level the frame on the bench, open the <b>gate valve fully</b> (0% closed), then purge — ABS open with the FCV at 5–30% until the air clears, then close the ABS.';
+    $('progressHint').innerHTML='Calibration in progress.';return;
+  }
+  if(state.unlocked){$('runHint').innerHTML='All measurements complete ✓ — work through the analysis on the right.';
+    $('progressHint').innerHTML='✓ 24 / 24 measurements.';return;}
+  let s='';
+  if(state.part==='A'){
+    const t=state.A[state.tA];
+    if(!t){s='Part A complete ✓ — switch to Part B.';}
+    else if(!t.heads){const tgt=TRIALS_A[state.tA].mitre;
+      s='<b>Part A, trial '+(state.tA+1)+':</b> open the FCV until the mitre pair reads h₁₁−h₁₂ ≈ <b>'+tgt.toFixed(0)+
+        ' mm</b>, then record all 12 manometers.';}
+    else s='<b>Part A, trial '+(state.tA+1)+':</b> readings recorded ✓ — collect 4 L three times ('+t.times.length+
+        '/3). The FCV is locked so the flow stays steady.';
+    if(partAdone())s='Part A complete ✓ — open <b>Part B</b> (tab above the apparatus) for the gate valve.';
+  } else {
+    const t=state.B[state.tB];
+    if(!t){s='Part B complete ✓.';}
+    else if(t.bar==null){const tgt=TRIALS_B[state.tB].bar;
+      s='<b>Part B, setting '+(state.tB+1)+':</b> '+(state.clamped?'':'<b>clamp the mitre tappings</b> (button above), then ')+
+        'close the gate valve until the differential gauge reads <b>'+tgt.toFixed(1)+' bar</b>, then record the gauge.';}
+    else s='<b>Part B, setting '+(state.tB+1)+':</b> gauge recorded ✓ — collect 4 L three times ('+t.times.length+
+        '/3). The gate valve is locked.';
+  }
+  $('runHint').innerHTML=s;
+  $('progressHint').innerHTML=measCount()+' / 24 measurements logged.';
+}
+
+/* ============================================================ DRAWING
+   Modeled on the Armfield F1-22 "Losses in Bends" apparatus: a dark
+   pipe frame around the central manometer panel, differential gauge
+   on its own VALVE panel, red gate-valve and FCV handwheels, and the
+   collection tank on the hydraulic bench below. */
+function tracePipe(p){
+  p.beginPath();p.moveTo(36,470);
+  p.arcTo(100,470,100,272,26);      // long bend — large radius
+  p.arcTo(100,272,640,272,14);      // short bend — small radius
+  p.arcTo(640,272,640,430,9);       // elbow — tight radius
+  p.arcTo(640,430,706,430,2);       // mitre — sharp corner
+  p.lineTo(706,430);
+}
+const PATH=[[36,470],[100,470],[100,272],[640,272],[640,430],[706,430]];
+const SEGLEN=[];let PLEN=0;
+for(let i=0;i<PATH.length-1;i++){const l=Math.hypot(PATH[i+1][0]-PATH[i][0],PATH[i+1][1]-PATH[i][1]);
+  SEGLEN.push(l);PLEN+=l;}
+function pointAt(d){let i=0;while(i<SEGLEN.length-1&&d>SEGLEN[i]){d-=SEGLEN[i];i++;}
+  const f=Math.min(1,d/SEGLEN[i]);
+  return [PATH[i][0]+(PATH[i+1][0]-PATH[i][0])*f,PATH[i][1]+(PATH[i+1][1]-PATH[i][1])*f];}
+let parts=[];for(let i=0;i<60;i++)parts.push({d:Math.random()*PLEN});
+let dispLevels=new Array(12).fill(0), dispBar=0, swT=0, collVol=0, collTarget=0, airJit=0;
+const BANK={base:196,scale:0.30,top:66};
+const TUBEX=[0,1,2,3,4,5,6,7,8,9,10,11].map(j=>96+j*34);
+
+function currentQ(){
+  return state.part==='B'?QofB(+$('gate').value):QofA(+$('valve').value);
+}
+function setTgtDone(){
+  $('tgtChip').textContent=state.unlocked?'all measurements ✓':'collect 4 L × 3';
+  $('tgtChip').style.background=state.unlocked?'#e7f6ee':'#eef1f6';
+  $('tgtChip').style.color=state.unlocked?'#1a8f52':'#5b6472';
+}
+function drawScene(dt){
+  ctx.clearRect(0,0,760,520);
+  const partB=state.part==='B';
+  const Q=currentQ();
+  const lv=manoLevels(Q,KGATE_OPEN);
+  const airF=state.cal.air;
+  if(!REDUCED)airJit+=dt*1.6;
+  for(let i=0;i<12;i++){
+    const tgtL=lv[i]*1000*(1-0.35*airF)+airF*24*Math.sin(i*2.1+airJit);
+    dispLevels[i]+=(tgtL-dispLevels[i])*(REDUCED?1:Math.min(1,dt*4));
+  }
+  const barNow=partB?gateBar(+$('gate').value):0.02;
+  dispBar+=(barNow-dispBar)*(REDUCED?1:Math.min(1,dt*4));
+
+  // ================= manometer panel =================
+  ctx.fillStyle='#fff';ctx.strokeStyle='#c9d2dd';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(60,40,436,196,5);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#37414f';ctx.fillRect(60,40,436,16);
+  ctx.fillStyle='#fff';ctx.font='600 8px system-ui';ctx.textAlign='center';
+  const GNAMES=['ENLARGE','CONTRACT','LONG','SHORT','ELBOW','MITRE'];
+  for(let g=0;g<6;g++)ctx.fillText(GNAMES[g],(TUBEX[2*g]+TUBEX[2*g+1])/2,51);
+  ctx.font='7.5px system-ui';
+  for(let mm=0;mm<=400;mm+=100){
+    const y=BANK.base-mm*BANK.scale;
+    ctx.strokeStyle='#eef1f6';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(92,y);ctx.lineTo(486,y);ctx.stroke();
+    ctx.fillStyle='#aab2c0';ctx.textAlign='right';ctx.fillText(mm,88,y+2.5);
+  }
+  for(let j=0;j<12;j++){
+    const x=TUBEX[j], clamped=state.clamped&&(j>=10);
+    ctx.strokeStyle='#d6dde6';ctx.lineWidth=7;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x,BANK.top);ctx.lineTo(x,BANK.base);ctx.stroke();
+    ctx.strokeStyle='#f6f8fb';ctx.lineWidth=4.5;
+    ctx.beginPath();ctx.moveTo(x,BANK.top);ctx.lineTo(x,BANK.base);ctx.stroke();
+    if(!partB){
+      const colH=Math.max(0,Math.min(BANK.base-BANK.top,dispLevels[j]*BANK.scale));
+      ctx.strokeStyle='#5b9bd5';ctx.lineWidth=4.5;
+      ctx.beginPath();ctx.moveTo(x,BANK.base);ctx.lineTo(x,BANK.base-colH);ctx.stroke();
+      if(airF>0.02&&colH>16){
+        ctx.strokeStyle='#fff';ctx.lineWidth=4.5;
+        for(let b2=0;b2<3;b2++){
+          const seg=((j*31+b2*47+airJit*20)%(colH-8))+4;
+          ctx.beginPath();ctx.moveTo(x,BANK.base-seg);ctx.lineTo(x,BANK.base-seg-3-5*airF);ctx.stroke();
+        }
+      }
+    }
+    if(clamped){ctx.strokeStyle='#c02a2a';ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(x-6,BANK.base-62);ctx.lineTo(x+6,BANK.base-50);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x-6,BANK.base-50);ctx.lineTo(x+6,BANK.base-62);ctx.stroke();}
+  }
+  ctx.fillStyle='#37414f';ctx.fillRect(60,BANK.base,436,9);
+  ctx.textAlign='center';
+  for(let j=0;j<12;j++){
+    ctx.fillStyle='#33405a';ctx.font='600 8.5px system-ui';
+    ctx.fillText('h'+(j+1),TUBEX[j],BANK.base+20);
+    if(!partB){ctx.fillStyle='#0033A0';ctx.font='8.5px ui-monospace,monospace';
+      ctx.fillText(dispLevels[j].toFixed(0),TUBEX[j],BANK.base+32);}
+  }
+  if(partB){ctx.fillStyle='#7a8598';ctx.font='10px system-ui';
+    ctx.fillText('manometer bank isolated — read the differential gauge',278,BANK.base+32);}
+
+  // ================= differential gauge panel =================
+  ctx.fillStyle='#2a3140';ctx.beginPath();ctx.roundRect(524,40,216,172,5);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='600 9px system-ui';ctx.textAlign='center';
+  ctx.fillText('VALVE',632,56);
+  const gx=632,gy=128,gr=52;
+  ctx.fillStyle='#fff';ctx.strokeStyle='#8790a0';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.fill();ctx.stroke();
+  ctx.lineWidth=1;
+  for(let b=0;b<=1.21;b+=0.3){
+    const a=Math.PI*0.75+b/1.2*Math.PI*1.5;
+    ctx.strokeStyle='#c9d2dd';
+    ctx.beginPath();ctx.moveTo(gx+Math.cos(a)*(gr-9),gy+Math.sin(a)*(gr-9));
+    ctx.lineTo(gx+Math.cos(a)*(gr-3),gy+Math.sin(a)*(gr-3));ctx.stroke();
+    ctx.fillStyle='#5c6373';ctx.font='8px system-ui';
+    ctx.fillText(b.toFixed(1),gx+Math.cos(a)*(gr-17),gy+Math.sin(a)*(gr-17)+2.5);
+  }
+  const na=Math.PI*0.75+Math.min(dispBar,1.2)/1.2*Math.PI*1.5;
+  ctx.strokeStyle='#c02a2a';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+Math.cos(na)*(gr-13),gy+Math.sin(na)*(gr-13));ctx.stroke();
+  ctx.fillStyle='#33405a';ctx.beginPath();ctx.arc(gx,gy,3,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='700 12px ui-monospace,monospace';
+  ctx.fillText(dispBar.toFixed(2)+' bar',gx,gy+gr+22);
+  // gauge tappings across the gate valve
+  ctx.strokeStyle='#c9d2dd';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(640,326);ctx.quadraticCurveTo(600,270,614,214);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(640,366);ctx.quadraticCurveTo(668,280,650,214);ctx.stroke();
+
+  // ================= pipe circuit =================
+  ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.strokeStyle='#4a5261';ctx.lineWidth=12;tracePipe(ctx);ctx.stroke();
+  ctx.strokeStyle='#cfe3f2';ctx.lineWidth=6;tracePipe(ctx);ctx.stroke();
+  // 24 mm run between the enlargement and the contraction
+  ctx.strokeStyle='#4a5261';ctx.lineWidth=17;
+  ctx.beginPath();ctx.moveTo(100,414);ctx.lineTo(100,338);ctx.stroke();
+  ctx.strokeStyle='#cfe3f2';ctx.lineWidth=10;
+  ctx.beginPath();ctx.moveTo(100,414);ctx.lineTo(100,338);ctx.stroke();
+  // gate valve body + red handwheel
+  ctx.fillStyle='#5c6373';ctx.fillRect(632,336,16,20);
+  ctx.strokeStyle='#c02a2a';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(660,346,10,0,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(650,346);ctx.lineTo(646,346);ctx.stroke();
+  // FCV (red) on the outlet
+  ctx.fillStyle='#c02a2a';
+  ctx.beginPath();ctx.moveTo(668,423);ctx.lineTo(684,437);ctx.lineTo(668,437);ctx.lineTo(684,423);ctx.closePath();ctx.fill();
+  // fitting markers + labels
+  ctx.font='9.5px system-ui';
+  const LBL=[
+    ['long bend (h₅–h₆)',36,494,'left',88,470,FIT[2].col],
+    ['enlargement (h₁–h₂)',118,424,'left',100,419,FIT[0].col],
+    ['contraction (h₃–h₄)',118,336,'left',100,333,FIT[1].col],
+    ['short bend (h₇–h₈)',118,258,'left',100,272,FIT[3].col],
+    ['elbow (h₉–h₁₀)',622,258,'right',640,272,FIT[4].col],
+    ['gate valve (h₁₀–h₁₁)',622,350,'right',0,0,null],
+    ['mitre (h₁₁–h₁₂)',622,454,'right',640,430,FIT[5].col],
+    ['FCV',676,414,'center',0,0,null]
+  ];
+  LBL.forEach(l=>{
+    if(l[6]){ctx.fillStyle=l[6];ctx.beginPath();ctx.arc(l[4],l[5],4.5,0,7);ctx.fill();}
+    ctx.fillStyle='#5c6373';ctx.textAlign=l[3];ctx.fillText(l[0],l[1],l[2]);
+  });
+  ctx.fillStyle='#33405a';ctx.font='11px system-ui';ctx.textAlign='left';
+  ctx.fillText('flow →',36,456);
+
+  // particles
+  if(Q>0.2e-4&&!REDUCED){
+    const sp=Q/Ap*95;
+    parts.forEach(p=>{p.d+=sp*dt;if(p.d>PLEN)p.d-=PLEN;
+      const [x,y]=pointAt(p.d);
+      ctx.fillStyle='rgba(11,73,148,.5)';
+      ctx.beginPath();ctx.arc(x,y,2,0,7);ctx.fill();});
+  }
+
+  // ================= bench + collection tank =================
+  ctx.fillStyle='rgba(232,134,46,.85)';ctx.fillRect(0,506,760,14);
+  const bubF=state.cal.feetOK?0:Math.max(-16,Math.min(16,(+($('feet')?$('feet').value:0))*0.4));
+  ctx.fillStyle='#f2f6fa';ctx.strokeStyle='#9aa4b3';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.roundRect(130,508,56,10,5);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='#c9d2dd';ctx.beginPath();ctx.moveTo(154,508);ctx.lineTo(154,518);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(162,508);ctx.lineTo(162,518);ctx.stroke();
+  ctx.fillStyle=Math.abs(bubF)<=1.5?'#1a8f52':'#D64309';
+  ctx.beginPath();ctx.arc(158+bubF,513,4,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='9px system-ui';ctx.textAlign='left';
+  ctx.fillText('spirit level',192,517);
+  const tx=664,ty=452,tw=84,th=54;
+  ctx.strokeStyle='#b9c0cc';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(706,430);ctx.lineTo(706,ty-2);ctx.stroke();
+  ctx.strokeStyle='#9aa4b3';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx,ty+th);ctx.lineTo(tx+tw,ty+th);ctx.lineTo(tx+tw,ty);ctx.stroke();
+  ctx.fillStyle='#7a8598';ctx.font='9.5px system-ui';ctx.textAlign='center';
+  ctx.fillText('4 L',tx+tw/2,ty+th-6);
+  if(state.collecting){
+    const frac=Math.min(1,collVol/VOL);
+    ctx.fillStyle='rgba(91,155,213,.8)';
+    ctx.fillRect(tx+2,ty+th-2-(th-4)*frac,tw-4,(th-4)*frac);
+    ctx.fillStyle='#0033A0';ctx.font='700 11px ui-monospace,monospace';
+    ctx.fillText((collVol*1000).toFixed(2)+' L',tx+tw/2,ty-8);
+  }
+}
+
+/* ============================================================ SIM LOOP */
+let lastT=performance.now();
+function tick(now){
+  const dt=Math.min((now-lastT)/1000,0.05);lastT=now;
+  const sp=REDUCED?8:+$('simSpeed').value;
+  $('spdLbl').textContent=$('simSpeed').value+'×';
+  $('valveLbl').textContent=(+$('valve').value).toFixed(0)+'%';
+  $('gateLbl').textContent=(+$('gate').value).toFixed(0)+'%';
+  const Qc=currentQ();
+  $('qChip').textContent='Q = '+(Qc*1e6).toFixed(0)+' mL/s · v = '+(Qc/Ap).toFixed(2)+' m/s';
+  if(state.part==='A'){
+    const lvC=manoLevels(QofA(+$('valve').value),KGATE_OPEN);
+    const mdh=(lvC[10]-lvC[11])*1000;
+    $('mChip').textContent='mitre Δh = '+mdh.toFixed(0)+' mm';
+    if(!state.unlocked&&state.A[state.tA]&&!state.A[state.tA].heads){
+      const tgtC=TRIALS_A[state.tA].mitre, inR=Math.abs(mdh-tgtC)<=3;
+      $('tgtChip').textContent='target ≈ '+tgtC.toFixed(0)+' mm'+(inR?' ✓ record':'');
+      $('tgtChip').style.background=inR?'#e7f6ee':'#eef1f6';
+      $('tgtChip').style.color=inR?'#1a8f52':'#5b6472';
+    } else setTgtDone();
+  } else {
+    const barC=gateBar(+$('gate').value);
+    $('mChip').textContent='gauge = '+barC.toFixed(2)+' bar';
+    if(!state.unlocked&&state.B[state.tB]&&state.B[state.tB].bar==null){
+      const tgtC=TRIALS_B[state.tB].bar, inR=Math.abs(barC-tgtC)<=0.02;
+      $('tgtChip').textContent='target '+tgtC.toFixed(1)+' bar'+(inR?' ✓ record':'');
+      $('tgtChip').style.background=inR?'#e7f6ee':'#eef1f6';
+      $('tgtChip').style.color=inR?'#1a8f52':'#5b6472';
+    } else setTgtDone();
+  }
+  if(state.collecting){
+    collVol+=VOL/collTarget*dt*sp;
+    swT+=dt*sp;
+    $('sw').textContent=swT.toFixed(2)+' s';
+    if(collVol>=VOL)finishCollection();
+  }
+  if(!state.unlocked){
+    if(state.part==='S'){
+      state.cal.feetOK=Math.abs(+$('feet').value)<=3;
+      state.cal.gateOK=+$('gate').value<=1;
+      const fv=+$('valve').value;
+      if(state.cal.absOpen&&fv>=5&&fv<=30&&state.cal.air>0)state.cal.air=Math.max(0,state.cal.air-dt*0.25*sp);
+      if(state.cal.feetOK&&state.cal.gateOK&&state.cal.air<=0&&!state.cal.absOpen&&!state.cal.done){
+        state.cal.done=true;$('tabA').disabled=false;
+        flash('Apparatus calibrated ✓ — open Part A.','ok');}
+      renderCalList();
+      $('recordBtn').disabled=true;$('collectBtn').disabled=true;
+    } else if(state.part==='A'){
+      const t=state.A[state.tA];
+      let can=false;
+      if(t&&!t.heads&&!state.collecting){
+        const lv=manoLevels(QofA(+$('valve').value),KGATE_OPEN);
+        can=Math.abs((lv[10]-lv[11])*1000-TRIALS_A[state.tA].mitre)<=3;
+      }
+      $('recordBtn').disabled=!can;
+      $('collectBtn').disabled=!(t&&t.heads&&t.times.length<3&&!state.collecting);
+    } else {
+      const t=state.B[state.tB];
+      let can=false;
+      if(t&&t.bar==null&&!state.collecting&&state.clamped)
+        can=Math.abs(gateBar(+$('gate').value)-TRIALS_B[state.tB].bar)<=0.02;
+      $('recordBtn').disabled=!can;
+      $('collectBtn').disabled=!(t&&t.bar!=null&&t.times.length<3&&!state.collecting);
+    }
+  } else {$('recordBtn').disabled=true;$('collectBtn').disabled=true;}
+  $('valve').disabled=state.locked||state.collecting||state.part==='B';
+  $('gate').disabled=state.locked||state.collecting||state.part==='A';
+  drawScene(dt);
+  requestAnimationFrame(tick);
+}
+function startCollection(){
+  const Q=currentQ();
+  collTarget=VOL/Q*(1+(Math.random()*2-1)*0.015);
+  collVol=0;swT=0;state.collecting=true;
+}
+function finishCollection(){
+  state.collecting=false;$('sw').textContent='0.00 s';
+  if(state.part==='A'){
+    const t=state.A[state.tA];t.times.push(collTarget);
+    flash('Collected 4 L in '+collTarget.toFixed(1)+' s ✓ ('+t.times.length+'/3)','ok');
+    if(t.times.length>=3){state.locked=false;
+      if(state.tA<2){state.tA++;flash('Trial complete ✓ — set the FCV for the next target.','ok');}}
+  } else {
+    const t=state.B[state.tB];t.times.push(collTarget);
+    flash('Collected 4 L in '+collTarget.toFixed(1)+' s ✓ ('+t.times.length+'/3)','ok');
+    if(t.times.length>=3){state.locked=false;
+      if(state.tB<2){state.tB++;flash('Setting complete ✓ — close the gate further for the next target.','ok');}}
+  }
+  renderTables();updateHint();
+}
+
+/* ============================================================ EVENTS */
+$('recordBtn').addEventListener('click',()=>{
+  if(state.part==='A'){
+    const lv=manoLevels(QofA(+$('valve').value),KGATE_OPEN);
+    state.A[state.tA].heads=lv.map(x=>x*1000+(Math.random()*2-1)*0.8);
+    state.locked=true;
+    flash('12 manometers recorded ✓ — FCV locked; time three 4 L collections.','ok');
+  } else {
+    state.B[state.tB].bar=gateBar(+$('gate').value)+(Math.random()*2-1)*0.004;
+    state.locked=true;
+    flash('Gauge recorded ✓ — gate locked; time three 4 L collections.','ok');
+  }
+  renderTables();updateHint();
+});
+$('collectBtn').addEventListener('click',startCollection);
+function setPart(p){
+  if(state.collecting||state.locked)return;
+  if(p==='A'&&!state.cal.done)return;
+  if(p==='B'&&!(partAdone()&&state.cal.done))return;
+  state.part=p;
+  $('tabS').setAttribute('aria-pressed',p==='S'?'true':'false');
+  $('tabA').setAttribute('aria-pressed',p==='A'?'true':'false');
+  $('tabB').setAttribute('aria-pressed',p==='B'?'true':'false');
+  $('feetCtl').style.display=p==='S'?'flex':'none';
+  $('absCtl').style.display=p==='S'?'flex':'none';
+  $('calList').style.display=p==='S'?'block':'none';
+  $('fcvCtl').style.display=(p==='S'||p==='A')?'flex':'none';
+  $('gateCtl').style.display=(p==='S'||p==='B')?'flex':'none';
+  $('clampCtl').style.display=p==='B'?'flex':'none';
+  if(p==='B'&&+$('valve').value<100)$('valve').value=100;   // FCV fully open in Part B
+  renderTables();updateHint();
+}
+$('tabS').addEventListener('click',()=>setPart('S'));
+$('tabA').addEventListener('click',()=>setPart('A'));
+$('tabB').addEventListener('click',()=>setPart('B'));
+$('valve').addEventListener('input',updateHint);
+$('gate').addEventListener('input',updateHint);
+
+/* ============================================================ SETUP + CLAMPS + DOWNLOAD */
+function ckRow(ok,txt){return '<div class="ck'+(ok?' done':'')+'"><span class="dot">'+(ok?'✓':'')+'</span><span>'+txt+'</span></div>';}
+let calCache='';
+function renderCalList(){
+  const c=state.cal;
+  const html='<b>Calibration checklist</b> — the real pre-run procedure:'+
+   ckRow(c.feetOK,'Level the apparatus on the bench: adjust the feet until the spirit-level bubble is centred.')+
+   ckRow(c.gateOK,'Confirm the gate valve is fully open (0% closed) — Part A measures the fittings, not the valve.')+
+   ckRow(c.air<=0,'Purge the manometers: open the ABS with the FCV at 5–30% and let the trapped air clear ('+Math.round((1-c.air)*100)+'% purged).')+
+   ckRow(c.air<=0&&!c.absOpen,'Close the ABS once no air remains — flow through the ABS should now be zero.')+
+   (c.done?'<div class="tag" style="color:var(--good);font-weight:650;margin-top:6px">Calibrated — Part A is unlocked.</div>':'');
+  if(html!==calCache){calCache=html;$('calList').innerHTML=html;}
+}
+$('absBtn').addEventListener('click',()=>{state.cal.absOpen=!state.cal.absOpen;
+  $('absBtn').setAttribute('aria-pressed',state.cal.absOpen?'true':'false');
+  $('absBtn').textContent=state.cal.absOpen?'Close air-bleed screw (ABS)':'Open air-bleed screw (ABS)';});
+$('clampBtn').addEventListener('click',()=>{state.clamped=!state.clamped;
+  $('clampBtn').setAttribute('aria-pressed',state.clamped?'true':'false');
+  $('clampBtn').textContent=state.clamped?'Unclamp mitre tappings':'Clamp mitre tappings';
+  flash(state.clamped?'Mitre tappings clamped ✓ — no air can be drawn into the system.':'Mitre tappings released.','info');
+  updateHint();});
+const PS_NAME='CE323_Fluids_Report_No3_Problem_Statement.html';
+const PS_DOC="<!DOCTYPE html><html><head><meta charset='utf-8'><title>CE 323 \u00b7 Fluids Report No. 3 \u2014 Problem Statements and Requirements</title><style>body{font-family:Georgia,'Times New Roman',serif;max-width:820px;margin:36px auto;line-height:1.5;color:#111;padding:0 16px}h1{font-size:21px}h2{font-size:17px;margin-top:26px;border-bottom:2px solid #0033A0;color:#0033A0;padding-bottom:3px}h3{font-size:15px}table{border-collapse:collapse;margin:10px 0}td,th{border:1px solid #555;padding:4px 10px;font-size:14px}th{background:#eef3fb}.meta{color:#555;font-size:13px}.eq{background:#f5f7fa;border-left:3px solid #0033A0;padding:6px 12px;margin:8px 0;font-style:italic}li{margin:4px 0}</style></head><body><h1>CE 323 \u00b7 Fluids Report No. 3 \u2014 Problem Statements and Requirements</h1><p class='meta'>CE 323 \u2014 Environmental and Fluids Laboratory \u00b7 1 CR Graded \u00b7 Boise State University</p>\n<p class='meta'>Adapted from: Habib Ahmari and Shah Md Imran Kabir, <i>Applied Fluid Mechanics Lab Manual</i>, 2019, Mavs Open Press.</p>\n<h2>Energy Losses in Pipe Fittings</h2>\n<h3>Objective</h3>\n<p>Determine the minor head loss coefficient, K, for a range of pipe fittings: several bends, a contraction, an enlargement, and a gate valve.</p>\n<h3>Background</h3>\n<p>Minor head losses arise from fittings, changes in flow direction, and changes in flow area \u2014 in systems with many fittings they can exceed the friction (major) losses. If the diameter through a fitting is constant, the minor loss is the measured static head difference \u0394h = H\u2081 \u2212 H\u2082. The loss is expressed as a fraction K of the velocity head:</p>\n<p class='eq'>\u0394h = K\u00b7v\u00b2/2g &nbsp;\u2192&nbsp; K = \u0394h / (v\u00b2/2g) &nbsp;\u00b7&nbsp; enlargement/contraction correction: H\u2081 \u2212 H\u2082 + (v\u00b2/2g)<sub>in</sub> \u2212 (v\u00b2/2g)<sub>out</sub> = \u0394h &nbsp;\u00b7&nbsp; Re = v\u00b7D/\u03bd</p>\n<p>The gate valve pressure difference is measured with the differential pressure gauge (1 bar = 10.2 m of water).</p>\n<h3>Equipment</h3>\n<p>Hydraulics bench; energy-losses apparatus (six fittings in series, twelve manometers, differential pressure gauge, air-bleed valve, clamps); stopwatch; thermometer. Manometer pairs: enlargement h\u2081\u2013h\u2082 \u00b7 contraction h\u2083\u2013h\u2084 \u00b7 long bend h\u2085\u2013h\u2086 \u00b7 short bend h\u2087\u2013h\u2088 \u00b7 elbow h\u2089\u2013h\u2081\u2080 \u00b7 gate valve h\u2081\u2080\u2013h\u2081\u2081 (gauge) \u00b7 mitre h\u2081\u2081\u2013h\u2081\u2082. Internal diameter 0.0183 m everywhere except the enlargement outlet / contraction inlet (0.0240 m).</p>\n<h3>Part A \u2014 all fittings except the gate valve</h3>\n<ol><li>Bench valve shut; gate valve fully open. Connect water and level the apparatus.</li>\n<li>Pump on; slowly increase flow. Purge: ABS open at low flow, close FCV until water flows in the manometers, tap tubes to free air, then open FCV until ABS flow stops.</li>\n<li>Set a sizeable manometer head difference; record all twelve manometers.</li>\n<li>Measure flow by timing 4 L collection, three (3) times; average.</li>\n<li>Repeat for two more (smaller) flow rates.</li>\n<li>Measure outflow water temperature at the lowest flow (for \u03bd and Reynolds number).</li></ol>\n<h3>Part B \u2014 gate valve</h3>\n<ol><li>Clamp the connecting tubes to the mitre-bend tappings (prevents air entering the system).</li>\n<li>Bench valve and gate valve fully open; connect and level; pump on.</li>\n<li>Close the gate valve until the gauge reads 0.3 bar; measure the flow rate (4 L \u00d7 3).</li>\n<li>Repeat for 0.6 and 0.9 bar.</li></ol>\n<h3>Calculations</h3>\n<p>For each experiment calculate discharge Q, velocity v, velocity head v\u00b2/2g, Reynolds number Re, and the minor loss coefficient K for each fitting and the gate valve (use corrected \u0394h for the enlargement and contraction).</p>\n<h2>Requirements</h2>\n<ul><li>Team member names; section of CE 323; date prepared.</li>\n<li>Properly captioned tables and graphs: table(s) of results; Part A \u2014 \u0394h vs v\u00b2/2g (one graph) and K vs Q (another); Part B \u2014 the same two graphs for the gate valve.</li>\n<li>Brief responses (complete sentences): relationships noticed in the graphs \u2014 dependence of \u0394h on velocity head; is it justifiable to treat K as constant for a given fitting?; how does the gate valve's K vary with how far it is opened?</li>\n<li>Supporting information: raw data and all calculations in an appendix; initials of who performed and who checked calculations; note any deviations.</li></ul></body></html>";
+$('dlPS').addEventListener('click',()=>{const b=new Blob([PS_DOC],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=PS_NAME;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+renderCalList();setPart('S');
+
+/* ============================================================ GUIDED CALC helpers */
+function num(v){return typeof v==='number'&&isFinite(v);}
+function close(a,b,tol){return Math.abs(a-b)<=Math.abs(b)*tol+1e-9;}
+function tbarA(i){return avg(state.A[i].times);}
+function QtA(i){return VOL/tbarA(i);}                       // m³/s
+function vtA(i){return QtA(i)/Ap;}
+function vhA(i){return vtA(i)*vtA(i)/(2*g)*1000;}           // mm
+function ReA(i){return vtA(i)*Dp/NU;}
+function dhMeas(i,f){const h=state.A[i].heads;return h[2*f]-h[2*f+1];}   // mm, signed
+function dhCorr(i,f){                                       // mm — velocity-head corrected
+  const d=dhMeas(i,f);
+  if(f===0)return d+(1-AR2)*vhA(i);                         // enlargement: + (vh_in − vh_out)
+  if(f===1)return d-(1-AR2)*vhA(i);                         // contraction: + (vh_in − vh_out), vh_in smaller
+  return d;
+}
+function Ktrue(i,f){return dhCorr(i,f)/vhA(i);}
+function tbarB(i){return avg(state.B[i].times);}
+function QtB(i){return VOL/tbarB(i);}
+function vtB(i){return QtB(i)/Ap;}
+function vhB(i){return vtB(i)*vtB(i)/(2*g)*1000;}           // mm
+function dhB(i){return state.B[i].bar*10.2;}                // m
+function KtrueB(i){return dhB(i)/(vhB(i)/1000);}
+function ReB(i){return vtB(i)*Dp/NU;}
+
+function unlockCalc(){
+  state.unlocked=true;state.locked=false;
+  $('calcLock').style.display='none';$('steps').style.display='block';
+  buildSteps();renderTables();updateHint();
+  flash('All measurements collected — analysis unlocked! ✓','ok');
+}
+function stepShell(n,ttl){return '<div class="step" id="st'+n+'"><div class="step-h">'+
+  '<span class="num" id="num'+n+'">'+n+'</span><span class="ttl">'+ttl+'</span></div>'+
+  '<div class="step-body" id="body'+n+'"></div></div>';}
+function markDone(n){$('num'+n).classList.add('done');$('num'+n).textContent='✓';}
+function buildSteps(){
+  $('steps').innerHTML =
+   stepShell(1,'Flow rate, velocity, velocity head and Reynolds number (Part A)') +
+   stepShell(2,'Measured head loss Δh across each fitting') +
+   stepShell(3,'Velocity-head correction for the enlargement and contraction') +
+   stepShell(4,'Minor loss coefficient K for each fitting') +
+   stepShell(5,'Part A plots — Δh vs velocity head, K vs Q') +
+   stepShell(6,'Part B — the gate valve') +
+   stepShell(7,'Interpret the results');
+  renderStep1();renderStep2();renderStep3();renderStep4();renderStep5();renderStep6();renderStep7();
+}
+function gridCols(n){return 'grid-template-columns:repeat('+n+',1fr)';}
+
+/* ---- STEP 1 ---- */
+function renderStep1(){
+  let h='<div class="eq">Q = <span class="frac"><span>V</span><span>t̄</span></span>,&nbsp; '+
+   'v = <span class="frac"><span>Q</span><span>A</span></span>,&nbsp; velocity head = '+
+   '<span class="frac"><span>v²</span><span>2g</span></span>,&nbsp; Re = '+
+   '<span class="frac"><span>v D</span><span>ν</span></span>&nbsp;&nbsp; D = 0.0183 m,&nbsp; ν(22 °C) = 0.955×10⁻⁶ m²/s</div>'+
+   '<p class="tag">Pipe area A = πD²/4. Compute all four rows for each trial. Velocity head in <b>mm</b> '+
+   '(m × 1000); Re to the nearest hundred is fine.</p>';
+  h+='<div class="gridN" style="'+gridCols(4)+'"><span class="hd"></span>';
+  for(let i=0;i<3;i++)h+='<span class="hd" style="text-align:center">Trial '+(i+1)+' (t̄='+tbarA(i).toFixed(1)+' s)</span>';
+  [['Qr','Q (L/s)','0.0001'],['vr','v (m/s)','0.001'],['vhr','v²/2g (mm)','0.1'],['Rer','Re (–)','1']].forEach(r=>{
+    h+='<span class="hd">'+r[1]+'</span>';
+    for(let i=0;i<3;i++)h+='<input id="'+r[0]+'_'+i+'" type="number" step="'+r[2]+'" aria-label="'+r[1]+' trial '+(i+1)+'">';
+  });
+  h+='</div><button class="btn" style="margin-top:8px" onclick="checkStep1()">Check Step 1</button> '+
+   '<button class="linkbtn" onclick="hint(1)">Show me the formulas in words</button>'+
+   '<div class="msg" id="msg1" role="status" aria-live="polite"></div>';
+  $('body1').innerHTML=h;
+}
+function checkStep1(){
+  let ok=true;
+  for(let i=0;i<3;i++){
+    const checks=[['Qr',QtA(i)*1000,0.025],['vr',vtA(i),0.03],['vhr',vhA(i),0.05],['Rer',ReA(i),0.05]];
+    checks.forEach(([id,t,tol])=>{const inp=$(id+'_'+i);const v=parseFloat(inp.value);
+      inp.classList.remove('cell-ok','cell-bad');
+      if(num(v)&&close(v,t,tol)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}});
+  }
+  const m=$('msg1');
+  if(ok){m.className='msg ok';m.textContent='Correct ✓ — Re ≈ 13,000–22,000: fully turbulent in every trial, which is why K behaves as a constant.';markDone(1);}
+  else{m.className='msg err';m.textContent='Q = 4.0/t̄ (L/s) → ÷1000 for m³/s. A = π(0.0183)²/4 = 2.63×10⁻⁴ m². v = Q/A. Velocity head ×1000 for mm. Re = v×0.0183/0.955×10⁻⁶.';}
+}
+
+/* ---- STEP 2: Δh trial 1, then fill-down ---- */
+function renderStep2(){
+  let h='<div class="eq">Δh = H₁ − H₂ &nbsp;&nbsp;(mm) — upstream minus downstream manometer of each pair</div>'+
+   '<p class="tag">Compute Δh for <b>trial 1</b> from your recorded readings (keep the sign!). When all six are right, '+
+   'the tool fills trials 2–3 for you — exactly like dragging the formula down in Excel.</p>';
+  h+='<div class="gridN" style="'+gridCols(7)+'"><span class="hd">trial</span>';
+  FIT.forEach(f=>h+='<span class="hd" style="text-align:center;color:'+f.col+'">'+f.name+'<br>'+f.taps+'</span>');
+  h+='<span class="hd">1</span>';
+  FIT.forEach((f,j)=>h+='<input id="dh_'+j+'" type="number" step="0.1" aria-label="Delta h trial 1 '+f.name+'">');
+  h+='</div><div id="dhFill"></div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep2()">Check Step 2</button> '+
+   '<button class="linkbtn" onclick="hint(2)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg2" role="status" aria-live="polite"></div>';
+  $('body2').innerHTML=h;
+}
+function fillTable(id,fn,dec){
+  let h='<table style="margin-top:8px"><tr><th>trial</th>';
+  FIT.forEach(f=>h+='<th>'+f.name+'</th>');h+='</tr>';
+  for(let i=0;i<3;i++){h+='<tr><td>'+(i+1)+(i===0?'':' <span style="color:var(--muted)">(auto)</span>')+'</td>';
+    for(let j=0;j<6;j++)h+='<td>'+fn(i,j).toFixed(dec)+'</td>';h+='</tr>';}
+  h+='</table>';
+  $(id).innerHTML=h;
+}
+function checkStep2(){
+  let ok=true;
+  for(let j=0;j<6;j++){const inp=$('dh_'+j);const v=parseFloat(inp.value);
+    const t=dhMeas(0,j);
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&(close(v,t,0.04)||Math.abs(v-t)<0.8)){inp.classList.add('cell-ok');}
+    else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg2');
+  if(ok){m.className='msg ok';
+    m.innerHTML='Correct ✓ — and yes, the <b>enlargement Δh is negative</b>: static pressure actually rises as the flow '+
+    'slows into the bigger pipe. Trials 2–3 filled below, Excel-style.';
+    state.fillA.dh=true;fillTable('dhFill',dhMeas,1);markDone(2);}
+  else{m.className='msg err';m.textContent='Subtract the second (downstream) reading from the first (upstream) for each pair — h₁−h₂, h₃−h₄, … Keep negative signs.';}
+}
+
+/* ---- STEP 3: corrections ---- */
+function renderStep3(){
+  $('body3').innerHTML=
+   '<div class="eq">corrected Δh = (H₁ − H₂) + ( <span class="frac"><span>v²</span><span>2g</span></span> )<sub>in</sub>'+
+   ' − ( <span class="frac"><span>v²</span><span>2g</span></span> )<sub>out</sub></div>'+
+   '<p class="tag">The enlargement and contraction change the pipe area, so velocity head changes across them and the raw '+
+   'manometer difference mixes that in. The 24.0 mm section carries velocity head = (18.3/24.0)⁴ ≈ 0.338 × the '+
+   '18.3 mm value. Correct <b>trial 1</b> (mm); the tool fills the rest.</p>'+
+   '<div class="rowin">Enlargement (18.3 → 24.0 mm), corrected Δh: <input id="corr_0" type="number" step="0.1" aria-label="Corrected delta h enlargement"><span class="tag">mm</span></div>'+
+   '<div class="rowin">Contraction (24.0 → 18.3 mm), corrected Δh: <input id="corr_1" type="number" step="0.1" aria-label="Corrected delta h contraction"><span class="tag">mm</span></div>'+
+   '<div id="corrFill"></div>'+
+   '<button class="btn" onclick="checkStep3()">Check Step 3</button> '+
+   '<button class="linkbtn" onclick="hint(3)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg3" role="status" aria-live="polite"></div>';
+}
+function checkStep3(){
+  let ok=true;
+  [0,1].forEach(f=>{const inp=$('corr_'+f);const v=parseFloat(inp.value);
+    const t=dhCorr(0,f);
+    inp.classList.remove('cell-ok','cell-bad');
+    if(num(v)&&(close(v,t,0.05)||Math.abs(v-t)<0.8)){inp.classList.add('cell-ok');}
+    else{inp.classList.add('cell-bad');ok=false;}});
+  const m=$('msg3');
+  if(ok){m.className='msg ok';
+    m.innerHTML='Correct ✓ — after correction both are small <b>positive</b> losses, as physics demands. '+
+    'Trials 2–3 filled below. (Bends need no correction: same diameter in and out.)';
+    state.fillA.corr=true;
+    let h='<table style="margin-top:8px"><tr><th>trial</th><th>Enlargement (mm)</th><th>Contraction (mm)</th></tr>';
+    for(let i=0;i<3;i++){h+='<tr><td>'+(i+1)+(i===0?'':' <span style="color:var(--muted)">(auto)</span>')+
+      '</td><td>'+dhCorr(i,0).toFixed(1)+'</td><td>'+dhCorr(i,1).toFixed(1)+'</td></tr>';}
+    $('corrFill').innerHTML=h+'</table>';markDone(3);}
+  else{m.className='msg err';m.textContent='Enlargement: v²/2g drops across it — add (1−0.338)×(v²/2g from Step 1) to the measured Δh. Contraction: velocity head rises — subtract that same amount.';}
+}
+
+/* ---- STEP 4: K ---- */
+function renderStep4(){
+  let h='<div class="eq">K = <span class="frac"><span>Δh</span><span>v²/2g</span></span>&nbsp;&nbsp;(–) '+
+   '— use the <b>corrected</b> Δh for the enlargement and contraction, the measured Δh for the bends</div>'+
+   '<p class="tag">Both in mm (or both in m — the ratio is dimensionless). Compute <b>trial 1</b>; the tool fills trials '+
+   '2–3 and you can judge how constant K really is.</p>';
+  h+='<div class="gridN" style="'+gridCols(7)+'"><span class="hd">trial</span>';
+  FIT.forEach(f=>h+='<span class="hd" style="text-align:center;color:'+f.col+'">'+f.name+'</span>');
+  h+='<span class="hd">1</span>';
+  FIT.forEach((f,j)=>h+='<input id="K_'+j+'" type="number" step="0.001" aria-label="K trial 1 '+f.name+'">');
+  h+='</div><div id="KFill"></div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep4()">Check Step 4</button> '+
+   '<button class="linkbtn" onclick="hint(4)">Show me the formula in words</button>'+
+   '<div class="msg" id="msg4" role="status" aria-live="polite"></div>';
+  $('body4').innerHTML=h;
+}
+function checkStep4(){
+  let ok=true;
+  for(let j=0;j<6;j++){const inp=$('K_'+j);const v=parseFloat(inp.value);
+    const t=Ktrue(0,j);
+    inp.classList.remove('cell-ok','cell-bad');
+    const good=num(v)&&(close(v,t,0.06)||Math.abs(v-t)<0.02);
+    state.kOkA[j]=good;
+    if(good){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}}
+  const m=$('msg4');
+  if(ok){m.className='msg ok';
+    m.innerHTML='Correct ✓ — ranking: mitre &gt; elbow &gt; short bend &gt; long bend &gt; contraction &gt; enlargement. '+
+    'The sharper the change of direction or area, the bigger K. Trials 2–3 filled below — points now plot in Step 5.';
+    state.fillA.K=true;fillTable('KFill',Ktrue,3);markDone(4);refreshPlotsA();}
+  else{m.className='msg err';m.textContent='Divide each fitting\'s Δh (corrected for enlargement/contraction) by trial 1\'s velocity head from Step 1 — both in mm.';}
+  refreshPlotsA();
+}
+
+/* ---- STEP 5: Part A plots ---- */
+function renderStep5(){
+  $('body5').innerHTML=
+   '<p class="tag">The report\'s two Part-A graphs. They fill in once Step 4 is complete (using all three trials).</p>'+
+   '<div class="plots2">'+
+     '<canvas id="plotDH" width="330" height="270" role="img" aria-label="Head loss versus velocity head"></canvas>'+
+     '<canvas id="plotK" width="330" height="270" role="img" aria-label="K versus flow rate"></canvas>'+
+   '</div>'+
+   '<div style="margin-top:10px;font-weight:650">What do the graphs say?</div>'+
+   '<div class="choice" id="q5">'+
+     '<button onclick="pick(\'q5\',0)">Δh grows linearly with velocity head (slope = K), and K stays roughly constant with Q — so one K per fitting is justified in turbulent flow</button>'+
+     '<button onclick="pick(\'q5\',1)">Δh is independent of velocity head; K rises steeply with Q</button>'+
+     '<button onclick="pick(\'q5\',2)">Both graphs should be perfectly flat lines</button></div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep5()">Check answer</button>'+
+   '<div class="msg" id="msg5" role="status" aria-live="polite"></div>';
+  refreshPlotsA();
+}
+function refreshPlotsA(){drawDH();drawK();}
+function drawAxes(p,Wc,Hc,mL,mT,pw,ph,xmax,ymax,xlab,ylab,xdec,ydec){
+  p.strokeStyle='#eceff4';p.lineWidth=1;p.fillStyle='#7a8598';p.font='9.5px system-ui';
+  for(let k=0;k<=5;k++){const y=mT+ph-ph*k/5;p.beginPath();p.moveTo(mL,y);p.lineTo(mL+pw,y);p.stroke();
+    p.textAlign='right';p.fillText((ymax*k/5).toFixed(ydec),mL-4,y+3);}
+  for(let k=0;k<=5;k++){const x=mL+pw*k/5;p.beginPath();p.moveTo(x,mT);p.lineTo(x,mT+ph);p.stroke();
+    p.textAlign='center';p.fillText((xmax*k/5).toFixed(xdec),x,mT+ph+13);}
+  p.fillStyle='#33405a';p.font='600 11px system-ui';p.textAlign='center';
+  p.fillText(xlab,mL+pw/2,Hc-5);
+  p.save();p.translate(11,mT+ph/2);p.rotate(-Math.PI/2);p.fillText(ylab,0,0);p.restore();
+}
+function drawDH(){
+  const c=$('plotDH');if(!c)return;const p=c.getContext('2d');
+  const Wc=330,Hc=270;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,Wc,Hc);
+  const mL=40,mT=16,pw=Wc-mL-12,ph=Hc-mT-38;
+  const xmax=80,ymax=90;
+  drawAxes(p,Wc,Hc,mL,mT,pw,ph,xmax,ymax,'v²/2g (mm)','Δh (mm)',0,0);
+  if(!state.fillA.K){p.fillStyle='#aab2c0';p.font='11px system-ui';p.textAlign='center';
+    p.fillText('Complete Step 4 to fill this plot',mL+pw/2,mT+ph/2);return;}
+  // reference lines through the origin with slope K, plus the data points
+  FIT.forEach((f,j)=>{
+    p.strokeStyle=f.col;p.lineWidth=1.3;p.globalAlpha=.55;
+    const yAt=xmax*f.K;                       // Δh at x=xmax
+    let x2=xmax,y2=yAt;
+    if(yAt>ymax){x2=ymax/f.K;y2=ymax;}
+    p.beginPath();p.moveTo(mL,mT+ph);
+    p.lineTo(mL+x2/xmax*pw,mT+ph-y2/ymax*ph);p.stroke();p.globalAlpha=1;
+    p.fillStyle=f.col;
+    [0,1,2].forEach(i=>{const x=mL+vhA(i)/xmax*pw,y=mT+ph-Math.min(dhCorr(i,j),ymax)/ymax*ph;
+      p.beginPath();p.arc(x,y,3.5,0,7);p.fill();});
+  });
+  p.font='600 9.5px system-ui';p.textAlign='left';
+  FIT.forEach((f,j)=>{p.fillStyle=f.col;p.fillText(f.name,mL+6,mT+11+j*12);});
+}
+function drawK(){
+  const c=$('plotK');if(!c)return;const p=c.getContext('2d');
+  const Wc=330,Hc=270;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+  p.clearRect(0,0,Wc,Hc);
+  const mL=40,mT=16,pw=Wc-mL-12,ph=Hc-mT-38;
+  const xmax=0.35,ymax=1.3;                   // Q in L/s
+  drawAxes(p,Wc,Hc,mL,mT,pw,ph,xmax,ymax,'Q (L/s)','K (–)',2,1);
+  if(!state.fillA.K){p.fillStyle='#aab2c0';p.font='11px system-ui';p.textAlign='center';
+    p.fillText('Complete Step 4 to fill this plot',mL+pw/2,mT+ph/2);return;}
+  FIT.forEach((f,j)=>{
+    p.fillStyle=f.col;p.strokeStyle=f.col;p.lineWidth=1.4;
+    const pts=[0,1,2].map(i=>[QtA(i)*1000,Ktrue(i,j)]);
+    p.beginPath();
+    pts.forEach((pt,k)=>{const x=mL+pt[0]/xmax*pw,y=mT+ph-pt[1]/ymax*ph;
+      if(k===0)p.moveTo(x,y);else p.lineTo(x,y);});
+    p.stroke();
+    pts.forEach(pt=>{const x=mL+pt[0]/xmax*pw,y=mT+ph-pt[1]/ymax*ph;
+      p.beginPath();p.arc(x,y,3.5,0,7);p.fill();});
+  });
+}
+function checkStep5(){
+  const m=$('msg5');
+  if(picks.q5==null){m.className='msg err';m.textContent='Pick an answer first.';return;}
+  if(picks.q5===0){m.className='msg ok';m.textContent='Correct ✓ — Δh ∝ v²/2g with K as the constant of proportionality, and K is nearly flat across your three flows. That is why handbooks tabulate a single K per fitting.';markDone(5);}
+  else{m.className='msg err';m.textContent='Look at your plotted points: do the Δh points follow the straight K-lines? Do the K values wander much across Q?';}
+}
+
+/* ---- STEP 6: Part B ---- */
+function renderStep6(){
+  let h='<div class="eq">Δh = Δp × 10.2 <span class="tag">(1 bar = 10.2 m of water)</span>,&nbsp;&nbsp;'+
+   'K = <span class="frac"><span>Δh</span><span>v²/2g</span></span> <span class="tag">(both in m)</span></div>'+
+   '<p class="tag">Work each gauge setting fully: convert the gauge to metres of water, get Q from the average time, '+
+   'then v, velocity head, K and Re.</p>';
+  h+='<div class="gridN" style="'+gridCols(4)+'"><span class="hd"></span>';
+  for(let i=0;i<3;i++)h+='<span class="hd" style="text-align:center">'+TRIALS_B[i].bar.toFixed(1)+' bar (t̄='+tbarB(i).toFixed(1)+' s)</span>';
+  [['Bdh','Δh (m)','0.01'],['BQ','Q (L/s)','0.0001'],['Bv','v (m/s)','0.001'],
+   ['Bvh','v²/2g (mm)','0.1'],['BK','K (–)','0.1'],['BRe','Re (–)','1']].forEach(r=>{
+    h+='<span class="hd">'+r[1]+'</span>';
+    for(let i=0;i<3;i++)h+='<input id="'+r[0]+'_'+i+'" type="number" step="'+r[2]+'" aria-label="'+r[1]+' setting '+(i+1)+'">';
+  });
+  h+='</div>'+
+   '<div class="plots2" style="margin-top:10px">'+
+     '<canvas id="plotBDH" width="330" height="240" role="img" aria-label="Gate valve head loss versus velocity head"></canvas>'+
+     '<canvas id="plotBK" width="330" height="240" role="img" aria-label="Gate valve K versus flow rate"></canvas>'+
+   '</div>'+
+   '<button class="btn" style="margin-top:8px" onclick="checkStep6()">Check Step 6</button> '+
+   '<button class="linkbtn" onclick="hint(6)">Show me the formulas in words</button>'+
+   '<div class="msg" id="msg6" role="status" aria-live="polite"></div>';
+  $('body6').innerHTML=h;
+  drawBPlots(false);
+}
+function checkStep6(){
+  let ok=true;
+  for(let i=0;i<3;i++){
+    const checks=[['Bdh',dhB(i),0.02],['BQ',QtB(i)*1000,0.025],['Bv',vtB(i),0.03],
+                  ['Bvh',vhB(i),0.05],['BK',KtrueB(i),0.07],['BRe',ReB(i),0.05]];
+    checks.forEach(([id,t,tol])=>{const inp=$(id+'_'+i);const v=parseFloat(inp.value);
+      inp.classList.remove('cell-ok','cell-bad');
+      if(num(v)&&close(v,t,tol)){inp.classList.add('cell-ok');}else{inp.classList.add('cell-bad');ok=false;}});
+  }
+  const m=$('msg6');
+  if(ok){m.className='msg ok';state.bOk=true;
+    m.innerHTML='Correct ✓ — K exploded from ≈40 to ≈250 as the valve closed. Unlike a fixed fitting, a valve\'s K '+
+    'depends strongly on its opening — that is exactly how valves throttle. Plots drawn below.';
+    markDone(6);drawBPlots(true);}
+  else{m.className='msg err';m.textContent='Δh = bar × 10.2 (m). Q = 4.0/t̄ (L/s). v = Q(m³/s)/2.63×10⁻⁴. K = Δh(m) ÷ velocity head(m) — watch the mm→m conversion.';}
+}
+function drawBPlots(filled){
+  const specs=[['plotBDH','v²/2g (mm)','Δh (m)',90,10,(i)=>[vhB(i),dhB(i)],0,0],
+               ['plotBK','Q (L/s)','K (–)',0.4,300,(i)=>[QtB(i)*1000,KtrueB(i)],2,0]];
+  specs.forEach(([cid,xl,yl,xmax,ymax,fn,xd,yd])=>{
+    const c=$(cid);if(!c)return;const p=c.getContext('2d');
+    const Wc=330,Hc=240;c.width=Wc*DPR;c.height=Hc*DPR;p.setTransform(DPR,0,0,DPR,0,0);
+    p.clearRect(0,0,Wc,Hc);
+    const mL=42,mT=16,pw=Wc-mL-12,ph=Hc-mT-38;
+    drawAxes(p,Wc,Hc,mL,mT,pw,ph,xmax,ymax,xl,yl,xd,yd);
+    if(!filled&&!state.bOk){p.fillStyle='#aab2c0';p.font='11px system-ui';p.textAlign='center';
+      p.fillText('Validate the table to fill this plot',mL+pw/2,mT+ph/2);return;}
+    p.fillStyle='#D64309';p.strokeStyle='#D64309';p.lineWidth=1.6;
+    const pts=[0,1,2].map(i=>fn(i));
+    p.beginPath();
+    pts.forEach((pt,k)=>{const x=mL+pt[0]/xmax*pw,y=mT+ph-Math.min(pt[1],ymax)/ymax*ph;
+      if(k===0)p.moveTo(x,y);else p.lineTo(x,y);});
+    p.stroke();
+    pts.forEach(pt=>{const x=mL+pt[0]/xmax*pw,y=mT+ph-Math.min(pt[1],ymax)/ymax*ph;
+      p.beginPath();p.arc(x,y,4,0,7);p.fill();});
+  });
+}
+
+/* ---- STEP 7: interpretation ---- */
+const picks={};
+function pick(qid,i){picks[qid]=i;
+  document.querySelectorAll('#'+qid+' button').forEach((b,j)=>b.classList.toggle('sel',j===i));}
+function renderStep7(){
+  $('body7').innerHTML=
+   '<div style="font-weight:650">Is it justifiable to treat K as a constant for a given fitting?</div>'+
+   '<div class="choice" id="q7a">'+
+     '<button onclick="pick(\'q7a\',0)">Yes for fixed-geometry fittings in fully turbulent flow — your Part-A K values barely moved across the flows. But not for valves, whose geometry (opening) changes</button>'+
+     '<button onclick="pick(\'q7a\',1)">No — K varied wildly for every fitting in Part A</button>'+
+     '<button onclick="pick(\'q7a\',2)">Yes for all devices including valves at any opening</button></div>'+
+   '<div style="font-weight:650;margin-top:12px">Why can these "minor" losses dominate a real pipe network?</div>'+
+   '<div class="choice" id="q7b">'+
+     '<button onclick="pick(\'q7b\',0)">They can\'t — friction always dominates</button>'+
+     '<button onclick="pick(\'q7b\',1)">A network with many bends, tees and partly-open valves accumulates ΣK·v²/2g that can exceed the straight-pipe friction loss — your part-closed gate valve alone (K ≈ 40–250) outweighed every fitting combined</button>'+
+     '<button onclick="pick(\'q7b\',2)">Minor losses only matter in laminar flow</button></div>'+
+   '<button class="btn" style="margin-top:10px" onclick="checkStep7()">Check answers</button>'+
+   '<div class="msg" id="msg7" role="status" aria-live="polite"></div>';
+}
+function checkStep7(){
+  const m=$('msg7');
+  if(picks.q7a==null||picks.q7b==null){m.className='msg err';m.textContent='Answer both questions first.';return;}
+  if(picks.q7a===0&&picks.q7b===1){m.className='msg ok';
+    m.innerHTML='Both correct ✓ — that is the engineering payoff of this lab: tabulated K values let you total minor '+
+    'losses quickly, but treat every valve as a variable. You now have every number and graph the report requires.';markDone(7);}
+  else{m.className='msg err';m.textContent='Compare your Part-A K spread against the Part-B K range, and think about what ΣK means for a system with dozens of fittings.';}
+}
+
+/* ---- hints ---- */
+function hint(n){const m=$('msg'+n);m.className='msg info';
+  const H={1:'Flow rate: 4 litres divided by the average time. Velocity: flow rate in cubic metres per second divided by the pipe area (2.63×10⁻⁴ m²). Velocity head: velocity squared over 19.62, times 1000 for millimetres. Reynolds: velocity times 0.0183 divided by 0.955×10⁻⁶.',
+    2:'For each pair, subtract the downstream manometer reading from the upstream one, keeping the sign.',
+    3:'The 24 mm section carries 0.338 times the 18.3 mm velocity head. Enlargement: add the difference (0.662 × velocity head) to the measured Δh. Contraction: subtract it.',
+    4:'Divide each fitting\'s head loss by the velocity head — both from trial 1, both in millimetres.',
+    6:'Convert bar to metres of water (× 10.2). Get Q from 4 litres over the average time, velocity from Q over area, velocity head from v²/19.62. K is head loss divided by velocity head with both in metres.'};
+  m.textContent=H[n];}
+
+/* ============================================================ INIT */
+renderTables();updateHint();
+requestAnimationFrame(t=>{lastT=t;tick(t);});
+window.addEventListener('resize',()=>{fitCanvas();if(state.unlocked){refreshPlotsA();drawBPlots(state.bOk);}});
+</script>
+</body>
+</html>

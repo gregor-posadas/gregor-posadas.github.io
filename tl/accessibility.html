@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="tl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aksesibilidad · Gregor Posadas</title>
+<meta name="description" content="Paano ginawang accessible ang site na ito: target na WCAG 2.2 AA, madaling basahing titik, contrast, disenyong hindi nakasalalay sa kulay, suporta sa keyboard at screen reader, at ang sistema ng disenyo.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://gregor-posadas.github.io/tl/accessibility.html">
+<link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/accessibility.html">
+<link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/accessibility.html">
+<link rel="alternate" hreflang="x-default" href="https://gregor-posadas.github.io/accessibility.html">
+<meta property="og:title" content="Aksesibilidad · Gregor Posadas">
+<meta property="og:description" content="Paano ginawang accessible ang site na ito: target na WCAG 2.2 AA, madaling basahing titik, contrast, disenyong hindi nakasalalay sa kulay, suporta sa keyboard at screen reader, at ang sistema ng disenyo.">
+<meta property="og:url" content="https://gregor-posadas.github.io/tl/accessibility.html">
+<meta property="og:image" content="https://gregor-posadas.github.io/assets/img/headshot.jpg">
+<link rel="preload" href="../fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/AtkinsonHyperlegibleNext-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' fill='%23fff' text-anchor='middle'%3EGP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/styles.css">
+<script>try { var t = localStorage.getItem("gp.theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+</head>
+<body>
+<a class="skip" href="#main">Lumaktaw sa nilalaman</a>
+<header class="band" role="banner">
+  <div class="band__inner">
+    <a class="brand" href="./">
+      <span class="brand__name">Gregor Posadas</span>
+      <span class="brand__sub">Environmental Engineering, UC Berkeley</span>
+    </a>
+    <nav class="nav" aria-label="Pangunahin">
+      <a href="./">Tungkol</a>
+      <a href="research.html">Pananaliksik</a>
+      <a href="publications.html">Mga Publikasyon</a>
+      <a href="cv.html">CV</a>
+      <a href="tatay.html">Tatay</a>
+      <a href="accessibility.html" aria-current="page">Aksesibilidad</a>
+    </nav>
+    <div class="band__tools">
+      <a class="tool" href="../accessibility.html" lang="en" hreflang="en">English</a>
+      <button type="button" class="tool" id="sound-toggle" aria-pressed="true" data-on="May tunog" data-off="Walang tunog"><span class="tool__state">May tunog</span></button>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-dark="Madilim" data-light="Maliwanag">Madilim</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <div class="head">
+      <h1>Aksesibilidad</h1>
+      <p>Ang site na ito ay para mabasa ng lahat, kabilang ang mga gumagamit ng screen reader, keyboard, magnification, o yaong iba ang pagtingin sa kulay. Narito kung ano ang ibig sabihin nito sa praktika, paano ito sinusuri, at ang mga desisyon sa disenyo sa likod nito.</p>
+    </div>
+
+    <section class="section" aria-labelledby="std-h">
+      <h2 id="std-h">Ang pamantayan</h2>
+      <p class="rt-p">Ang layunin ay ang <a href="https://www.w3.org/TR/WCAG22/" hreflang="en">Web Content Accessibility Guidelines (WCAG) 2.2</a> sa antas na AA. Bawat pahina, sa Ingles at Filipino at sa maliwanag at madilim na mode, ay sinusuri gamit ang open-source na <a href="https://github.com/dequelabs/axe-core" hreflang="en">axe-core</a> laban sa mga patakaran ng WCAG 2.0, 2.1, at 2.2 A at AA, at sa kasalukuyan ay walang naiuulat na paglabag. Bahagi lamang ng larawan ang nahuhuli ng awtomatikong pagsusuri, kaya sinusuri rin ang site nang mano-mano: keyboard lamang, sa lapad ng telepono na 390 pixel, sa pag-print, at sa grayscale.</p>
+      <p class="rt-p">Kung may bahagi ng site na hindi gumagana para sa iyo, <a href="mailto:gregorposadas@berkeley.edu?subject=Website%20accessibility">mag-email sa akin</a> at aayusin ko ito.</p>
+    </section>
+
+    <section class="section" aria-labelledby="feat-h">
+      <h2 id="feat-h">Mga nakapaloob na tampok</h2>
+      <ul class="legend">
+        <li><b>Madaling basahing titik</b><span>Nakatipa ang lahat sa Atkinson Hyperlegible Next, isang typeface na idinisenyo kasama ang Braille Institute upang magkaiba ang hitsura ng mga titik at numerong madaling mapagkamalan (I, l, 1; O, 0; b, d). 18 pixel ang body text na may maluwag na pagitan ng linya, at hanggang mga 70 titik lamang bawat linya.</span></li>
+        <li><b>Malakas na contrast</b><span>15.6 sa 1 ang body text laban sa background sa maliwanag na mode at 21 sa 1 sa madilim, higit pa sa 4.5 sa 1 na hinihingi ng AA. Hindi bababa sa 7.1 sa 1 ang pangalawang teksto, na umaabot sa mas mahigpit na antas na AAA.</span></li>
+        <li><b>Hindi kailanman kulay lamang ang senyales</b><span>Sadyang halos-itim at puti ang site. Walang bahaging nakasalalay sa pagkilala ng pula sa berde o ng asul sa lila. May salungguhit ang mga link, may bar at makapal na titik ang kasalukuyang pahina, at gumagamit ng salita at puno o butas na tuldok ang mga on/off na estado.</span></li>
+        <li><b>Maliwanag at madilim</b><span>Sinusundan ng site ang setting ng iyong device, at mapapalitan ito ng button sa header. Sa iyong device lamang naaalala ang pinili mo.</span></li>
+        <li><b>Keyboard</b><span>Maaabot ang lahat gamit ang Tab at mapipindot gamit ang Enter o Space. Ipinapakita ng makapal na asul na focus ring (hindi bababa sa 4.6 sa 1 laban sa background) kung nasaan ka, at ang "Lumaktaw sa nilalaman" ang unang naaabot ng keyboard.</span></li>
+        <li><b>Screen reader</b><span>Gumagamit ang mga pahina ng wastong landmark (header, nabigasyon, nilalaman, footer) at iisang balangkas ng heading bawat pahina. May nakasulat na paglalarawan ang bawat larawan at graphic. Nakatago sa assistive technology ang mga palamuting hugis.</span></li>
+        <li><b>Touch</b><span>Hindi bababa sa 48 pixel ang taas ng mga button at link, mas malaki sa 24 pixel na minimum ng WCAG 2.2, at walang pahalang na pag-scroll sa telepono.</span></li>
+        <li><b>Galaw</b><span>Lumulubog nang mga 4 pixel ang mga button kapag pinindot. Kung humihingi ang iyong device ng reduced motion, inaalis ang animation at nakapatay ang tunog sa simula.</span></li>
+        <li><b>Tunog</b><span>Maikling click ang tunog ng mga button. Ginagawa ang tunog sa browser, wala pang isang daan ng segundo, hindi nagdadala ng impormasyon, at mapapatay gamit ang button na "Tunog" sa header.</span></li>
+        <li><b>Dalawang wika</b><span>May bersiyong Ingles at Filipino ang bawat pahina, at magkakaugnay ang mga ito. Naka-tag ang teksto sa ibang wika upang tama ang bigkas ng screen reader.</span></li>
+        <li><b>Pag-print</b><span>Itinatago ang header at mga button kapag nagpi-print, at itim sa puti ang lumalabas.</span></li>
+        <li><b>Privacy</b><span>Walang tracker, analytics, cookie, o script mula sa ibang partido. Ang tanging iniimbak ay ang pinili mong tema at tunog, sa sarili mong device.</span></li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="known-h">
+      <h2 id="known-h">Mga kilalang limitasyon</h2>
+      <p class="rt-p">Ang mga <a href="research.html#sims-h">virtual lab ng CE 323</a> ay mga biswal na simulasyong iginuhit sa canvas. Naaabot ng keyboard ang kanilang mga kontrol at may paglalarawan ang bawat guhit, ngunit nakasalalay sa paningin ang pagsubaybay sa mismong kagamitan. Mga larawan ng teksto ang mga card ng Pinoy Scientists; nasa paglalarawan ng bawat larawan ang buong teksto. Ang mga publikasyon ay naka-link sa mga pahina ng journal na hindi ko hawak.</p>
+    </section>
+
+    <section class="section" aria-labelledby="style-h">
+      <h2 id="style-h">Istilo ng disenyo</h2>
+      <p class="rt-p">Hango ang disenyo sa mga karatula ng pampublikong transportasyon, ang uri ng karatulang nababasa habang naglalakad. Isang itim na banda ang may hawak ng pangalan at nabigasyon. Nagsisimula ang bawat seksiyon sa makapal na linya. Nasa mga kahon o sa "departure board" ng mga hanay ang impormasyon, at iginuguhit ang mga timeline bilang linya ng tren na may mga istasyon. Bahagyang nakaangat ang mga button at lumulubog kapag pinindot, gaya ng tunay na button. Ito rin ang biswal na sistema ng Microbe Busters team hub na ginawa ko para sa isang kurso sa Development Engineering.</p>
+      <p class="rt-p">Simple ang mga patakaran. Iisang typeface sa dalawang kapal. Limang laki ng titik. Halos-itim na tinta sa mainit na papel sa maliwanag na mode, puti sa itim sa madilim. Ginagamit lamang ang kulay para sa focus, hindi kailanman para magdala ng kahulugan.</p>
+      <h3 class="rt-h">Paleta</h3>
+      <p class="section__note">Ipinapakita ng bawat swatch ang halaga sa maliwanag, saka sa madilim. Ang ratio ay contrast laban sa background ng pahina.</p>
+      <ul class="palette">
+        <li><span class="swatch" style="--sw:#1b1a17" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#ffffff" aria-hidden="true"></span><span><b>Tinta</b> · mga heading at teksto<br><span class="swatch__meta">Maliwanag #1b1a17 (15.6:1) · Madilim #ffffff (21:1)</span></span></li>
+        <li><span class="swatch" style="--sw:#4d4a43" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#c9c9c9" aria-hidden="true"></span><span><b>Pangalawang tinta</b> · caption, petsa, tala<br><span class="swatch__meta">Maliwanag #4d4a43 (7.9:1) · Madilim #c9c9c9 (12.7:1)</span></span></li>
+        <li><span class="swatch" style="--sw:#f6f2e9" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#000000" aria-hidden="true"></span><span><b>Papel</b> · background ng pahina<br><span class="swatch__meta">Maliwanag #f6f2e9 (n/a) · Madilim #000000 (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#fcfaf5" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#121212" aria-hidden="true"></span><span><b>Ibabaw</b> · mga card at kahon<br><span class="swatch__meta">Maliwanag #fcfaf5 (n/a) · Madilim #121212 (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#ece6d8" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#1c1c1c" aria-hidden="true"></span><span><b>Lubog</b> · hover at sipi<br><span class="swatch__meta">Maliwanag #ece6d8 (n/a) · Madilim #1c1c1c (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#d4ccbb" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#3d3d3d" aria-hidden="true"></span><span><b>Linya</b> · manipis na hati<br><span class="swatch__meta">Maliwanag #d4ccbb (n/a) · Madilim #3d3d3d (n/a)</span></span></li>
+        <li><span class="swatch" style="--sw:#0072b2" aria-hidden="true"></span><span class="swatch swatch--dark" style="--sw:#56b4e9" aria-hidden="true"></span><span><b>Focus</b> · focus ring ng keyboard<br><span class="swatch__meta">Maliwanag #0072b2 (4.6:1) · Madilim #56b4e9 (9.1:1)</span></span></li>
+      </ul>
+      <p class="rt-p">Mula sa paleta nina Okabe at Ito ang asul ng focus, na idinisenyong manatiling makikilala ng mga taong may karaniwang uri ng color vision deficiency.</p>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Gregor Posadas · Berkeley, California</p>
+    <p>Nakatipa sa Atkinson Hyperlegible Next. <a href="accessibility.html">Paano ginawang accessible ang site na ito</a>. Ang salin sa Filipino ay gawa ng may-ari ng site; ipaalam kung may dapat itama.</p>
+  </div>
+</footer>
+<script src="../assets/site.js"></script>
+</body>
+</html>

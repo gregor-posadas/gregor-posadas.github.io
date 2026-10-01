@@ -186,7 +186,7 @@ button { font: inherit; color: inherit; }
 .sign--static:active { transform: none; }
 .theme-toggle:active, .theme-toggle.is-pressed, .tool:active, .tool.is-pressed { transform: translateY(2px); }
 .nav a:active { transform: translateY(2px); }
-@media (prefers-reduced-motion: reduce) { .btn, .sign, .theme-toggle, .tool { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .btn, .sign, .theme-toggle, .tool { transition: none; } .btn:active, .btn.is-pressed, .sign:active, .sign.is-pressed, .theme-toggle:active, .tool:active, .nav a:active { transform: none; } }
 
 /* Header tools: language, sound, theme */
 .band__tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -238,3 +238,13 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
   .row, .sign, .now { break-inside: avoid; }
   a { text-decoration: none; }
 }
+
+/* Accessibility page: palette swatches (always labelled with words and hex values) */
+.palette { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; max-width: var(--read); }
+.palette li { display: grid; grid-template-columns: 40px 40px 1fr; gap: 12px; align-items: center; }
+.swatch { width: 40px; height: 40px; background: var(--sw); border: 2px solid var(--rule-strong); display: block; }
+.swatch__meta { font-size: var(--f1); color: var(--ink-2); }
+.foot a { color: inherit; }
+.solo { margin: 16px 0 0; max-width: 40rem; border: 2px solid var(--rule-strong); background: var(--surface); }
+.solo img { display: block; width: 100%; height: auto; }
+.solo figcaption { padding: 10px 14px; font-size: var(--f1); color: var(--ink-2); border-top: 2px solid var(--rule-strong); }
