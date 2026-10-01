@@ -2,7 +2,7 @@
 
 Personal site, served by GitHub Pages from the `main` branch root. Plain HTML, no build step.
 
-- `index.html`, `research.html`, `publications.html`, `cv.html`, `tatay.html` — English pages
+- `index.html`, `research.html`, `publications.html`, `cv.html`, `dad.html` (`tatay.html` redirects there) — English pages
 - `tl/` — the same five pages in Filipino (each page links to its counterpart in the header)
 - `assets/styles.css` — one stylesheet, same signage rules as the Microbe Busters hub
 - `assets/site.js` — light/dark toggle and the click sounds (synthesized with Web Audio, no audio files; off by default for visitors with reduced-motion set, remembered per visitor)
