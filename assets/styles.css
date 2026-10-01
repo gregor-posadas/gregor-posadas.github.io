@@ -68,13 +68,15 @@ button { font: inherit; color: inherit; }
 
 /* Signage band */
 .band { background: var(--band); color: var(--band-ink); border-bottom: 6px solid var(--band); }
-.band__inner { max-width: var(--wrap); margin: 0 auto; padding: 14px 16px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.band__inner { max-width: var(--wrap); margin: 0 auto; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 16px; align-items: center; }
+/* Same layout in every language: brand and tools share the first row, the menu gets its own row, so switching language never moves the controls. */
+@media (min-width: 720px) { .band__inner { grid-template-columns: minmax(0, 1fr) auto; } .band__tools { justify-content: flex-end; } .nav { grid-column: 1 / -1; } }
 @media (min-width: 720px) { .band__inner { padding: 18px 32px; } }
 @media (min-width: 1100px) { .band__inner { padding: 18px 56px; } }
 .brand { text-decoration: none; display: flex; flex-direction: column; min-height: var(--tap); justify-content: center; }
 .brand__name { font-size: var(--f3); font-weight: 700; letter-spacing: 0.01em; }
 .brand__sub { font-size: var(--f1); color: #cfcfcf; }
-.nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: -14px; }
 .nav a { min-height: var(--tap); display: inline-flex; align-items: center; padding: 0 14px; text-decoration: none; border-bottom: 4px solid transparent; }
 .nav a:hover { border-bottom-color: #7a7a7a; }
 .nav a[aria-current="page"] { border-bottom-color: #ffffff; font-weight: 700; }
@@ -376,6 +378,7 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 @media (min-width: 1200px) {
   .band__inner { padding-left: 40px; padding-right: 40px; gap: 12px; }
   .nav a { padding: 0 10px; }
+  .nav { margin-left: -10px; }
   .band__tools { gap: 6px; }
   .tool, .theme-toggle { padding-left: 12px; padding-right: 12px; }
 }
