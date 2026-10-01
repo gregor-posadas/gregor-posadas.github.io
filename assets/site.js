@@ -280,18 +280,19 @@
   vids.forEach(function (v) { io.observe(v); });
 })();
 
-/* Share: a story-sized card (1080 x 1920) for each page, like a music app's "share to story".
-   Phones get the system share sheet with the image (Instagram Stories is one of the targets),
-   and the page link is copied so it can go on a Link sticker. Elsewhere a small dialog offers
-   the image, a download, and a copy-link button. */
+/* Share: one menu on every device.
+   - Share to story: a 1080 x 1920 card of the page through the phone's share sheet (Instagram Stories is a target),
+     or a download where the browser cannot share files. The link is copied for a Link sticker.
+   - Share link: the page's address through the share sheet (Messages, WhatsApp, email...), where available.
+   - Copy link: the address to the clipboard. */
 (function () {
   var btn = document.getElementById("share-btn");
   if (!btn) return;
   var tl = (document.documentElement.lang || "en").indexOf("tl") === 0;
-  var T = tl ? { h: "Ibahagi ang pahinang ito", p: "Isang story card para sa Instagram. Sa telepono, ipinapadala ito ng button na Ibahagi sa share sheet, kung saan mapipili ang Instagram Stories. Kinokopya rin ang link para maidagdag mo ito gamit ang Link sticker.", dl: "I-download ang larawan", copy: "Kopyahin ang link", copied: "Nakopya ang link.", nocopy: "Hindi makopya. Narito ang link: ", sharelink: "Ibahagi ang link", close: "Isara", alt: "Story card ng pahinang ito", toast: "Nakopya ang link. Idagdag ito gamit ang Link sticker sa Instagram." }
-               : { h: "Share this page", p: "A story card for Instagram. On a phone, the Share button sends it to your share sheet, where you can pick Instagram Stories. The link is copied too, so you can add it with a Link sticker.", dl: "Download image", copy: "Copy link", copied: "Link copied.", nocopy: "Could not copy. Here is the link: ", sharelink: "Share link", close: "Close", alt: "Story card for this page", toast: "Link copied. Add it with a Link sticker in Instagram." };
-  var url = btn.getAttribute("data-url"), card = btn.getAttribute("data-card"), title = btn.getAttribute("data-title");
-  var touch = window.matchMedia("(pointer: coarse)").matches;
+  var T = tl ? { h: "Ibahagi ang pahinang ito", story: "Ibahagi sa story", dl: "I-download ang story image", link: "Ibahagi ang link", copy: "Kopyahin ang link", copied: "Nakopya ang link.", nocopy: "Hindi makopya. Piliin at kopyahin ang link sa itaas.", close: "Isara", alt: "Story card ng pahinang ito", urlLabel: "Link ng pahinang ito", note: "Kinokopya rin ng Ibahagi sa story ang link, kaya sa Instagram ay maaari kang magdagdag ng Link sticker at i-paste ito.", noteDesk: "Para sa Instagram Stories: i-download ang larawan, i-post ito mula sa iyong telepono, at magdagdag ng Link sticker na may link sa itaas.", toast: "Nakopya ang link. Idagdag ito gamit ang Link sticker sa Instagram." }
+               : { h: "Share this page", story: "Share to story", dl: "Download story image", link: "Share link", copy: "Copy link", copied: "Link copied.", nocopy: "Could not copy. Select and copy the link above.", close: "Close", alt: "Story card for this page", urlLabel: "Link to this page", note: "Share to story also copies the link, so in Instagram you can add a Link sticker and paste it.", noteDesk: "For Instagram Stories: download the image, post it from your phone, and add a Link sticker with the link above.", toast: "Link copied. Add it with a Link sticker in Instagram." };
+  /* GitHub Pages serves pages without ".html", so share the shorter address. */
+  var url = btn.getAttribute("data-url").replace(/\.html$/, ""), card = btn.getAttribute("data-card"), title = btn.getAttribute("data-title");
   var file = null;
   function load() {
     if (file || !window.fetch || typeof File === "undefined") return;
@@ -299,7 +300,8 @@
       file = new File([b], card.split("/").pop(), { type: "image/jpeg" });
     }).catch(function () {});
   }
-  /* Phones fetch the card ahead of time so the share sheet can open straight from the tap. */
+  function canShareFile() { return !!(file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })); }
+  var touch = window.matchMedia("(pointer: coarse)").matches;
   if (touch) { if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 4000 }); else setTimeout(load, 2500); }
   btn.addEventListener("pointerenter", load); btn.addEventListener("focus", load);
 
@@ -315,41 +317,50 @@
   }
 
   var dlg = null, status = null;
-  function dialog() {
-    if (dlg) return dlg;
+  function build() {
     dlg = document.createElement("dialog");
     dlg.className = "sh"; dlg.setAttribute("aria-labelledby", "sh-h");
     dlg.innerHTML =
       '<h2 id="sh-h">' + T.h + '</h2><div class="sh__body"><img class="sh__img" alt="' + T.alt + '" width="216" height="384">' +
-      '<div><p>' + T.p + '</p><div class="actions">' +
+      '<div><label class="sh__label" for="sh-url">' + T.urlLabel + '</label>' +
+      '<input class="sh__url" id="sh-url" type="text" readonly value="' + url + '">' +
+      '<div class="actions sh__actions">' +
+      '<button type="button" class="btn btn--solid sh__story">' + T.story + '</button>' +
       '<a class="btn btn--solid sh__dl" download>' + T.dl + '</a>' +
+      '<button type="button" class="btn sh__link">' + T.link + '</button>' +
       '<button type="button" class="btn sh__copy">' + T.copy + '</button>' +
-      (navigator.share ? '<button type="button" class="btn sh__link">' + T.sharelink + '</button>' : '') +
       '<button type="button" class="btn sh__close">' + T.close + '</button></div>' +
-      '<p class="sh__status" aria-live="polite"></p></div></div>';
+      '<p class="sh__status" aria-live="polite"></p><p class="sh__note"></p></div></div>';
     document.body.appendChild(dlg);
     status = dlg.querySelector(".sh__status");
     dlg.querySelector(".sh__close").addEventListener("click", function () { dlg.close(); });
+    dlg.querySelector(".sh__url").addEventListener("focus", function (e) { e.target.select(); });
     dlg.querySelector(".sh__copy").addEventListener("click", function () {
-      copy().then(function () { status.textContent = T.copied; }, function () { status.textContent = T.nocopy + url; });
+      copy().then(function () { status.textContent = T.copied; }, function () { status.textContent = T.nocopy; dlg.querySelector(".sh__url").select(); });
     });
-    var sl = dlg.querySelector(".sh__link");
-    if (sl) sl.addEventListener("click", function () { navigator.share({ title: title, url: url }).catch(function () {}); });
-    dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
-    dlg.addEventListener("close", function () { btn.focus(); });
-    return dlg;
-  }
-  btn.addEventListener("click", function () {
-    if (touch && file && navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+    dlg.querySelector(".sh__link").addEventListener("click", function () {
+      navigator.share({ title: title, url: url }).catch(function () {});
+    });
+    dlg.querySelector(".sh__story").addEventListener("click", function () {
       copy().then(function () { toast(T.toast); }, function () {});
       navigator.share({ files: [file], title: title }).catch(function () {});
-      return;
-    }
-    var d = dialog();
-    d.querySelector(".sh__img").src = card;
-    d.querySelector(".sh__dl").href = card;
+    });
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", function () { btn.focus(); });
+  }
+  btn.addEventListener("click", function () {
+    if (!dlg) build();
+    load();
+    var fileOK = canShareFile();
+    dlg.querySelector(".sh__img").src = card;
+    dlg.querySelector(".sh__dl").href = card;
+    /* Show only what this device can do. */
+    dlg.querySelector(".sh__story").hidden = !fileOK;
+    dlg.querySelector(".sh__dl").hidden = fileOK;
+    dlg.querySelector(".sh__link").hidden = !navigator.share;
+    dlg.querySelector(".sh__note").textContent = fileOK ? T.note : T.noteDesk;
     status.textContent = "";
-    if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
-    d.querySelector(".sh__copy").focus();
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+    (fileOK ? dlg.querySelector(".sh__story") : dlg.querySelector(".sh__copy")).focus();
   });
 })();
