@@ -335,3 +335,17 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .term__def { display: block; }
 .term__more { display: inline-block; margin-top: 6px; font-weight: 700; color: var(--ink); }
 @media print { .term__tip { display: none !important; } .term__btn { text-decoration: none; } }
+
+/* Signage-style table (Research → Interests): black header band, ruled rows, row labels in bold. Stacks on phones. */
+.ttable { width: 100%; margin-top: 18px; border-collapse: collapse; border: 2px solid var(--rule-strong); background: var(--surface); }
+.ttable thead th { background: var(--ink); color: var(--paper); text-align: left; font-size: var(--f1); font-weight: 700; padding: 10px 16px; letter-spacing: 0.02em; }
+.ttable tbody th, .ttable td { padding: 14px 16px; border-top: 2px solid var(--rule-strong); vertical-align: top; text-align: left; }
+.ttable tbody th { width: 30%; font-weight: 700; color: var(--ink); }
+.ttable td { color: var(--ink-2); border-left: 2px solid var(--rule); }
+.ttable tbody tr:hover { background: var(--sunk); }
+@media (max-width: 599px) {
+  .ttable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ttable, .ttable tbody, .ttable tr, .ttable th, .ttable td { display: block; width: auto; }
+  .ttable tbody th { width: auto; background: var(--sunk); padding-bottom: 8px; }
+  .ttable td { border-top: 0; border-left: 0; padding-top: 6px; }
+}

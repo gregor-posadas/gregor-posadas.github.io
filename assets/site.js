@@ -165,7 +165,9 @@
     var fc = a.closest("figure") ? a.closest("figure").querySelector("figcaption") : null;
     if (!fc && a.parentElement) fc = a.parentElement.querySelector("figcaption");
     img.src = a.href; img.alt = thumb ? thumb.alt : "";
-    cap.textContent = fc ? fc.textContent : "";
+    var fcc = fc ? fc.cloneNode(true) : null;
+    if (fcc) Array.prototype.forEach.call(fcc.querySelectorAll(".term__tip"), function (t) { t.remove(); });
+    cap.textContent = fcc ? fcc.textContent.trim() : "";
     count.textContent = set.length > 1 ? (i + 1) + " " + T.of + " " + set.length : "";
     prev.disabled = i === 0; next.disabled = i === set.length - 1;
     prev.hidden = next.hidden = set.length < 2;
