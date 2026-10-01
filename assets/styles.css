@@ -356,3 +356,5 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .ttable--acro tbody th { width: 4.5rem; font-size: var(--f3); line-height: 1.1; text-align: center; }
 .split > .ttable { margin-top: 14px; }
 @media (max-width: 599px) { .ttable--acro tbody th { width: auto; text-align: left; } }
+/* Tools page: featured tools get wide cards, two across on large screens. */
+.signs--wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); }

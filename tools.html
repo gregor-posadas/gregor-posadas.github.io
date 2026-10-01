@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools · Gregor Posadas</title>
+<meta name="description" content="Free, open web tools by Gregor Posadas: the BahaWatch flood dashboard, wastewater data analysis, settling column and sedimentation basin tools, and virtual fluids labs for CE 323.">
+<meta name="google-site-verification" content="HwATnaeRPXQxeW66Q3CMdVKShwH9wC9Nbt5M4FjqppI">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://gregor-posadas.github.io/tools.html">
+<link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/tools.html">
+<link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/tools.html">
+<link rel="alternate" hreflang="x-default" href="https://gregor-posadas.github.io/tools.html">
+<meta property="og:title" content="Tools · Gregor Posadas">
+<meta property="og:description" content="Free, open web tools by Gregor Posadas: the BahaWatch flood dashboard, wastewater data analysis, settling column and sedimentation basin tools, and virtual fluids labs for CE 323.">
+<meta property="og:url" content="https://gregor-posadas.github.io/tools.html">
+<meta property="og:image" content="https://gregor-posadas.github.io/assets/img/headshot.jpg">
+<link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' fill='%23fff' text-anchor='middle'%3EGP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+<script>try { var t = localStorage.getItem("gp.theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band" role="banner">
+  <div class="band__inner">
+    <a class="brand" href="./">
+      <span class="brand__name">Gregor Posadas</span>
+      <span class="brand__sub">Environmental Engineering, UC Berkeley</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="./">About</a>
+      <a href="research.html">Research</a>
+      <a href="tools.html" aria-current="page">Tools</a>
+      <a href="publications.html">Publications</a>
+      <a href="cv.html">CV</a>
+      <a href="dad.html">Dad</a>
+      <a href="accessibility.html">Accessibility</a>
+    </nav>
+    <div class="band__tools">
+      <a class="tool" href="tl/tools.html" lang="tl" hreflang="tl">Filipino</a>
+      <button type="button" class="tool" id="sound-toggle" aria-pressed="true" data-on="Sound on" data-off="Sound off"><span class="tool__state">Sound on</span></button>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-dark="Dark mode" data-light="Light mode">Dark mode</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <div class="head">
+      <h1>Tools</h1>
+      <p>Free, open web tools I have built for public information, research and teaching. They run in the browser with no accounts, and the code is on GitHub.</p>
+    </div>
+
+    <section class="section" aria-labelledby="public-h">
+      <h2 id="public-h">For the public and for research</h2>
+      <p class="section__note">A live flood dashboard anyone can read, and the analysis code behind my wastewater work.</p>
+      <div class="signs signs--wide">
+        <a class="sign" href="https://gregor-posadas.github.io/bahawatch/" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">BW</span><span><span class="sign__name">BahaWatch flood dashboard</span><span class="sign__role">BahaWatch is a community flood-sensing project led by Noam Anglo; I build its web dashboard. A proof-of-concept showing how a network of low-cost household water-level sensors could produce live flood maps for Philippine neighborhoods. No accounts, free hosting, plain language in six languages.</span><span class="sign__meta">github.com/gregor-posadas/bahawatch · MIT</span></span><span class="sr"> (opens in a new tab)</span></a>
+        <a class="sign" href="https://github.com/gregor-posadas/wwtp-network-visualization" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">WW</span><span><span class="sign__name">WWTP statistical framework and visualization tool</span><span class="sign__role">Python tool for wastewater plant data: bootstrapped correlation analysis across Pearson, Spearman, and Kendall methods, false-discovery-rate correction, heatmaps, and network diagrams of parameter relationships.</span><span class="sign__meta">github.com/gregor-posadas/wwtp-network-visualization</span></span><span class="sr"> (opens in a new tab)</span></a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="teachtools-h">
+      <h2 id="teachtools-h">For teaching</h2>
+      <p class="section__note">Built while teaching environmental engineering and fluids labs at Boise State. For learning, not certified for engineering design.</p>
+      <div class="signs signs--wide">
+        <a class="sign" href="https://isoremoval.streamlit.app" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">Iso</span><span><span class="sign__name">Settling column isoremoval curve generator</span><span class="sign__role">An open learning tool that turns raw settling column data into isoremoval curves. Adopted in an environmental engineering course at Boise State.</span><span class="sign__meta">isoremoval.streamlit.app · github.com/gregor-posadas/isoremoval</span></span><span class="sr"> (opens in a new tab)</span></a>
+        <a class="sign" href="https://github.com/gregor-posadas/Sedimentation-Basin-Generator" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">SB</span><span><span class="sign__name">Sedimentation basin generator</span><span class="sign__role">A sedimentation basin sizing tool for educational use (not certified for engineering design).</span><span class="sign__meta">github.com/gregor-posadas/Sedimentation-Basin-Generator</span></span><span class="sr"> (opens in a new tab)</span></a>
+      </div>
+      <h3 class="rt-h" id="sims-h">Virtual fluids laboratories for CE 323</h3>
+      <p class="rt-p">Four browser-based simulations of the Boise State CE 323 fluids experiments, built while I taught the lab. Each one walks through setup and calibration, lets you run the experiment and record readings, and then checks your own calculations against the simulated apparatus. They run entirely in the browser with no accounts or installs.</p>
+      <div class="signs">
+        <a class="sign" href="tools/ce323/viscometer.html" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">μ</span><span><span class="sign__name">Stormer viscometer</span><span class="sign__role">Measure dynamic viscosity of two oils with a falling-weight drive and decide whether each behaves as a Newtonian fluid.</span><span class="sign__meta">Fluids Report 1 · fluid properties</span></span><span class="sr"> (opens in a new tab)</span></a>
+        <a class="sign" href="tools/ce323/hydrostatics.html" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">F</span><span><span class="sign__name">Hydrostatic force on a plane surface</span><span class="sign__role">Balance a quarter-circle block on a beam by filling the tank, then relate the resultant force to water depth.</span><span class="sign__meta">Fluids Report 1 · hydrostatics</span></span><span class="sr"> (opens in a new tab)</span></a>
+        <a class="sign" href="tools/ce323/bernoulli.html" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">V</span><span><span class="sign__name">Bernoulli's law in a tapered duct</span><span class="sign__role">Run steady flow through a venturi and compare velocities from manometer heads with velocities from continuity.</span><span class="sign__meta">Fluids Report 2 · energy equation</span></span><span class="sr"> (opens in a new tab)</span></a>
+        <a class="sign" href="tools/ce323/pipe-fittings.html" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">K</span><span><span class="sign__name">Energy losses in pipe fittings</span><span class="sign__role">Find minor-loss coefficients for bends, a contraction, an enlargement, and a gate valve across a range of flows.</span><span class="sign__meta">Fluids Report 3 · minor losses</span></span><span class="sr"> (opens in a new tab)</span></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Gregor Posadas · Berkeley, California</p>
+    <p>Set in Atkinson Hyperlegible Next. <a href="accessibility.html">How this site is built for accessibility</a>.</p>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

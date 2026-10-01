@@ -25,6 +25,18 @@
     <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/research.html"/>
   </url>
   <url>
+    <loc>https://gregor-posadas.github.io/tools.html</loc>
+    <lastmod>2026-10-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/tools.html"/>
+    <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/tools.html"/>
+  </url>
+  <url>
+    <loc>https://gregor-posadas.github.io/tl/tools.html</loc>
+    <lastmod>2026-10-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/tools.html"/>
+    <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/tools.html"/>
+  </url>
+  <url>
     <loc>https://gregor-posadas.github.io/publications.html</loc>
     <lastmod>2026-10-01</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/publications.html"/>

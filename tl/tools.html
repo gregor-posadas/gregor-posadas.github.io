@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mga Kasangkapan · Gregor Posadas</title>
+<meta name="description" content="Mga libre at bukas na web tool ni Gregor Posadas: ang BahaWatch na dashboard ng baha, pagsusuri ng datos ng wastewater, mga kasangkapan para sa settling column at sedimentation basin, at mga virtual na laboratoryo ng fluids para sa CE 323.">
+<meta name="google-site-verification" content="HwATnaeRPXQxeW66Q3CMdVKShwH9wC9Nbt5M4FjqppI">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://gregor-posadas.github.io/tl/tools.html">
+<link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/tools.html">
+<link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/tools.html">
+<link rel="alternate" hreflang="x-default" href="https://gregor-posadas.github.io/tools.html">
+<meta property="og:title" content="Mga Kasangkapan · Gregor Posadas">
+<meta property="og:description" content="Mga libre at bukas na web tool ni Gregor Posadas: ang BahaWatch na dashboard ng baha, pagsusuri ng datos ng wastewater, mga kasangkapan para sa settling column at sedimentation basin, at mga virtual na laboratoryo ng fluids para sa CE 323.">
+<meta property="og:url" content="https://gregor-posadas.github.io/tl/tools.html">
+<meta property="og:image" content="https://gregor-posadas.github.io/assets/img/headshot.jpg">
+<link rel="preload" href="../fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/AtkinsonHyperlegibleNext-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' fill='%23fff' text-anchor='middle'%3EGP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/styles.css">
+<script>try { var t = localStorage.getItem("gp.theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+</head>
+<body>
+<a class="skip" href="#main">Lumaktaw sa nilalaman</a>
+<header class="band" role="banner">
+  <div class="band__inner">
+    <a class="brand" href="./">
+      <span class="brand__name">Gregor Posadas</span>
+      <span class="brand__sub">Environmental Engineering, UC Berkeley</span>
+    </a>
+    <nav class="nav" aria-label="Pangunahin">
+      <a href="./">Tungkol</a>
+      <a href="research.html">Pananaliksik</a>
+      <a href="tools.html" aria-current="page">Mga Kasangkapan</a>
+      <a href="publications.html">Mga Publikasyon</a>
+      <a href="cv.html">CV</a>
+      <a href="dad.html">Dad</a>
+      <a href="accessibility.html">Aksesibilidad</a>
+    </nav>
+    <div class="band__tools">
+      <a class="tool" href="../tools.html" lang="en" hreflang="en">English</a>
+      <button type="button" class="tool" id="sound-toggle" aria-pressed="true" data-on="May tunog" data-off="Walang tunog"><span class="tool__state">May tunog</span></button>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-dark="Madilim" data-light="Maliwanag">Madilim</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <div class="head">
+      <h1>Mga Kasangkapan</h1>
+      <p>Mga libre at bukas na web tool na binuo ko para sa impormasyong pampubliko, pananaliksik at pagtuturo. Tumatakbo ang mga ito sa browser nang walang account, at nasa GitHub ang code.</p>
+    </div>
+
+    <section class="section" aria-labelledby="public-h">
+      <h2 id="public-h">Para sa publiko at sa pananaliksik</h2>
+      <p class="section__note">Isang buhay na dashboard ng baha na mababasa ng sinuman, at ang code sa pagsusuri sa likod ng aking gawain sa wastewater.</p>
+      <div class="signs signs--wide">
+        <a class="sign" href="https://gregor-posadas.github.io/bahawatch/" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">BW</span><span><span class="sign__name">BahaWatch, dashboard ng baha</span><span class="sign__role">Ang BahaWatch ay proyektong pang-komunidad sa pagsubaybay ng baha na pinamumunuan ni Noam Anglo; ako ang bumubuo ng web dashboard nito. Isang proof-of-concept na web dashboard na nagpapakita kung paano makagagawa ng live na mapa ng baha para sa mga barangay sa Pilipinas ang network ng murang household water-level sensor. Walang account, libreng hosting, simpleng wika sa anim na lengguwahe.</span><span class="sign__meta">github.com/gregor-posadas/bahawatch · MIT</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+        <a class="sign" href="https://github.com/gregor-posadas/wwtp-network-visualization" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">WW</span><span><span class="sign__name">WWTP statistical framework and visualization tool</span><span class="sign__role">Kasangkapang Python para sa datos ng planta ng wastewater: bootstrapped na pagsusuri ng korelasyon (Pearson, Spearman, Kendall), pagwawasto ng false discovery rate, heatmap, at network diagram ng ugnayan ng mga parameter.</span><span class="sign__meta">github.com/gregor-posadas/wwtp-network-visualization</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="teachtools-h">
+      <h2 id="teachtools-h">Para sa pagtuturo</h2>
+      <p class="section__note">Binuo habang nagtuturo ng environmental engineering at mga laboratoryo ng fluids sa Boise State. Para sa pag-aaral, hindi sertipikado para sa disenyong pang-inhinyeriya.</p>
+      <div class="signs signs--wide">
+        <a class="sign" href="https://isoremoval.streamlit.app" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">Iso</span><span><span class="sign__name">Isoremoval curve generator para sa settling column</span><span class="sign__role">Isang bukas na kasangkapang pampag-aaral na ginagawang isoremoval curve ang hilaw na datos mula sa settling column. Ginagamit sa isang kurso sa environmental engineering sa Boise State.</span><span class="sign__meta">isoremoval.streamlit.app · github.com/gregor-posadas/isoremoval</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+        <a class="sign" href="https://github.com/gregor-posadas/Sedimentation-Basin-Generator" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">SB</span><span><span class="sign__name">Sedimentation basin generator</span><span class="sign__role">Kasangkapan sa pagsukat ng sedimentation basin para sa pag-aaral (hindi sertipikado para sa aktuwal na disenyo).</span><span class="sign__meta">github.com/gregor-posadas/Sedimentation-Basin-Generator</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+      </div>
+      <h3 class="rt-h" id="sims-h">Mga virtual na laboratoryo ng fluids para sa CE 323</h3>
+      <p class="rt-p">Apat na simulasyon sa browser ng mga eksperimento sa fluids ng CE 323 sa Boise State, na binuo ko habang itinuturo ang laboratoryo. Ginagabayan ng bawat isa ang setup at calibration, pinapatakbo ang eksperimento at itinatala ang mga reading, at sinusuri ang sarili mong kalkulasyon laban sa simulated na kagamitan. Tumatakbo ang lahat sa browser nang walang account o installation. Nasa Ingles ang mga simulasyon.</p>
+      <div class="signs">
+        <a class="sign" href="../tools/ce323/viscometer.html" hreflang="en" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">μ</span><span><span class="sign__name">Stormer viscometer</span><span class="sign__role">Sukatin ang dynamic viscosity ng dalawang langis gamit ang bumabagsak na pabigat, at alamin kung Newtonian ang bawat isa.</span><span class="sign__meta">Fluids Report 1 · katangian ng fluid</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+        <a class="sign" href="../tools/ce323/hydrostatics.html" hreflang="en" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">F</span><span><span class="sign__name">Hydrostatic force sa patag na ibabaw</span><span class="sign__role">Pantayin ang quarter-circle block sa isang beam sa pagpuno ng tangke, at iugnay ang resultant force sa lalim ng tubig.</span><span class="sign__meta">Fluids Report 1 · hydrostatics</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+        <a class="sign" href="../tools/ce323/bernoulli.html" hreflang="en" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">V</span><span><span class="sign__name">Batas ni Bernoulli sa tapered duct</span><span class="sign__role">Paagusin ang tubig sa venturi at ihambing ang bilis mula sa manometer at mula sa continuity.</span><span class="sign__meta">Fluids Report 2 · energy equation</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+        <a class="sign" href="../tools/ce323/pipe-fittings.html" hreflang="en" target="_blank" rel="noopener"><span class="bullet" aria-hidden="true">K</span><span><span class="sign__name">Energy losses sa pipe fittings</span><span class="sign__role">Hanapin ang minor-loss coefficient ng mga liko, contraction, enlargement, at gate valve sa iba't ibang daloy.</span><span class="sign__meta">Fluids Report 3 · minor losses</span></span><span class="sr"> (magbubukas sa bagong tab)</span></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Gregor Posadas · Berkeley, California</p>
+    <p>Nakatipa sa Atkinson Hyperlegible Next. <a href="accessibility.html">Paano ginawang accessible ang site na ito</a>. Ang salin sa Filipino ay gawa ng may-ari ng site; ipaalam kung may dapat itama.</p>
+  </div>
+</footer>
+<script src="../assets/site.js"></script>
+</body>
+</html>
