@@ -248,3 +248,14 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .solo { margin: 16px 0 0; max-width: 40rem; border: 2px solid var(--rule-strong); background: var(--surface); }
 .solo img { display: block; width: 100%; height: auto; }
 .solo figcaption { padding: 10px 14px; font-size: var(--f1); color: var(--ink-2); border-top: 2px solid var(--rule-strong); }
+
+/* Tatay page: vertical route line for a long life */
+@media (min-width: 800px) {
+  .route--v ol { grid-auto-flow: row; grid-auto-columns: auto; max-width: var(--read); }
+  .route--v li { grid-template-columns: 28px 1fr; grid-template-rows: none; padding: 0 0 18px; }
+  .route--v li::before { left: 12px; right: auto; top: 14px; bottom: -4px; width: 4px; height: auto; }
+}
+.route--v h2 { font-size: var(--f3); color: var(--ink); padding-bottom: 10px; border-bottom: 4px solid var(--rule-strong); margin-bottom: 16px; }
+.gallery { align-items: start; }
+.intro figure { margin: 0; }
+.intro figure a { display: block; }
