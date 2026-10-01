@@ -279,3 +279,77 @@
   }, { threshold: [0, 0.6] });
   vids.forEach(function (v) { io.observe(v); });
 })();
+
+/* Share: a story-sized card (1080 x 1920) for each page, like a music app's "share to story".
+   Phones get the system share sheet with the image (Instagram Stories is one of the targets),
+   and the page link is copied so it can go on a Link sticker. Elsewhere a small dialog offers
+   the image, a download, and a copy-link button. */
+(function () {
+  var btn = document.getElementById("share-btn");
+  if (!btn) return;
+  var tl = (document.documentElement.lang || "en").indexOf("tl") === 0;
+  var T = tl ? { h: "Ibahagi ang pahinang ito", p: "Isang story card para sa Instagram. Sa telepono, ipinapadala ito ng button na Ibahagi sa share sheet, kung saan mapipili ang Instagram Stories. Kinokopya rin ang link para maidagdag mo ito gamit ang Link sticker.", dl: "I-download ang larawan", copy: "Kopyahin ang link", copied: "Nakopya ang link.", nocopy: "Hindi makopya. Narito ang link: ", sharelink: "Ibahagi ang link", close: "Isara", alt: "Story card ng pahinang ito", toast: "Nakopya ang link. Idagdag ito gamit ang Link sticker sa Instagram." }
+               : { h: "Share this page", p: "A story card for Instagram. On a phone, the Share button sends it to your share sheet, where you can pick Instagram Stories. The link is copied too, so you can add it with a Link sticker.", dl: "Download image", copy: "Copy link", copied: "Link copied.", nocopy: "Could not copy. Here is the link: ", sharelink: "Share link", close: "Close", alt: "Story card for this page", toast: "Link copied. Add it with a Link sticker in Instagram." };
+  var url = btn.getAttribute("data-url"), card = btn.getAttribute("data-card"), title = btn.getAttribute("data-title");
+  var touch = window.matchMedia("(pointer: coarse)").matches;
+  var file = null;
+  function load() {
+    if (file || !window.fetch || typeof File === "undefined") return;
+    fetch(card).then(function (r) { return r.blob(); }).then(function (b) {
+      file = new File([b], card.split("/").pop(), { type: "image/jpeg" });
+    }).catch(function () {});
+  }
+  /* Phones fetch the card ahead of time so the share sheet can open straight from the tap. */
+  if (touch) { if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 4000 }); else setTimeout(load, 2500); }
+  btn.addEventListener("pointerenter", load); btn.addEventListener("focus", load);
+
+  function copy() {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(url); } catch (e) {}
+    return Promise.reject();
+  }
+  var toastEl = null, toastT = null;
+  function toast(msg) {
+    if (!toastEl) { toastEl = document.createElement("p"); toastEl.className = "toast"; toastEl.setAttribute("role", "status"); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg; toastEl.classList.add("is-on");
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("is-on"); }, 6000);
+  }
+
+  var dlg = null, status = null;
+  function dialog() {
+    if (dlg) return dlg;
+    dlg = document.createElement("dialog");
+    dlg.className = "sh"; dlg.setAttribute("aria-labelledby", "sh-h");
+    dlg.innerHTML =
+      '<h2 id="sh-h">' + T.h + '</h2><div class="sh__body"><img class="sh__img" alt="' + T.alt + '" width="216" height="384">' +
+      '<div><p>' + T.p + '</p><div class="actions">' +
+      '<a class="btn btn--solid sh__dl" download>' + T.dl + '</a>' +
+      '<button type="button" class="btn sh__copy">' + T.copy + '</button>' +
+      (navigator.share ? '<button type="button" class="btn sh__link">' + T.sharelink + '</button>' : '') +
+      '<button type="button" class="btn sh__close">' + T.close + '</button></div>' +
+      '<p class="sh__status" aria-live="polite"></p></div></div>';
+    document.body.appendChild(dlg);
+    status = dlg.querySelector(".sh__status");
+    dlg.querySelector(".sh__close").addEventListener("click", function () { dlg.close(); });
+    dlg.querySelector(".sh__copy").addEventListener("click", function () {
+      copy().then(function () { status.textContent = T.copied; }, function () { status.textContent = T.nocopy + url; });
+    });
+    var sl = dlg.querySelector(".sh__link");
+    if (sl) sl.addEventListener("click", function () { navigator.share({ title: title, url: url }).catch(function () {}); });
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", function () { btn.focus(); });
+    return dlg;
+  }
+  btn.addEventListener("click", function () {
+    if (touch && file && navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+      copy().then(function () { toast(T.toast); }, function () {});
+      navigator.share({ files: [file], title: title }).catch(function () {});
+      return;
+    }
+    var d = dialog();
+    d.querySelector(".sh__img").src = card;
+    d.querySelector(".sh__dl").href = card;
+    status.textContent = "";
+    if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+    d.querySelector(".sh__copy").focus();
+  });
+})();

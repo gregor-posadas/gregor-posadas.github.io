@@ -358,3 +358,24 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 @media (max-width: 599px) { .ttable--acro tbody th { width: auto; text-align: left; } }
 /* Tools page: featured tools get wide cards, two across on large screens. */
 .signs--wide { grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); }
+
+/* Share dialog and toast */
+.sh { border: 2px solid var(--rule-strong); background: var(--surface); color: var(--ink); padding: 24px; width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 8px 8px 0 0 var(--rule-strong); }
+.sh::backdrop { background: rgba(0, 0, 0, 0.6); }
+.sh h2 { font-size: var(--f3); margin-bottom: 14px; }
+.sh__body { display: grid; grid-template-columns: 216px 1fr; gap: 20px; align-items: start; }
+.sh__img { display: block; width: 216px; height: auto; border: 2px solid var(--rule-strong); }
+.sh__status { margin-top: 10px; font-size: var(--f1); color: var(--ink-2); min-height: 1.5em; overflow-wrap: anywhere; }
+@media (max-width: 599px) { .sh__body { grid-template-columns: 1fr; } .sh__img { width: 160px; } }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); max-width: calc(100vw - 32px); background: var(--ink); color: var(--paper); padding: 12px 18px; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+@media print { .sh, .toast, #share-btn { display: none !important; } }
+/* Large screens: tighten the header a little so brand, menu and tools stay on one line. */
+@media (min-width: 1200px) {
+  .band__inner { padding-left: 40px; padding-right: 40px; gap: 12px; }
+  .nav a { padding: 0 10px; }
+  .band__tools { gap: 6px; }
+  .tool, .theme-toggle { padding-left: 12px; padding-right: 12px; }
+}
+.toast { width: max-content; }
