@@ -7,10 +7,13 @@
 <meta name="description" content="Gregor Posadas is a PhD student in Environmental Engineering at UC Berkeley (Nelson Research Group) working on water governance and infrastructure, with roots in wastewater engineering and the Philippines.">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://gregor-posadas.github.io/">
+<link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/">
+<link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/">
+<link rel="alternate" hreflang="x-default" href="https://gregor-posadas.github.io/">
 <meta property="og:title" content="Gregor Posadas">
-<meta property="og:description" content="PhD student in Environmental Engineering at UC Berkeley. Water governance, wastewater engineering, the Philippines.">
+<meta property="og:description" content="Gregor Posadas is a PhD student in Environmental Engineering at UC Berkeley (Nelson Research Group) working on water governance and infrastructure, with roots in wastewater engineering and the Philippines.">
 <meta property="og:url" content="https://gregor-posadas.github.io/">
-<meta property="og:type" content="profile">
+<meta property="og:image" content="https://gregor-posadas.github.io/assets/img/headshot.jpg">
 <link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Bold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' fill='%23fff' text-anchor='middle'%3EGP%3C/text%3E%3C/svg%3E">
@@ -24,13 +27,17 @@
   "givenName": "Gregor",
   "familyName": "Posadas",
   "url": "https://gregor-posadas.github.io/",
+  "image": "https://gregor-posadas.github.io/assets/img/headshot.jpg",
   "email": "mailto:gregorposadas@berkeley.edu",
   "jobTitle": "PhD student, Environmental Engineering",
   "affiliation": { "@type": "CollegeOrUniversity", "name": "University of California, Berkeley" },
   "alumniOf": { "@type": "CollegeOrUniversity", "name": "Boise State University" },
+  "identifier": { "@type": "PropertyValue", "propertyID": "ORCID", "value": "https://orcid.org/0009-0003-4541-7379" },
   "sameAs": [
+    "https://orcid.org/0009-0003-4541-7379",
     "https://www.linkedin.com/in/gregorposadas/",
     "https://github.com/gregor-posadas",
+    "https://medium.com/@gregorposadas",
     "https://nelsongroup.berkeley.edu/current-members/"
   ]
 }
@@ -49,8 +56,13 @@
       <a href="research.html">Research</a>
       <a href="publications.html">Publications</a>
       <a href="cv.html">CV</a>
+      <a href="tatay.html">Tatay</a>
     </nav>
-    <button type="button" class="theme-toggle" id="theme-toggle">Dark mode</button>
+    <div class="band__tools">
+      <a class="tool" href="tl/" lang="tl" hreflang="tl">Filipino</a>
+      <button type="button" class="tool" id="sound-toggle" aria-pressed="true" data-on="Sound on" data-off="Sound off"><span class="tool__state">Sound on</span></button>
+      <button type="button" class="theme-toggle" id="theme-toggle" data-dark="Dark mode" data-light="Light mode">Dark mode</button>
+    </div>
   </div>
 </header>
 
@@ -62,7 +74,7 @@
       <p>PhD student in Environmental Engineering at UC Berkeley, in the <a href="https://nelsongroup.berkeley.edu/">Nelson Research Group</a>, with a Designated Emphasis in Development Engineering.</p>
     </div>
 
-    <section class="intro" aria-labelledby="about-h">
+    <section class="intro has-photo" aria-labelledby="about-h">
       <div class="intro__text">
         <h2 id="about-h" class="sr">About</h2>
         <p>I am a first-year PhD student in Environmental Engineering at the University of California, Berkeley, advised by Prof. Kara Nelson and co-advised by Prof. Maya Carrasquillo. I came to Berkeley from Boise State University, where I earned my bachelor's and master's degrees in Civil Engineering and studied the performance of retrofit oxygenation technologies in wastewater treatment and the behavior of emerging contaminants across wastewater unit processes.</p>
@@ -72,10 +84,14 @@
         <div class="actions">
           <a class="btn btn--solid" href="mailto:gregorposadas@berkeley.edu">Email me</a>
           <a class="btn" href="files/Posadas_CV.pdf">Download CV (PDF)</a>
+          <a class="btn" href="https://orcid.org/0009-0003-4541-7379">ORCID</a>
           <a class="btn" href="https://www.linkedin.com/in/gregorposadas/">LinkedIn</a>
-          <a class="btn" href="https://github.com/gregor-posadas">GitHub</a>
         </div>
       </div>
+      <figure>
+        <img class="photo" src="assets/img/headshot.jpg" alt="Gregor Posadas smiling in a cream barong Tagalog against a grey studio backdrop" width="900" height="1125">
+        <figcaption class="photo-cap">In a barong Tagalog, 2025.</figcaption>
+      </figure>
     </section>
 
     <section class="section" aria-labelledby="now-h">
@@ -108,12 +124,30 @@
       </ol>
     </section>
 
+    <section class="section" aria-labelledby="write-h">
+      <h2 id="write-h">Writing and outreach</h2>
+      <p class="rt-p">I write occasionally on <a href="https://medium.com/@gregorposadas">Medium</a> about water, infrastructure, and the Philippines. In May 2025 I was <a href="https://pinoyscientists.com/scientist/gregor-ethan-posadas/">Pinoy Scientists</a>' featured scientist and wrote a daily series on Philippine infrastructure and the role of Filipino engineers in national development. A few of the cards from that week:</p>
+      <ul class="gallery gallery--4" aria-label="Cards from the Pinoy Scientists series">
+        <li><a href="assets/img/ps-01-politics.jpg"><figure><img src="assets/img/ps-01-politics-thumb.jpg" alt="Engineering can't fix what politics keeps breaking. A man in an orange poncho wades through a flooded street. Flood control has a ₱1.14 trillion budget, but the streets still look like this." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-02-people.jpg"><figure><img src="assets/img/ps-02-people-thumb.jpg" alt="Infrastructure must benefit the people it serves. 64% of Filipinos do not own a car, yet road infrastructure receives 31.4% of the infrastructure budget. Photo of Metro Manila traffic." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-03-projects.jpg"><figure><img src="assets/img/ps-03-projects-thumb.jpg" alt="The government loves starting new projects but is terrible at completing existing ones. Quote from GlobalSource Partners analysts on the ever-lengthening list of flagship projects." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-04-governance.jpg"><figure><img src="assets/img/ps-04-governance-thumb.jpg" alt="Engineering delivers clean water; governance decides who gets it. A 2023 report quoted a Cavite resident calling PrimeWater's supply unusable, with fees up to 300% higher after privatization." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-05-energy.jpg"><figure><img src="assets/img/ps-05-energy-thumb.jpg" alt="Filipinos face the consequences of mismanaged energy infrastructure. In 2020 about 1.6 million households lacked electricity; rates of about $0.20 per kWh are the highest in ASEAN." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-06-engineers.jpg"><figure><img src="assets/img/ps-06-engineers-thumb.jpg" alt="You can't build a nation without the people who know how to build it. Entry-level engineers earn ₱16,000 to ₱22,000 a month, and engineers make up 28% of Filipino science and technology professionals working abroad." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-07-climate.jpg"><figure><img src="assets/img/ps-07-climate-thumb.jpg" alt="When infrastructure isn't built for climate change, the most vulnerable suffer the most. In 2024 green investment dropped 12% and renewables made up only 22% of the energy mix." width="440" height="550" loading="lazy"></figure></a></li>
+        <li><a href="assets/img/ps-08-quality.jpg"><figure><img src="assets/img/ps-08-quality-thumb.jpg" alt="Quality over quantity. The Philippines spent over ₱1.5 trillion on infrastructure in 2024, but roads still flood and bridges still collapse. We don't need more ribbon cuttings; we need systems that serve." width="440" height="550" loading="lazy"></figure></a></li>
+      </ul>
+      <p class="section__note">Each card opens at full size. The photographs on the cards are credited to their photographers on the cards themselves.</p>
+    </section>
+
     <section class="section" aria-labelledby="links-h">
       <h2 id="links-h">Find me</h2>
       <div class="signs signs--3">
         <a class="sign" href="mailto:gregorposadas@berkeley.edu"><span class="bullet" aria-hidden="true">@</span><span><span class="sign__name">Email</span><span class="sign__role">gregorposadas@berkeley.edu</span></span></a>
+        <a class="sign" href="https://orcid.org/0009-0003-4541-7379"><span class="bullet" aria-hidden="true">iD</span><span><span class="sign__name">ORCID</span><span class="sign__role">0009-0003-4541-7379</span></span></a>
         <a class="sign" href="https://www.linkedin.com/in/gregorposadas/"><span class="bullet" aria-hidden="true">in</span><span><span class="sign__name">LinkedIn</span><span class="sign__role">linkedin.com/in/gregorposadas</span></span></a>
         <a class="sign" href="https://github.com/gregor-posadas"><span class="bullet" aria-hidden="true">&lt;/&gt;</span><span><span class="sign__name">GitHub</span><span class="sign__role">github.com/gregor-posadas</span></span></a>
+        <a class="sign" href="https://medium.com/@gregorposadas"><span class="bullet" aria-hidden="true">M</span><span><span class="sign__name">Medium</span><span class="sign__role">medium.com/@gregorposadas</span></span></a>
         <a class="sign" href="https://nelsongroup.berkeley.edu/current-members/"><span class="bullet" aria-hidden="true">N</span><span><span class="sign__name">Nelson Research Group</span><span class="sign__role">Current members page</span></span></a>
         <a class="sign" href="https://pinoyscientists.com/scientist/gregor-ethan-posadas/"><span class="bullet" aria-hidden="true">PH</span><span><span class="sign__name">Pinoy Scientists</span><span class="sign__role">Featured scientist, May 2025</span></span></a>
         <a class="sign" href="https://www.storycollider.org/stories/2024/3/6/full-circle-stories-about-going-back-to-the-start"><span class="bullet" aria-hidden="true">SC</span><span><span class="sign__name">The Story Collider</span><span class="sign__role">"Full Circle", a story about service and engineering</span></span></a>
