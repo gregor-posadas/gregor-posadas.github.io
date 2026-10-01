@@ -351,3 +351,8 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 }
 .ttable--years tbody th { width: 7rem; font-variant-numeric: tabular-nums; }
 @media (max-width: 599px) { .ttable--years tbody th { width: auto; } }
+.ttable caption { caption-side: top; text-align: left; font-weight: 700; font-size: var(--f1); color: var(--ink); padding: 0 0 10px; }
+.ttable caption.sr { padding: 0; }
+.ttable--acro tbody th { width: 4.5rem; font-size: var(--f3); line-height: 1.1; text-align: center; }
+.split > .ttable { margin-top: 14px; }
+@media (max-width: 599px) { .ttable--acro tbody th { width: auto; text-align: left; } }
