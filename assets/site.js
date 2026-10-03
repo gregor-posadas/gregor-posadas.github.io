@@ -393,3 +393,109 @@
   window.addEventListener("resize", update);
   update();
 })();
+
+/* Explanatory animations. Each figure draws one simple scene in its SVG. They play only while on screen,
+   start paused for people who ask for reduced motion, and every one has a Pause / Play button. */
+(function () {
+  var figs = document.querySelectorAll("[data-anim]");
+  if (!figs.length) return;
+  var NS = "http://www.w3.org/2000/svg";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function ring(pool, i, cx, cy, r, op) {
+    var c = pool[i];
+    if (op <= 0 || r <= 0) { c.style.display = "none"; return; }
+    c.style.display = ""; c.setAttribute("cx", cx.toFixed(1)); c.setAttribute("cy", cy.toFixed(1));
+    c.setAttribute("r", r.toFixed(1)); c.style.opacity = op.toFixed(3);
+  }
+  var SCENES = {
+    // A source gliding across a fading grid, leaving rings that crowd ahead of it.
+    ripples: function (svg) {
+      var grid = el("g", { "class": "an-grid" }, svg), rings = el("g", {}, svg);
+      var trail = el("polyline", { "class": "an-trail" }, svg), dot = el("circle", { "class": "an-dot", r: 6 }, svg);
+      for (var x = 40; x < 400; x += 40) el("line", { x1: x, y1: 0, x2: x, y2: 240 }, grid);
+      for (var y = 40; y < 240; y += 40) el("line", { x1: 0, y1: y, x2: 400, y2: y }, grid);
+      var MOVE = 7, LOOP = 10, C = 80, EVERY = 0.45, RMAX = 240, pool = [];
+      for (var i = 0; i < 17; i++) pool.push(el("circle", { "class": "an-ring" }, rings));
+      function pos(t) { var u = Math.min(Math.max(t / MOVE, 0), 1), s = u * u * (3 - 2 * u); return [50 + 300 * s, 125 + 40 * Math.sin(u * Math.PI * 1.2)]; }
+      return { still: 5.2, draw: function (t) {
+        t = t % LOOP;
+        grid.style.opacity = Math.max(0, 1 - t / 1.8);
+        var p = pos(t); dot.setAttribute("cx", p[0].toFixed(1)); dot.setAttribute("cy", p[1].toFixed(1));
+        var pts = [], end = Math.min(t, MOVE);
+        for (var k = 0; k <= 40; k++) { var q = pos(end * k / 40); pts.push(q[0].toFixed(1) + "," + q[1].toFixed(1)); }
+        trail.setAttribute("points", pts.join(" "));
+        for (var j = 0; j < pool.length; j++) {
+          var te = j * EVERY, r = (t - te) * C;
+          if (te > MOVE || t < te) { ring(pool, j, 0, 0, 0, 0); continue; }
+          var e = pos(te); ring(pool, j, e[0], e[1], r, 1 - r / RMAX);
+        }
+      } };
+    },
+    // A charge shaking up and down, sending out rings while its shaking dies away.
+    radiation: function (svg) {
+      var rings = el("g", {}, svg), dot = el("circle", { "class": "an-dot", r: 6 }, svg);
+      var LOOP = 12, C = 90, EVERY = 0.4, RMAX = 300, PERIOD = 1.6, X = 70, pool = [];
+      var N = Math.ceil(RMAX / C / EVERY) + 2;
+      for (var i = 0; i < N; i++) pool.push(el("circle", { "class": "an-ring" }, rings));
+      function amp(t) { return 50 * Math.exp(-t / 4); }
+      function y(t) { return 120 + amp(t) * Math.sin(2 * Math.PI * t / PERIOD); }
+      function acc(t) { return Math.abs(amp(t) * Math.sin(2 * Math.PI * t / PERIOD)) / 50; }
+      return { still: 2.1, draw: function (t) {
+        t = t % LOOP;
+        dot.setAttribute("cx", X); dot.setAttribute("cy", y(t).toFixed(1));
+        var first = Math.max(0, Math.floor((t - RMAX / C) / EVERY) + 1);
+        for (var j = 0; j < pool.length; j++) {
+          var n = first + j, te = n * EVERY, r = (t - te) * C;
+          if (te > t) { ring(pool, j, 0, 0, 0, 0); continue; }
+          ring(pool, j, X, y(te), r, acc(te) * (1 - r / RMAX));
+        }
+      } };
+    },
+    // A space-time diagram: a world line climbing up, with light cones opening from points along it.
+    cones: function (svg) {
+      var cones = el("g", {}, svg), path = el("polyline", { "class": "an-trail" }, svg), dot = el("circle", { "class": "an-dot", r: 6 }, svg);
+      var LOOP = 9, CLIMB = 7, Y0 = 220, Y1 = 30, EVERY = 1.1, GROW = 70, pool = [];
+      function at(t) { var u = Math.min(Math.max(t / CLIMB, 0), 1), yy = Y0 - (Y0 - Y1) * u; return [215 + 32 * Math.sin((Y0 - yy) / 42), yy]; }
+      for (var i = 0; i < 7; i++) pool.push(el("polyline", { "class": "an-cone" }, cones));
+      return { still: 5, draw: function (t) {
+        t = t % LOOP;
+        var p = at(t); dot.setAttribute("cx", p[0].toFixed(1)); dot.setAttribute("cy", p[1].toFixed(1));
+        var pts = [], end = Math.min(t, CLIMB);
+        for (var k = 0; k <= 40; k++) { var q = at(end * k / 40); pts.push(q[0].toFixed(1) + "," + q[1].toFixed(1)); }
+        path.setAttribute("points", pts.join(" "));
+        for (var j = 0; j < pool.length; j++) {
+          var te = 0.3 + j * EVERY, c = pool[j];
+          if (te > CLIMB || t < te) { c.style.display = "none"; continue; }
+          var e = at(te), h = Math.min((t - te) * GROW, 42, e[1] - 14);
+          c.style.display = ""; c.style.opacity = (1 - 0.45 * Math.min(1, (t - te) / 3)).toFixed(3);
+          c.setAttribute("points", (e[0] - h).toFixed(1) + "," + (e[1] - h).toFixed(1) + " " + e[0].toFixed(1) + "," + e[1].toFixed(1) + " " + (e[0] + h).toFixed(1) + "," + (e[1] - h).toFixed(1));
+        }
+      } };
+    }
+  };
+  Array.prototype.forEach.call(figs, function (fig) {
+    var make = SCENES[fig.getAttribute("data-anim")], svg = fig.querySelector("svg"), btn = fig.querySelector(".anim__btn");
+    if (!make || !svg) return;
+    var scene = make(svg), playing = !reduce, visible = false, t = scene.still, last = null, raf = null;
+    scene.draw(t);
+    function label() { if (btn) btn.textContent = playing ? btn.getAttribute("data-pause") : btn.getAttribute("data-play"); }
+    function frame(now) {
+      raf = null;
+      if (!playing || !visible) { last = null; return; }
+      if (last !== null) t += Math.min(0.1, (now - last) / 1000);
+      last = now; scene.draw(t); raf = requestAnimationFrame(frame);
+    }
+    function kick() { if (playing && visible && raf === null) raf = requestAnimationFrame(frame); }
+    if (btn) btn.addEventListener("click", function () { playing = !playing; label(); kick(); });
+    label();
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; kick(); }, { threshold: 0.2 }).observe(fig);
+    } else { visible = true; kick(); }
+  });
+})();

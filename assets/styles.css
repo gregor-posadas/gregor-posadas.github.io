@@ -412,3 +412,17 @@ html:has(.toc) { scroll-padding-top: 76px; }
   .toc__list a { min-height: 38px; }
   html:has(.toc) { scroll-padding-top: 110px; }
 }
+/* Explanatory animations (Dad page and dissertation page): one ink colour, thin lines, a pause button. */
+.anims { display: grid; gap: 20px; align-content: start; margin-top: 14px; }
+.anim { margin: 0; border: 2px solid var(--rule-strong); background: var(--surface); }
+.anim svg { display: block; width: 100%; height: auto; }
+.anim .an-dot { fill: var(--ink); }
+.anim .an-ring, .anim .an-cone { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.anim .an-trail { fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 3 5; }
+.anim .an-grid line { stroke: var(--ink-2); stroke-width: 0.75; opacity: 0.5; }
+.anim .an-axis { stroke: var(--ink-2); stroke-width: 1.5; }
+.anim .an-label { fill: var(--ink-2); font-size: 14px; font-family: inherit; }
+.anim figcaption { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; padding: 10px 14px; border-top: 2px solid var(--rule-strong); font-size: var(--f1); color: var(--ink-2); }
+.anim__btn { flex: none; min-height: 36px; padding: 0 14px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.anim__btn:hover { background: var(--surface); }
+@media print { .anim__btn { display: none; } }
