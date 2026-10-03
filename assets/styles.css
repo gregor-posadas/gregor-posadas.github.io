@@ -389,29 +389,9 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .sh__actions [hidden] { display: none; }
 .sh__note { margin-top: 6px; font-size: var(--f1); color: var(--ink-2); }
 @media (max-width: 599px) { .sh__body { grid-template-columns: 1fr; } .sh__img { width: 120px; } .sh__actions .btn { flex: 1 1 100%; justify-content: center; } }
-/* Dad page: "On this page" bar. It sticks to the top while reading; on narrow screens the links scroll sideways inside the bar. */
-.toc { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; margin: 0 -16px 28px; padding: 0 16px; background: var(--paper); border-bottom: 2px solid var(--rule-strong); }
-@media (min-width: 720px) { .toc { margin-left: -32px; margin-right: -32px; padding: 0 32px; } }
-@media (min-width: 1100px) { .toc { margin-left: -56px; margin-right: -56px; padding: 0 56px; } }
-.toc__label { flex: none; margin: 0; font-size: var(--f1); font-weight: 700; color: var(--ink-2); }
-@media (max-width: 599px) { .toc__label { display: none; } }
-.toc__list { position: relative; display: flex; gap: 2px; flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; overflow-x: auto; scrollbar-width: thin; }
-.toc__list li { flex: none; margin: 0; }
-.toc__list a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; white-space: nowrap; text-decoration: none; color: var(--ink); font-size: var(--f1); border-bottom: 4px solid transparent; }
-.toc__list a:hover { border-bottom-color: var(--rule-strong); }
-.toc__list a[aria-current="true"] { border-bottom-color: var(--ink); font-weight: 700; }
-.toc__list a:focus-visible { outline-offset: -4px; }
-html:has(.toc) { scroll-padding-top: 76px; }
-@media (prefers-reduced-motion: no-preference) { html:has(.toc) { scroll-behavior: smooth; } }
-@media print { .toc { display: none; } }
 /* Breadcrumb on sub-pages */
 .crumbs { margin: 0 0 8px; font-size: var(--f1); color: var(--ink-2); }
 .crumbs a { color: var(--ink); }
-@media (min-width: 900px) {
-  .toc__list { flex-wrap: wrap; overflow: visible; }
-  .toc__list a { min-height: 38px; }
-  html:has(.toc) { scroll-padding-top: 110px; }
-}
 /* Explanatory animations (Dad page and dissertation page): one ink colour, thin lines, a pause button. */
 .anims { display: grid; gap: 20px; align-content: start; margin-top: 14px; }
 .anim { margin: 0; border: 2px solid var(--rule-strong); background: var(--surface); }
@@ -443,23 +423,33 @@ html:has(.toc) { scroll-padding-top: 76px; }
 .faces figcaption b { color: var(--ink); }
 .faces small { font-size: 0.85em; }
 .faces small a { color: inherit; }
-/* Wide screens: the "On this page" list becomes a sticky column on the left. */
-@media (min-width: 1200px) {
-  .dadlayout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0 48px; align-items: start; }
-  .dadlayout > .toc { position: sticky; top: 24px; display: block; margin: 8px 0 40px; padding: 0 0 0 0; border-bottom: 0; border-right: 2px solid var(--rule-strong);
-    max-height: calc(100vh - 48px); overflow-y: auto; background: transparent; }
-  .dadlayout > .toc .toc__label { display: block; margin: 0 0 10px; padding-right: 12px; }
-  .dadlayout > .toc .toc__list { display: block; overflow: visible; }
-  .dadlayout > .toc .toc__list a { display: block; min-height: 0; padding: 7px 14px 7px 0; white-space: normal; line-height: 1.3; border-bottom: 0; border-right: 4px solid transparent; margin-right: -3px; }
-  .dadlayout > .toc .toc__list a:hover { border-right-color: var(--rule-strong); }
-  .dadlayout > .toc .toc__list a[aria-current="true"] { border-right-color: var(--ink); }
-  html:has(.dadlayout) { scroll-padding-top: 24px; }
-}
 
 .anims, .anim { min-width: 0; }
 .anim figcaption > span { flex: 1; min-width: 0; }
-@media (min-width: 1200px) {
-  .dadlayout > .toc { overflow-x: hidden; scrollbar-width: none; }
-  .dadlayout > .toc::-webkit-scrollbar { display: none; }
-  .dadlayout > .toc .toc__list a { margin-right: 0; }
+/* Dad page: a slim "On this page" bar that sticks to the top. It shows the section you are reading;
+   its button opens the full list of sections as a drop-down, so it never takes width from the page. */
+.toc { position: sticky; top: 0; z-index: 25; margin: 0 -16px 28px; padding: 0 16px; background: var(--paper); border-bottom: 2px solid var(--rule-strong); }
+@media (min-width: 720px) { .toc { margin-left: -32px; margin-right: -32px; padding: 0 32px; } }
+@media (min-width: 1100px) { .toc { margin-left: -56px; margin-right: -56px; padding: 0 56px; } }
+.toc__bar { display: flex; align-items: center; gap: 10px; min-height: 52px; }
+.toc__label { margin: 0; font-size: var(--f1); font-weight: 700; color: var(--ink-2); }
+.toc__toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.toc__toggle::after { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+.toc__toggle[aria-expanded="true"]::after { transform: translateY(2px) rotate(-135deg); }
+.toc__toggle:hover { background: var(--sunk); }
+.toc__list { list-style: none; margin: 0; padding: 8px 0 14px; display: grid; gap: 0 24px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.toc.js .toc__list { position: absolute; left: 0; right: 0; top: 100%; padding: 12px 16px 16px; background: var(--paper); border-bottom: 2px solid var(--rule-strong); box-shadow: 0 6px 0 0 var(--rule-strong); }
+@media (min-width: 720px) { .toc.js .toc__list { padding-left: 32px; padding-right: 32px; } }
+@media (min-width: 1100px) { .toc.js .toc__list { padding-left: 56px; padding-right: 56px; } }
+.toc.js .toc__list[hidden] { display: none; }
+.toc__list li { margin: 0; }
+.toc__list a { display: flex; align-items: center; min-height: 40px; padding: 0 8px; text-decoration: none; color: var(--ink); border-left: 4px solid transparent; }
+.toc__list a:hover { border-left-color: var(--rule-strong); background: var(--surface); }
+.toc__list a[aria-current="true"] { border-left-color: var(--ink); font-weight: 700; }
+html:has(.toc) { scroll-padding-top: 72px; }
+@media (prefers-reduced-motion: no-preference) { html:has(.toc) { scroll-behavior: smooth; } }
+@media print { .toc { display: none; } }
+@media (min-width: 1100px) and (max-width: 1439px) {
+  .anims:has(> .gallery) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+  .anims:has(> .gallery) > .gallery { grid-row: span 2; }
 }

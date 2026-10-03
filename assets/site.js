@@ -374,29 +374,33 @@
   });
 })();
 
-/* "On this page" bar: underline the section being read, and keep that link visible in the bar. */
+/* "On this page" bar: shows the section being read; its button opens the list of sections.
+   Without JavaScript the list simply stays open under the label. */
 (function () {
   var toc = document.querySelector(".toc");
   if (!toc) return;
-  var list = toc.querySelector(".toc__list");
-  var pairs = Array.prototype.map.call(toc.querySelectorAll('a[href^="#"]'), function (a) {
+  var list = toc.querySelector(".toc__list"), btn = toc.querySelector(".toc__toggle"), cur = toc.querySelector(".toc__current");
+  toc.classList.add("js"); btn.hidden = false; list.hidden = true;
+  var sr = document.createElement("span"); sr.className = "sr"; sr.textContent = btn.getAttribute("data-jump") + ": "; btn.insertBefore(sr, cur);
+  function setOpen(o) { list.hidden = !o; btn.setAttribute("aria-expanded", o ? "true" : "false"); }
+  btn.addEventListener("click", function () { setOpen(list.hidden); if (!list.hidden) { var a = list.querySelector("a[aria-current]") || list.querySelector("a"); a.focus({ preventScroll: true }); } });
+  list.addEventListener("click", function (e) { if (e.target.closest("a")) setOpen(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !list.hidden) { setOpen(false); btn.focus(); } });
+  document.addEventListener("click", function (e) { if (!list.hidden && !toc.contains(e.target)) setOpen(false); });
+  toc.addEventListener("focusout", function (e) { if (e.relatedTarget && !toc.contains(e.relatedTarget)) setOpen(false); });
+  var pairs = Array.prototype.map.call(list.querySelectorAll('a[href^="#"]'), function (a) {
     return { a: a, h: document.getElementById(a.getAttribute("href").slice(1)) };
   }).filter(function (p) { return p.h; });
-  if (!pairs.length) return;
-  var cur = null, ticking = false;
+  var active = null, ticking = false;
   function update() {
     ticking = false;
-    var off = (toc.offsetWidth < window.innerWidth * 0.5 ? 0 : toc.offsetHeight) + 60, idx = -1;
+    var off = toc.querySelector(".toc__bar").offsetHeight + 60, idx = 0;
     for (var i = 0; i < pairs.length; i++) if (pairs[i].h.getBoundingClientRect().top - off <= 0) idx = i;
     if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) idx = pairs.length - 1;
-    var a = idx >= 0 ? pairs[idx].a : null;
-    if (a === cur) return;
-    if (cur) cur.removeAttribute("aria-current");
-    cur = a;
-    if (!a) return;
-    a.setAttribute("aria-current", "true");
-    var l = a.offsetLeft, w = a.offsetWidth;
-    if (l < list.scrollLeft || l + w > list.scrollLeft + list.clientWidth) list.scrollLeft = l - (list.clientWidth - w) / 2;
+    var a = pairs[idx].a;
+    if (a === active) return;
+    if (active) active.removeAttribute("aria-current");
+    active = a; a.setAttribute("aria-current", "true"); cur.textContent = a.textContent;
   }
   window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
   window.addEventListener("resize", update);
