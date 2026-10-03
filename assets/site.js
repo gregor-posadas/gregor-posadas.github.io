@@ -512,3 +512,63 @@
     } else { visible = true; kick(); }
   });
 })();
+
+/* Gentle reveal: blocks below the fold fade up a few pixels as they scroll into view.
+   Nothing is hidden until this script runs, so the page reads fine without JavaScript, in print,
+   and for anyone who asked for reduced motion (they get no effect at all). Blocks already on screen
+   or above it at load are shown at once, and the classes are removed once a block has arrived, so
+   no transform is left behind to disturb fixed explainer boxes or sticky elements. */
+(function () {
+  if (!("IntersectionObserver" in window)) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var sections = document.querySelectorAll("main .section");
+  if (!sections.length) return;
+  var SPLIT = ".split, .tribute, .anims";
+  var LIST = "ul.gallery, ul.faces, ol.rows, .signs, .stats";
+  var items = [];
+  function collect(el, depth) {
+    for (var i = 0; i < el.children.length; i++) {
+      var c = el.children[i];
+      if (c.matches("script, style, [hidden]")) continue;
+      if (depth < 3 && c.matches(SPLIT)) collect(c, depth + 1);
+      else if (c.matches(LIST)) { for (var j = 0; j < c.children.length; j++) items.push(c.children[j]); }
+      else items.push(c);
+    }
+  }
+  for (var s = 0; s < sections.length; s++) collect(sections[s], 0);
+  var vh = window.innerHeight;
+  var pending = [];
+  items.forEach(function (el) {
+    if (el.getBoundingClientRect().top < vh * 0.95) return; /* on screen or already passed */
+    el.classList.add("rv");
+    pending.push(el);
+  });
+  if (!pending.length) return;
+  document.documentElement.classList.add("rv-on");
+  function done(el) { el.classList.remove("rv", "rv-in"); el.style.removeProperty("--rv-d"); }
+  function show(el, delay) {
+    if (!el.classList.contains("rv") || el.classList.contains("rv-in")) return;
+    if (delay) el.style.setProperty("--rv-d", delay + "ms");
+    el.classList.add("rv-in");
+    var t = setTimeout(function () { done(el); }, 900 + (delay || 0));
+    el.addEventListener("transitionend", function te(e) {
+      if (e.target !== el || e.propertyName !== "opacity") return;
+      el.removeEventListener("transitionend", te); clearTimeout(t); done(el);
+    });
+  }
+  var io = new IntersectionObserver(function (es) {
+    var n = 0;
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      show(e.target, Math.min(n++, 4) * 70); /* small stagger when several arrive together */
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+  pending.forEach(function (el) { io.observe(el); });
+  /* Keyboard users: anything that takes focus is shown immediately. */
+  document.addEventListener("focusin", function (e) {
+    var el = e.target.closest && e.target.closest(".rv");
+    if (el) { io.unobserve(el); show(el, 0); }
+  });
+  window.addEventListener("beforeprint", function () { pending.forEach(function (el) { io.unobserve(el); done(el); }); });
+})();
