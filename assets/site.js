@@ -222,11 +222,15 @@
   var hover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   function parts(t) { return { b: t.querySelector(".term__btn"), tip: t.querySelector(".term__tip") }; }
   function place(t) {
-    var tip = parts(t).tip; tip.style.left = "";
-    var r = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth, shift = 0;
-    if (r.right > vw - 12) shift = vw - 12 - r.right;
-    if (r.left + shift < 12) shift = 12 - r.left;
-    if (shift) tip.style.left = shift + "px";
+    // Fixed positioning, so the box is never clipped by a column, a scroll box or a section edge.
+    var p = parts(t), tip = p.tip, br = p.b.getBoundingClientRect();
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    tip.style.position = "fixed"; tip.style.top = "0px"; tip.style.left = "0px";
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.min(Math.max(12, br.left), vw - 12 - w);
+    var top = br.bottom + 8;
+    if (top + h > vh - 12 && br.top - 8 - h >= 12) top = br.top - 8 - h;
+    tip.style.left = Math.max(12, left) + "px"; tip.style.top = top + "px";
   }
   function show(t, pin) {
     if (open && open !== t) hide(open);
@@ -254,6 +258,11 @@
   });
   document.addEventListener("click", function (e) { if (open && !open.contains(e.target)) hide(open); });
   window.addEventListener("resize", function () { if (open) place(open); });
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (!open || ticking) return; ticking = true;
+    requestAnimationFrame(function () { ticking = false; if (open) place(open); });
+  }, { passive: true });
 })();
 
 /* Timelapses play, muted, while at least 60% on screen, and pause when scrolled away.
@@ -377,7 +386,7 @@
   var cur = null, ticking = false;
   function update() {
     ticking = false;
-    var off = toc.offsetHeight + 60, idx = -1;
+    var off = (toc.offsetWidth < window.innerWidth * 0.5 ? 0 : toc.offsetHeight) + 60, idx = -1;
     for (var i = 0; i < pairs.length; i++) if (pairs[i].h.getBoundingClientRect().top - off <= 0) idx = i;
     if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) idx = pairs.length - 1;
     var a = idx >= 0 ? pairs[idx].a : null;
