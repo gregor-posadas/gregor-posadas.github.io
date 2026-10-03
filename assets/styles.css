@@ -458,3 +458,8 @@ html:has(.toc) { scroll-padding-top: 76px; }
 
 .anims, .anim { min-width: 0; }
 .anim figcaption > span { flex: 1; min-width: 0; }
+@media (min-width: 1200px) {
+  .dadlayout > .toc { overflow-x: hidden; scrollbar-width: none; }
+  .dadlayout > .toc::-webkit-scrollbar { display: none; }
+  .dadlayout > .toc .toc__list a { margin-right: 0; }
+}
