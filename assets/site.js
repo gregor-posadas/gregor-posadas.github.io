@@ -470,6 +470,39 @@
         }
       } };
     },
+    // Leapfrogging: a hollow dot hops up three steps one at a time; a filled dot jumps from the first to the third.
+    leap: function (svg) {
+      var P = [[84, 187], [220, 131], [356, 75]];
+      var a = el("circle", { "class": "an-ring", r: 7, style: "stroke-width:2.5" }, svg);
+      var b = el("circle", { "class": "an-dot", r: 7 }, svg);
+      function ease(u) { u = Math.min(Math.max(u, 0), 1); return u * u * (3 - 2 * u); }
+      function hop(p, q, u, h) { var e = ease(u); return [p[0] + (q[0] - p[0]) * e, p[1] + (q[1] - p[1]) * e - h * 4 * e * (1 - e)]; }
+      function put(c, xy) { c.setAttribute("cx", xy[0].toFixed(1)); c.setAttribute("cy", xy[1].toFixed(1)); }
+      return { still: 6.5, draw: function (t) {
+        t = t % 9;
+        var pa = t < 2.6 ? hop(P[0], P[1], (t - 1.4) / 0.9, 46) : hop(P[1], P[2], (t - 4) / 0.9, 46);
+        put(a, [pa[0] + 10, pa[1]]);
+        put(b, hop([P[0][0] - 12, P[0][1]], [P[2][0] - 12, P[2][1]], (t - 1.2) / 1.4, 110));
+      } };
+    },
+    // The technology ladder: a filled dot climbs to the top rung; a hollow dot reaches the second rung, drops back, and tries again.
+    ladder: function (svg) {
+      var Y = [204, 172, 140, 108, 76, 44];
+      var a = el("circle", { "class": "an-dot", r: 7, cx: 216 }, svg);
+      var b = el("circle", { "class": "an-ring", r: 7, cx: 246, style: "stroke-width:2.5" }, svg);
+      function at(level) { var i = Math.min(Math.floor(level), 4), f = level - i; return Y[i] + (Y[i + 1] - Y[i]) * f - 12; }
+      function ease(u) { u = Math.min(Math.max(u, 0), 1); return u * u * (3 - 2 * u); }
+      return { still: 7, draw: function (t) {
+        t = t % 12;
+        var la = 0;
+        for (var k = 0; k < 5; k++) la += ease((t - 0.6 - k * 1.2) / 0.8);
+        if (t > 11.2) la = 5 * (1 - ease((t - 11.2) / 0.6));
+        a.setAttribute("cy", at(la).toFixed(1));
+        var c = t % 4, lb = ease((c - 0.6) / 0.9);
+        if (c > 3.1) lb = 1 - ease((c - 3.1) / 0.35);
+        b.setAttribute("cy", at(lb).toFixed(1));
+      } };
+    },
     // A space-time diagram: a world line climbing up, with light cones opening from points along it.
     cones: function (svg) {
       var cones = el("g", {}, svg), path = el("polyline", { "class": "an-trail" }, svg), dot = el("circle", { "class": "an-dot", r: 6 }, svg);
@@ -571,4 +604,26 @@
     if (el) { io.unobserve(el); show(el, 0); }
   });
   window.addEventListener("beforeprint", function () { pending.forEach(function (el) { io.unobserve(el); done(el); }); });
+})();
+
+/* Interviews: each preview is a plain link to YouTube. With JavaScript it becomes a button that swaps in the
+   privacy-enhanced YouTube player only when pressed, so nothing loads from YouTube before that. */
+(function () {
+  var links = document.querySelectorAll("a.vid__play[data-yt]");
+  Array.prototype.forEach.call(links, function (a) {
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = a.className; btn.innerHTML = a.innerHTML;
+    btn.setAttribute("aria-label", a.getAttribute("data-play"));
+    a.parentNode.replaceChild(btn, a);
+    btn.addEventListener("click", function () {
+      var f = document.createElement("iframe");
+      f.src = "https://www.youtube-nocookie.com/embed/" + a.getAttribute("data-yt") + "?autoplay=1&rel=0";
+      f.title = a.getAttribute("data-title");
+      f.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen");
+      f.setAttribute("allowfullscreen", "");
+      f.className = "vid__frame";
+      btn.parentNode.replaceChild(f, btn);
+      f.focus();
+    });
+  });
 })();
