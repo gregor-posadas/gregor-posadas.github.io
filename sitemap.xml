@@ -84,4 +84,16 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/accessibility.html"/>
     <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/accessibility.html"/>
   </url>
+  <url>
+    <loc>https://gregor-posadas.github.io/dad-dissertation.html</loc>
+    <lastmod>2026-10-03</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/dad-dissertation.html"/>
+    <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/dad-dissertation.html"/>
+  </url>
+  <url>
+    <loc>https://gregor-posadas.github.io/tl/dad-dissertation.html</loc>
+    <lastmod>2026-10-03</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://gregor-posadas.github.io/dad-dissertation.html"/>
+    <xhtml:link rel="alternate" hreflang="tl" href="https://gregor-posadas.github.io/tl/dad-dissertation.html"/>
+  </url>
 </urlset>

@@ -364,3 +364,32 @@
     (fileOK ? dlg.querySelector(".sh__story") : dlg.querySelector(".sh__copy")).focus();
   });
 })();
+
+/* "On this page" bar: underline the section being read, and keep that link visible in the bar. */
+(function () {
+  var toc = document.querySelector(".toc");
+  if (!toc) return;
+  var list = toc.querySelector(".toc__list");
+  var pairs = Array.prototype.map.call(toc.querySelectorAll('a[href^="#"]'), function (a) {
+    return { a: a, h: document.getElementById(a.getAttribute("href").slice(1)) };
+  }).filter(function (p) { return p.h; });
+  if (!pairs.length) return;
+  var cur = null, ticking = false;
+  function update() {
+    ticking = false;
+    var off = toc.offsetHeight + 60, idx = -1;
+    for (var i = 0; i < pairs.length; i++) if (pairs[i].h.getBoundingClientRect().top - off <= 0) idx = i;
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) idx = pairs.length - 1;
+    var a = idx >= 0 ? pairs[idx].a : null;
+    if (a === cur) return;
+    if (cur) cur.removeAttribute("aria-current");
+    cur = a;
+    if (!a) return;
+    a.setAttribute("aria-current", "true");
+    var l = a.offsetLeft, w = a.offsetWidth;
+    if (l < list.scrollLeft || l + w > list.scrollLeft + list.clientWidth) list.scrollLeft = l - (list.clientWidth - w) / 2;
+  }
+  window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+})();

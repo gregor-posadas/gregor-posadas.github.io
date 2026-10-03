@@ -389,3 +389,26 @@ details.more summary { min-height: var(--tap); display: flex; align-items: cente
 .sh__actions [hidden] { display: none; }
 .sh__note { margin-top: 6px; font-size: var(--f1); color: var(--ink-2); }
 @media (max-width: 599px) { .sh__body { grid-template-columns: 1fr; } .sh__img { width: 120px; } .sh__actions .btn { flex: 1 1 100%; justify-content: center; } }
+/* Dad page: "On this page" bar. It sticks to the top while reading; on narrow screens the links scroll sideways inside the bar. */
+.toc { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; margin: 0 -16px 28px; padding: 0 16px; background: var(--paper); border-bottom: 2px solid var(--rule-strong); }
+@media (min-width: 720px) { .toc { margin-left: -32px; margin-right: -32px; padding: 0 32px; } }
+@media (min-width: 1100px) { .toc { margin-left: -56px; margin-right: -56px; padding: 0 56px; } }
+.toc__label { flex: none; margin: 0; font-size: var(--f1); font-weight: 700; color: var(--ink-2); }
+@media (max-width: 599px) { .toc__label { display: none; } }
+.toc__list { position: relative; display: flex; gap: 2px; flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; overflow-x: auto; scrollbar-width: thin; }
+.toc__list li { flex: none; margin: 0; }
+.toc__list a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; white-space: nowrap; text-decoration: none; color: var(--ink); font-size: var(--f1); border-bottom: 4px solid transparent; }
+.toc__list a:hover { border-bottom-color: var(--rule-strong); }
+.toc__list a[aria-current="true"] { border-bottom-color: var(--ink); font-weight: 700; }
+.toc__list a:focus-visible { outline-offset: -4px; }
+html:has(.toc) { scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: no-preference) { html:has(.toc) { scroll-behavior: smooth; } }
+@media print { .toc { display: none; } }
+/* Breadcrumb on sub-pages */
+.crumbs { margin: 0 0 8px; font-size: var(--f1); color: var(--ink-2); }
+.crumbs a { color: var(--ink); }
+@media (min-width: 900px) {
+  .toc__list { flex-wrap: wrap; overflow: visible; }
+  .toc__list a { min-height: 38px; }
+  html:has(.toc) { scroll-padding-top: 110px; }
+}
