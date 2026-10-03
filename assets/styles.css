@@ -453,3 +453,8 @@ html:has(.toc) { scroll-padding-top: 72px; }
   .anims:has(> .gallery) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
   .anims:has(> .gallery) > .gallery { grid-row: span 2; }
 }
+/* Keep the image in the middle column even when the arrow buttons are hidden (single-image viewers). */
+.lb__fig { grid-column: 2; }
+@media (max-width: 559px) { .lb__fig { grid-column: 1; } }
+.faces--col { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 24px; }
+@media (max-width: 420px) { .faces--col { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
