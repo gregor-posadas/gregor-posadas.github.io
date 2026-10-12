@@ -519,3 +519,4 @@ html:has(.toc) { scroll-padding-top: 72px; }
 .nw { white-space: nowrap; }
 .nw .term__tip { white-space: normal; }
 .bump__yr { font-size: 13px; }
+.tag--award { background: var(--ink); color: var(--paper); white-space: normal; }
