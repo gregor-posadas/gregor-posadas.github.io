@@ -520,3 +520,16 @@ html:has(.toc) { scroll-padding-top: 72px; }
 .nw .term__tip { white-space: normal; }
 .bump__yr { font-size: 13px; }
 .tag--award { background: var(--ink); color: var(--paper); white-space: normal; }
+
+/* Letters page: scans beside their transcriptions */
+.cw { margin: 14px 0 0; max-width: var(--read); padding: 10px 14px; border-left: 6px solid var(--ink); background: var(--sunk); font-weight: 700; }
+.letter__date { display: block; font-size: var(--f1); color: var(--ink-2); font-weight: 700; letter-spacing: 0.02em; }
+.letter__body { display: grid; gap: 20px 40px; grid-template-columns: 1fr; margin-top: 16px; align-items: start; }
+@media (min-width: 960px) { .letter__body { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+.gallery--letter { margin: 0; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.transcript { min-width: 0; border: 2px solid var(--rule-strong); background: var(--surface); padding: 4px 20px 18px; }
+.transcript .rt-h { margin-top: 12px; }
+.transcript__text { max-width: var(--read); }
+.transcript__text p { margin: 12px 0 0; line-height: 1.6; overflow-wrap: anywhere; }
+.tr-note { font-family: inherit; font-size: var(--f1); color: var(--ink-2); font-style: italic; }
+@media print { .gallery--letter { display: none; } .transcript { border: 0; padding: 0; } }
